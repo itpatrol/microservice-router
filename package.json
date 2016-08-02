@@ -1,0 +1,23 @@
+{
+  "name": "zenci-microservice-router",
+  "version": "0.1.0",
+  "description": "URL router for micro services",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itpatrol/zenci-microservice-router.git"
+  },
+  "author": "Gormartsen",
+  "license": "SEE LICENSE IN <LICENSE.txt>",
+  "bugs": {
+    "url": "https://github.com/itpatrol/zenci-microservice-router/issues"
+  },
+  "homepage": "https://github.com/itpatrol/zenci-microservice-router#readme",
+  "dependencies": {
+    "debug": "^2.2.0",
+    "dotenv": "^2.0.0"
+  }
+}
