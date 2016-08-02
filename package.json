@@ -1,14 +1,16 @@
 {
   "name": "zenci-microservice-router",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "URL router for micro services",
-  "main": "router.js",
+  "main": "router-admin.js",
   "scripts": {
     "test": "node_modules/.bin/mocha --timeout 15000",
-    "start": "DEBUG=http:log,cluster:* node  --max-old-space-size=24 router.js >> $LOGFILE 2>&1 &",
+    "start-admin": "DEBUG=http:log,cluster:* node  --max-old-space-size=24 router-admin.js >> $LOGFILE 2>&1 &",
+    "start-proxy": "DEBUG=http:log,cluster:* node  --max-old-space-size=24 router-proxy.js >> $LOGFILE 2>&1 &",
     "stop": "kill -2 `cat $PIDFILE` 2>&1 &",
-    "jscs": "jscs --fix router.js",
-    "devel-start": "DEBUG=* node  --max-old-space-size=24 router.js"
+    "jscs": "jscs --fix router-admin.js router-proxy.js",
+    "devel-start-admin": "DEBUG=* node  --max-old-space-size=24 router-admin.js",
+    "devel-start-proxy": "DEBUG=* node  --max-old-space-size=24 router-proxy.js"
   },
   "repository": {
     "type": "git",
