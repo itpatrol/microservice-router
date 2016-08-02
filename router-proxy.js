@@ -14,30 +14,30 @@ var mControlCluster = new Cluster({
   port: process.env.PROXY_PORT,
   count: process.env.WORKERS,
   callbacks: {
-//    POST: mservice.post,
+    //    POST: mservice.post,
     GET: ProxyRequestGet
-//    PUT: mservice.put,
-//    DELETE: mservice.delete,
-//    SEARCH: mservice.search
+    //    PUT: mservice.put,
+    //    DELETE: mservice.delete,
+    //    SEARCH: mservice.search
   }
 });
 
 function ProxyRequestGet(jsonData, requestDetails, callback) {
-  var url = requestDetails.url.split("/");
+  var url = requestDetails.url.split('/');
 
-  var route = "";
-  for(var i = 0; i < url.length -1; i++) {
-    if(i != url.length - 2) {
-      route = route + url[i] + "/";
+  var route = '';
+  for (var i = 0; i < url.length - 1; i++) {
+    if (i != url.length - 2) {
+      route = route + url[i] + '/';
     } else {
       route = route + url[i]
     }
   }
-  console.log("Route base: %s", route);
+  console.log('Route base: %s', route);
   FindTarget(route, function(err, router) {
     console.log(err);
     console.log(router);
-    if(err) {
+    if (err) {
       return callback(err, null);
     }
 
@@ -49,7 +49,7 @@ function ProxyRequestGet(jsonData, requestDetails, callback) {
       body: jsonData
     }, function(error, response, body) {
       if (error) {
-        return  ProxyRequestGet(jsonData, requestDetails, callback);
+        return ProxyRequestGet(jsonData, requestDetails, callback);
       }
       callback(null, {
         code: response.statusCode,
@@ -62,7 +62,7 @@ function ProxyRequestGet(jsonData, requestDetails, callback) {
 
 function FindTarget(route, callback) {
   MongoClient.connect(process.env.MONGO_URL, function(err, db) {
-    if(err) {
+    if (err) {
       return callback(err, null);
     }
 
