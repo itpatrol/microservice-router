@@ -1,0 +1,16 @@
+{
+  "id": "/Service",
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Base path for microservice.",
+      "required": true
+    },
+    "url": {
+      "type": "string",
+      "description": "url to access servive http://ip:port.",
+      "required": true
+    }
+  }
+}
