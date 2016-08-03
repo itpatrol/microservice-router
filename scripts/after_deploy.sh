@@ -2,9 +2,6 @@
 
 cd $ZENCI_DEPLOY_DIR
 
-mkdir -p $DATASTORE
-mkdir -p $CACHEDIR
-
 
 cat > $ZENCI_DEPLOY_DIR/.env <<_EOF
 
@@ -22,9 +19,9 @@ _EOF
 npm update
 
 # restart proxy.
-npm stop-proxy
-npm start-proxy
+npm run stop-proxy
+npm run start-proxy
 
 # restart admin.
-npm stop-admin
-npm start-admin
+npm run stop-admin
+npm run start-admin
