@@ -10,7 +10,6 @@ const debugF = require('debug');
 
 var debug = {
   log: debugF('proxy:log'),
-  request: debugF('http:request'),
   debug: debugF('proxy:debug')
 };
 
@@ -18,7 +17,7 @@ var debug = {
 require('dotenv').config();
 
 var mControlCluster = new Cluster({
-  pid: process.env.PIDFILE + 'proxy',
+  pid: process.env.PIDFILE + '.proxy',
   port: process.env.PROXY_PORT,
   count: process.env.WORKERS,
   callbacks: {

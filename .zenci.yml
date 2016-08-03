@@ -1,0 +1,18 @@
+deploy:
+  master:
+    server: a1.git.lc
+    username: node
+    dir: '{home}/{repo_name}/{branch}'
+    env_vars:
+      mongodb: 'mongodb://localhost:27017/zenci'
+      mongo_table: 'routes'
+      schema: 'service.json'
+      port: 2000
+      proxy_port: 2100
+      secure_key: '59592e56f34892159ff419ba2b0d347c'
+      pidfile: '{home}/pids/zenci-microservice-router.pid'
+      logfile: '{home}/logs/zenci-microservice-router.log'
+      workers: 2
+    scripts:
+      init: '{deploy_dir}/scripts/deploy_init.sh'
+      after: '{deploy_dir}/scripts/after_deploy.sh'

@@ -7,7 +7,8 @@
     "test": "node_modules/.bin/mocha --timeout 15000",
     "start-admin": "DEBUG=http:log,cluster:* node  --max-old-space-size=24 router-admin.js >> $LOGFILE 2>&1 &",
     "start-proxy": "DEBUG=http:log,cluster:* node  --max-old-space-size=24 router-proxy.js >> $LOGFILE 2>&1 &",
-    "stop": "kill -2 `cat $PIDFILE` 2>&1 &",
+    "stop-admin": "kill -2 `cat $PIDFILE` 2>&1 &",
+    "stop-proxy": "kill -2 `cat $PIDFILE.proxy` 2>&1 &",
     "jscs": "jscs --fix router-admin.js router-proxy.js",
     "devel-start-admin": "DEBUG=* node  --max-old-space-size=24 router-admin.js",
     "devel-start-proxy": "DEBUG=* node  --max-old-space-size=24 router-proxy.js"
