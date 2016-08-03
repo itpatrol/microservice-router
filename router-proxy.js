@@ -252,8 +252,20 @@ function FindTarget(route, callback) {
         return callback(err, null);
       }
       if (!results || results.length == 0) {
+
+        // If it is not default, search for default for not found.
+        if( route != 'default' ) {
+          return FindTarget('default', callback);
+        }
+
         return callback(new Error('Not found'), null);
       }
+
+      // If we have only one route, do not do random search.
+      if(results.length == 1) {
+        return callback(null, results.pop());
+      }
+
       var random = Math.floor(Math.random() * (results.length) + 1) - 1;
       return callback(null, results[random]);
     });
