@@ -22,16 +22,16 @@ var mControlCluster = new Cluster({
   }
 });
 
-if(!mControlCluster.isMaster) {
+if (!mControlCluster.isMaster) {
   var routes = [];
   updateRouteVariable(routes);
   var interval = 6000;
   if (process.env.INTERVAL) {
     interval = process.env.INTERVAL;
   }
-  setInterval(function(){
-//    console.log('Current routes');
-//    console.log(routes);
+  setInterval(function() {
+    //    console.log('Current routes');
+    //    console.log(routes);
     updateRouteVariable(routes)}, interval);
 }
 
@@ -252,7 +252,7 @@ function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
 function FindTarget(route, callback) {
   console.log('Find route %s', route);
   console.log(routes);
-  
+
   var availableRoutes = [];
   for (var i in routes) {
     if (routes[i].path == route) {
@@ -309,8 +309,8 @@ function FindTarget(route, callback) {
  * Update route infor each 10 sec.
  */
 function updateRouteVariable() {
-//  console.log('Update routes');
-//  console.log(routes);
+  //  console.log('Update routes');
+  //  console.log(routes);
   MongoClient.connect(process.env.MONGO_URL, function(err, db) {
     if (err) {
       // If error, do nothing.
@@ -340,8 +340,8 @@ function updateRouteVariable() {
         }
       }
       routes = newRoutes;
-//      console.log('Routes updated');
-//      console.log(routes);
+      //      console.log('Routes updated');
+      //      console.log(routes);
     });
   });
 }
