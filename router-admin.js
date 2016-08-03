@@ -5,8 +5,16 @@
 
 const Cluster = require('zenci-manager');
 const Microservice = require('zenci-microservice');
+const MongoClient = require('mongodb').MongoClient;
+const debugF = require('debug');
+
+var debug = {
+  log: debugF('router:log'),
+  debug: debugF('router:debug')
+};
 
 require('dotenv').config();
+
 
 var mservice = new Microservice({
   mongoUrl: process.env.MONGO_URL,
@@ -28,3 +36,40 @@ var mControlCluster = new Cluster({
     SEARCH: mservice.search
   }
 });
+
+if (mControlCluster.isMaster) {
+  var interval = 6000;
+  if (process.env.INTERVAL) {
+    interval = process.env.INTERVAL;
+  }
+  setInterval(cleanRouteTable , interval);
+}
+/**
+ * Update route infor each 10 sec.
+ */
+function cleanRouteTable() {
+  debug.log('Clean routes');
+  MongoClient.connect(process.env.MONGO_URL, function(err, db) {
+    if (err) {
+      // If error, do nothing.
+      debug.debug('Error %s', err.message);
+
+      return;
+    }
+
+    var collection = db.collection(process.env.MONGO_TABLE);
+    var query = {
+      changed: {
+        $lt: Date.now() - 60 * 1000
+      }
+    };
+    collection.deleteMany(query, function(err, results) {
+      if (err) {
+        // If error, do nothing.
+        debug.debug('Error %s', err.message);
+        return;
+      }
+      debug.log('Deleted %s routes', results.deletedCount);
+    });
+  });
+}
