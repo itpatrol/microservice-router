@@ -6,6 +6,14 @@
 const Cluster = require('zenci-manager');
 const request = require('request');
 const MongoClient = require('mongodb').MongoClient;
+const debugF = require('debug');
+
+var debug = {
+  log: debugF('proxy:log'),
+  request: debugF('http:request'),
+  debug: debugF('proxy:debug')
+};
+
 
 require('dotenv').config();
 
@@ -30,8 +38,7 @@ if (!mControlCluster.isMaster) {
     interval = process.env.INTERVAL;
   }
   setInterval(function() {
-    //    console.log('Current routes');
-    //    console.log(routes);
+    debug.debug('Current routes %s', JSON.stringify(routes , null, 2));
     updateRouteVariable(routes)}, interval);
 }
 
@@ -49,14 +56,15 @@ function ProxyRequestGet(jsonData, requestDetails, callback) {
       route = route + url[i]
     }
   }
-  console.log('Route base: %s', route);
+  debug.debug('Route base: %s', route);
 
   FindTarget(route, function(err, router) {
-    console.log(err);
-    console.log(router);
     if (err) {
+      debug.debug('Route %s err %s', route, err.message);
       return callback(err, null);
     }
+
+    debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
 
     request({
       uri: router.url + url[url.length - 1],
@@ -91,14 +99,15 @@ function ProxyRequestPOST(jsonData, requestDetails, callback) {
       route = route + url[i]
     }
   }
-  console.log('Route base: %s', route);
+  debug.debug('Route base: %s', route);
 
   FindTarget(route, function(err, router) {
-    console.log(err);
-    console.log(router);
     if (err) {
+      debug.debug('Route %s err %s', route, err.message);
       return callback(err, null);
     }
+
+    debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
 
     request({
       uri: router.url,
@@ -133,14 +142,15 @@ function ProxyRequestPUT(jsonData, requestDetails, callback) {
       route = route + url[i]
     }
   }
-  console.log('Route base: %s', route);
+  debug.debug('Route base: %s', route);
 
   FindTarget(route, function(err, router) {
-    console.log(err);
-    console.log(router);
     if (err) {
+      debug.debug('Route %s err %s', route, err.message);
       return callback(err, null);
     }
+
+    debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
 
     request({
       uri: router.url + url[url.length - 1],
@@ -175,14 +185,15 @@ function ProxyRequestDELETE(jsonData, requestDetails, callback) {
       route = route + url[i]
     }
   }
-  console.log('Route base: %s', route);
+  debug.debug('Route base: %s', route);
 
   FindTarget(route, function(err, router) {
-    console.log(err);
-    console.log(router);
     if (err) {
+      debug.debug('Route %s err %s', route, err.message);
       return callback(err, null);
     }
+
+    debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
 
     request({
       uri: router.url + url[url.length - 1],
@@ -218,14 +229,15 @@ function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
       route = route + url[i]
     }
   }
-  console.log('Route base: %s', route);
+  debug.debug('Route base: %s', route);
 
   FindTarget(route, function(err, router) {
-    console.log(err);
-    console.log(router);
     if (err) {
+      debug.debug('Route %s err %s', route, err.message);
       return callback(err, null);
     }
+
+    debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
 
     request({
       uri: router.url,
@@ -250,8 +262,7 @@ function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
  * Finx target URL.
  */
 function FindTarget(route, callback) {
-  console.log('Find route %s', route);
-  console.log(routes);
+  debug.debug('Find route %s', route);
 
   var availableRoutes = [];
   for (var i in routes) {
@@ -259,9 +270,9 @@ function FindTarget(route, callback) {
       availableRoutes.push(routes[i])
     }
   }
-  console.log('Available routes for %s', route);
-  console.log(availableRoutes);
+  debug.debug('Available routes for %s %s', route, JSON.stringify(routes , null, 2));
   if (availableRoutes.length == 0) {
+    debug.debug('Not found for %s', route);
     return callback(new Error('Not found'), null);
   }
   if (availableRoutes.length == 1) {
@@ -270,51 +281,18 @@ function FindTarget(route, callback) {
 
   var random = Math.floor(Math.random() * (availableRoutes.length) + 1) - 1;
   return callback(null, availableRoutes[random]);
-  /*  MongoClient.connect(process.env.MONGO_URL, function(err, db) {
-      if (err) {
-        return callback(err, null);
-      }
-
-      var collection = db.collection(process.env.MONGO_TABLE);
-      var query = {
-        path: route,
-        type: 'master'
-      };
-      collection.find(query).toArray(function(err, results) {
-        if (err) {
-          return callback(err, null);
-        }
-        if (!results || results.length == 0) {
-
-          // If it is not default, search for default for not found.
-          if( route != 'default' ) {
-            return FindTarget('default', callback);
-          }
-
-          return callback(new Error('Not found'), null);
-        }
-
-        // If we have only one route, do not do random search.
-        if(results.length == 1) {
-          return callback(null, results.pop());
-        }
-
-        var random = Math.floor(Math.random() * (results.length) + 1) - 1;
-        return callback(null, results[random]);
-      });
-    });*/
 }
 
 /**
  * Update route infor each 10 sec.
  */
 function updateRouteVariable() {
-  //  console.log('Update routes');
-  //  console.log(routes);
+
   MongoClient.connect(process.env.MONGO_URL, function(err, db) {
     if (err) {
       // If error, do nothing.
-      console.log(err);
+      debug.debug('Error %s', err.message);
+
       return;
     }
 
@@ -325,11 +303,13 @@ function updateRouteVariable() {
     collection.find(query).toArray(function(err, results) {
       if (err) {
         // If error, do nothing.
-        console.log(err);
+        debug.debug('Error %s', err.message);
         return;
       }
       if (!results || results.length == 0) {
         // If there is no results, do nothing
+        debug.debug('No records found');
+
         return;
       }
       var newRoutes = [];
@@ -340,8 +320,6 @@ function updateRouteVariable() {
         }
       }
       routes = newRoutes;
-      //      console.log('Routes updated');
-      //      console.log(routes);
     });
   });
 }
