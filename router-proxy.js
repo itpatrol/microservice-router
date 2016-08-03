@@ -14,14 +14,17 @@ var mControlCluster = new Cluster({
   port: process.env.PROXY_PORT,
   count: process.env.WORKERS,
   callbacks: {
-    //    POST: mservice.post,
-    GET: ProxyRequestGet
-    //    PUT: mservice.put,
-    //    DELETE: mservice.delete,
-    //    SEARCH: mservice.search
+    POST: ProxyRequestPOST,
+    GET: ProxyRequestGet,
+    PUT: ProxyRequestPUT,
+    DELETE: ProxyRequestDELETE,
+    SEARCH: ProxyRequestSEARCH
   }
 });
 
+/**
+ * Proxy GET requests.
+ */
 function ProxyRequestGet(jsonData, requestDetails, callback) {
   var url = requestDetails.url.split('/');
 
@@ -34,6 +37,7 @@ function ProxyRequestGet(jsonData, requestDetails, callback) {
     }
   }
   console.log('Route base: %s', route);
+
   FindTarget(route, function(err, router) {
     console.log(err);
     console.log(router);
@@ -60,6 +64,178 @@ function ProxyRequestGet(jsonData, requestDetails, callback) {
 
 }
 
+/**
+ * Proxy POST requests.
+ */
+function ProxyRequestPOST(jsonData, requestDetails, callback) {
+  var url = requestDetails.url.split('/');
+
+  var route = '';
+  for (var i = 0; i < url.length; i++) {
+    if (i != url.length - 1) {
+      route = route + url[i] + '/';
+    } else {
+      route = route + url[i]
+    }
+  }
+  console.log('Route base: %s', route);
+
+  FindTarget(route, function(err, router) {
+    console.log(err);
+    console.log(router);
+    if (err) {
+      return callback(err, null);
+    }
+
+    request({
+      uri: router.url + url[url.length - 1],
+      method: 'POST',
+      headers: requestDetails.headers,
+      json: true,
+      body: jsonData
+    }, function(error, response, body) {
+      if (error) {
+        return ProxyRequestGet(jsonData, requestDetails, callback);
+      }
+      callback(null, {
+        code: response.statusCode,
+        answer: body
+      });
+    });
+  })
+
+}
+
+/**
+ * Proxy PUT requests.
+ */
+function ProxyRequestPUT(jsonData, requestDetails, callback) {
+  var url = requestDetails.url.split('/');
+
+  var route = '';
+  for (var i = 0; i < url.length - 1; i++) {
+    if (i != url.length - 2) {
+      route = route + url[i] + '/';
+    } else {
+      route = route + url[i]
+    }
+  }
+  console.log('Route base: %s', route);
+
+  FindTarget(route, function(err, router) {
+    console.log(err);
+    console.log(router);
+    if (err) {
+      return callback(err, null);
+    }
+
+    request({
+      uri: router.url + url[url.length - 1],
+      method: 'PUT',
+      headers: requestDetails.headers,
+      json: true,
+      body: jsonData
+    }, function(error, response, body) {
+      if (error) {
+        return ProxyRequestGet(jsonData, requestDetails, callback);
+      }
+      callback(null, {
+        code: response.statusCode,
+        answer: body
+      });
+    });
+  })
+
+}
+
+/**
+ * Proxy DELETE requests.
+ */
+function ProxyRequestDELETE(jsonData, requestDetails, callback) {
+  var url = requestDetails.url.split('/');
+
+  var route = '';
+  for (var i = 0; i < url.length - 1; i++) {
+    if (i != url.length - 2) {
+      route = route + url[i] + '/';
+    } else {
+      route = route + url[i]
+    }
+  }
+  console.log('Route base: %s', route);
+
+  FindTarget(route, function(err, router) {
+    console.log(err);
+    console.log(router);
+    if (err) {
+      return callback(err, null);
+    }
+
+    request({
+      uri: router.url + url[url.length - 1],
+      method: 'DELETE',
+      headers: requestDetails.headers,
+      json: true,
+      body: jsonData
+    }, function(error, response, body) {
+      if (error) {
+        return ProxyRequestGet(jsonData, requestDetails, callback);
+      }
+      callback(null, {
+        code: response.statusCode,
+        answer: body
+      });
+    });
+  })
+
+}
+
+
+/**
+ * Proxy SEARCH requests.
+ */
+function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
+  var url = requestDetails.url.split('/');
+
+  var route = '';
+  for (var i = 0; i < url.length; i++) {
+    if (i != url.length - 1) {
+      route = route + url[i] + '/';
+    } else {
+      route = route + url[i]
+    }
+  }
+  console.log('Route base: %s', route);
+
+  FindTarget(route, function(err, router) {
+    console.log(err);
+    console.log(router);
+    if (err) {
+      return callback(err, null);
+    }
+
+    request({
+      uri: router.url + url[url.length - 1],
+      method: 'SEARCH',
+      headers: requestDetails.headers,
+      json: true,
+      body: jsonData
+    }, function(error, response, body) {
+      if (error) {
+        return ProxyRequestGet(jsonData, requestDetails, callback);
+      }
+      callback(null, {
+        code: response.statusCode,
+        answer: body
+      });
+    });
+  })
+
+}
+
+/**
+ * Finx target URL.
+ */
 function FindTarget(route, callback) {
   MongoClient.connect(process.env.MONGO_URL, function(err, db) {
     if (err) {
