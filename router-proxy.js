@@ -291,15 +291,12 @@ function updateRouteVariable() {
     if (err) {
       // If error, do nothing.
       debug.debug('Error %s', err.message);
-
       return;
     }
 
     var collection = db.collection(process.env.MONGO_TABLE);
-    var query = {
-      type: 'master'
-    };
-    collection.find(query).toArray(function(err, results) {
+
+    collection.find({}).toArray(function(err, results) {
       db.close();
       if (err) {
         // If error, do nothing.
