@@ -31,14 +31,14 @@ var mControlCluster = new Cluster({
 
 if (!mControlCluster.isMaster) {
   var routes = [];
-  updateRouteVariable(routes);
+  updateRouteVariable();
   var interval = 6000;
   if (process.env.INTERVAL) {
     interval = process.env.INTERVAL;
   }
   setInterval(function() {
     debug.debug('Current routes %s', JSON.stringify(routes , null, 2));
-    updateRouteVariable(routes)}, interval);
+    updateRouteVariable()}, interval);
 }
 
 /**
@@ -300,6 +300,7 @@ function updateRouteVariable() {
       type: 'master'
     };
     collection.find(query).toArray(function(err, results) {
+      db.close();
       if (err) {
         // If error, do nothing.
         debug.debug('Error %s', err.message);
