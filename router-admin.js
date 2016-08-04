@@ -64,6 +64,7 @@ function cleanRouteTable() {
       }
     };
     collection.deleteMany(query, function(err, results) {
+      db.close();
       if (err) {
         // If error, do nothing.
         debug.debug('Error %s', err.message);
