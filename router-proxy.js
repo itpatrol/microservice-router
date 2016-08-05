@@ -56,7 +56,7 @@ function ProxyRequestGet(jsonData, requestDetails, callback) {
     }
   }
   var path = url[url.length - 1];
-  proxyRequest(route, path, "GET", jsonData, requestDetails, callback);
+  proxyRequest(route, path, 'GET', jsonData, requestDetails, callback);
 }
 
 /**
@@ -74,7 +74,7 @@ function ProxyRequestPOST(jsonData, requestDetails, callback) {
     }
   }
   var path = '';
-  proxyRequest(route, path, "POST", jsonData, requestDetails, callback);
+  proxyRequest(route, path, 'POST', jsonData, requestDetails, callback);
 }
 
 /**
@@ -92,7 +92,7 @@ function ProxyRequestPUT(jsonData, requestDetails, callback) {
     }
   }
   var path = url[url.length - 1];
-  proxyRequest(route, path, "PUT", jsonData, requestDetails, callback);
+  proxyRequest(route, path, 'PUT', jsonData, requestDetails, callback);
 }
 
 /**
@@ -110,7 +110,7 @@ function ProxyRequestDELETE(jsonData, requestDetails, callback) {
     }
   }
   var path = url[url.length - 1];
-  proxyRequest(route, path, "DELETE", jsonData, requestDetails, callback);
+  proxyRequest(route, path, 'DELETE', jsonData, requestDetails, callback);
 }
 
 
@@ -129,7 +129,7 @@ function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
     }
   }
   var path = '';
-  proxyRequest(route, path, "SEARCH", jsonData, requestDetails, callback);
+  proxyRequest(route, path, 'SEARCH', jsonData, requestDetails, callback);
 }
 
 /**
