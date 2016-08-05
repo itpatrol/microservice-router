@@ -170,6 +170,9 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
     }
 
     debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
+    debug.debug('%s Request: %s %s %s', route, path, method);
+    debug.debug('%s Data %s', route, JSON.stringify(jsonData , null, 2));
+
 
     request({
       uri: router.url + path,
@@ -179,6 +182,9 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       body: jsonData
     }, function(error, response, body) {
       if (error) {
+        debug.debug('%s Error received: %s', route, error.message);
+        debug.debug('%s Restart request: %s %s %s', route, path, method);
+        debug.debug('%s Data %s', route, JSON.stringify(jsonData , null, 2));
         return proxyRequest(route, path, method, jsonData, requestDetails, callback);
       }
       if (body.id) {
