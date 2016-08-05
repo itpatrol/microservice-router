@@ -173,11 +173,16 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
     debug.debug('%s Request: %s %s', route, path, method);
     debug.debug('%s Data %s', route, JSON.stringify(jsonData , null, 2));
 
-
+    var headers = {};
+    for (var i in requestDetails.headers) {
+      if(!requestDetails.headers[i]['content-length']) {
+        headers[i] = requestDetails.headers[i];
+      }
+    }
     request({
       uri: router.url + path,
       method: method,
-      headers: requestDetails.headers,
+      headers: headers,
       json: true,
       body: jsonData
     }, function(error, response, body) {
