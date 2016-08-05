@@ -175,7 +175,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
 
     var headers = {};
     for (var i in requestDetails.headers) {
-      if(!requestDetails.headers[i]['host']) {
+      if(i != 'host') {
         headers[i] = requestDetails.headers[i];
       }
     }
