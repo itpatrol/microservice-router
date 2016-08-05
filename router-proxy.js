@@ -37,7 +37,7 @@ if (!mControlCluster.isMaster) {
     interval = process.env.INTERVAL;
   }
   setInterval(function() {
-    debug.debug('Current routes %s', JSON.stringify(routes , null, 2));
+//    debug.debug('Current routes %s', JSON.stringify(routes , null, 2));
     updateRouteVariable()}, interval);
 }
 
@@ -179,6 +179,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         headers[i] = requestDetails.headers[i];
       }
     }
+    debug.debug('%s headers %s', route, JSON.stringify(headers , null, 2));
     request({
       uri: router.url + path,
       method: method,
