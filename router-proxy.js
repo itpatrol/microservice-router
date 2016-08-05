@@ -182,15 +182,15 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         return proxyRequest(route, path, method, jsonData, requestDetails, callback);
       }
       if (body.id) {
-        body.url = process.env.BASE_URL + router.url + '/' + body.id;
+        body.url = process.env.BASE_URL + router.path + '/' + body.id;
       }
       if (body._id) {
-        body.url = process.env.BASE_URL + router.url + '/' + body._id;
+        body.url = process.env.BASE_URL + router.path + '/' + body._id;
       }
       if (body instanceof Array) {
         for (var i in body) {
           if (body[i]._id) {
-            body[i].url = process.env.BASE_URL + router.url  + '/' + body[i]._id;
+            body[i].url = process.env.BASE_URL + router.path  + '/' + body[i]._id;
           }
         }
       }
