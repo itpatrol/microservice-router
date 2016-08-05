@@ -55,33 +55,8 @@ function ProxyRequestGet(jsonData, requestDetails, callback) {
       route = route + url[i]
     }
   }
-  debug.debug('Route base: %s', route);
-
-  FindTarget(route, function(err, router) {
-    if (err) {
-      debug.debug('Route %s err %s', route, err.message);
-      return callback(err, null);
-    }
-
-    debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
-
-    request({
-      uri: router.url + url[url.length - 1],
-      method: 'GET',
-      headers: requestDetails.headers,
-      json: true,
-      body: jsonData
-    }, function(error, response, body) {
-      if (error) {
-        return ProxyRequestGet(jsonData, requestDetails, callback);
-      }
-      callback(null, {
-        code: response.statusCode,
-        answer: body
-      });
-    });
-  })
-
+  var path = url[url.length - 1];
+  proxyRequest(route, path, "GET", jsonData, requestDetails, callback);
 }
 
 /**
@@ -98,33 +73,8 @@ function ProxyRequestPOST(jsonData, requestDetails, callback) {
       route = route + url[i]
     }
   }
-  debug.debug('Route base: %s', route);
-
-  FindTarget(route, function(err, router) {
-    if (err) {
-      debug.debug('Route %s err %s', route, err.message);
-      return callback(err, null);
-    }
-
-    debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
-
-    request({
-      uri: router.url,
-      method: 'POST',
-      headers: requestDetails.headers,
-      json: true,
-      body: jsonData
-    }, function(error, response, body) {
-      if (error) {
-        return ProxyRequestGet(jsonData, requestDetails, callback);
-      }
-      callback(null, {
-        code: response.statusCode,
-        answer: body
-      });
-    });
-  })
-
+  var path = '';
+  proxyRequest(route, path, "POST", jsonData, requestDetails, callback);
 }
 
 /**
@@ -141,33 +91,8 @@ function ProxyRequestPUT(jsonData, requestDetails, callback) {
       route = route + url[i]
     }
   }
-  debug.debug('Route base: %s', route);
-
-  FindTarget(route, function(err, router) {
-    if (err) {
-      debug.debug('Route %s err %s', route, err.message);
-      return callback(err, null);
-    }
-
-    debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
-
-    request({
-      uri: router.url + url[url.length - 1],
-      method: 'PUT',
-      headers: requestDetails.headers,
-      json: true,
-      body: jsonData
-    }, function(error, response, body) {
-      if (error) {
-        return ProxyRequestGet(jsonData, requestDetails, callback);
-      }
-      callback(null, {
-        code: response.statusCode,
-        answer: body
-      });
-    });
-  })
-
+  var path = url[url.length - 1];
+  proxyRequest(route, path, "PUT", jsonData, requestDetails, callback);
 }
 
 /**
@@ -184,33 +109,8 @@ function ProxyRequestDELETE(jsonData, requestDetails, callback) {
       route = route + url[i]
     }
   }
-  debug.debug('Route base: %s', route);
-
-  FindTarget(route, function(err, router) {
-    if (err) {
-      debug.debug('Route %s err %s', route, err.message);
-      return callback(err, null);
-    }
-
-    debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
-
-    request({
-      uri: router.url + url[url.length - 1],
-      method: 'DELETE',
-      headers: requestDetails.headers,
-      json: true,
-      body: jsonData
-    }, function(error, response, body) {
-      if (error) {
-        return ProxyRequestGet(jsonData, requestDetails, callback);
-      }
-      callback(null, {
-        code: response.statusCode,
-        answer: body
-      });
-    });
-  })
-
+  var path = url[url.length - 1];
+  proxyRequest(route, path, "DELETE", jsonData, requestDetails, callback);
 }
 
 
@@ -228,33 +128,8 @@ function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
       route = route + url[i]
     }
   }
-  debug.debug('Route base: %s', route);
-
-  FindTarget(route, function(err, router) {
-    if (err) {
-      debug.debug('Route %s err %s', route, err.message);
-      return callback(err, null);
-    }
-
-    debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
-
-    request({
-      uri: router.url,
-      method: 'SEARCH',
-      headers: requestDetails.headers,
-      json: true,
-      body: jsonData
-    }, function(error, response, body) {
-      if (error) {
-        return ProxyRequestGet(jsonData, requestDetails, callback);
-      }
-      callback(null, {
-        code: response.statusCode,
-        answer: body
-      });
-    });
-  })
-
+  var path = '';
+  proxyRequest(route, path, "SEARCH", jsonData, requestDetails, callback);
 }
 
 /**
@@ -280,6 +155,38 @@ function FindTarget(route, callback) {
 
   var random = Math.floor(Math.random() * (availableRoutes.length) + 1) - 1;
   return callback(null, availableRoutes[random]);
+}
+
+/**
+ * Proxy request to backend server.
+ */
+function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
+  debug.debug('Route base: %s', route);
+
+  FindTarget(route, function(err, router) {
+    if (err) {
+      debug.debug('Route %s err %s', route, err.message);
+      return callback(err, null);
+    }
+
+    debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
+
+    request({
+      uri: router.url + path,
+      method: method,
+      headers: requestDetails.headers,
+      json: true,
+      body: jsonData
+    }, function(error, response, body) {
+      if (error) {
+        return proxyRequest(route, path, method, jsonData, requestDetails, callback);
+      }
+      callback(null, {
+        code: response.statusCode,
+        answer: body
+      });
+    });
+  })
 }
 
 /**
