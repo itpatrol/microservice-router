@@ -184,8 +184,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       uri: router.url + path,
       method: method,
       headers: headers,
-      json: true,
-      body: jsonData
+      body: requestDetails._buffer
     }, function(error, response, body) {
       debug.debug('%s Responce: %s', route, response);
       debug.debug('%s body: %s', route, body);
