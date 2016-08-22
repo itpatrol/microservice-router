@@ -1,6 +1,6 @@
 deploy:
   master:
-    server: a1.git.lc
+    server: api.zen.ci
     username: node
     dir: '{home}/{repo_name}/{branch}'
     env_vars:
@@ -13,7 +13,7 @@ deploy:
       pidfile: '{home}/pids/zenci-microservice-router.pid'
       logfile: '{home}/logs/zenci-microservice-router.log'
       workers: 2
-      base_url: "http://a1.git.lc:2100/"
+      base_url: "http://api.zen.ci:2100/"
     scripts:
       init: '{deploy_dir}/scripts/deploy_init.sh'
       after: '{deploy_dir}/scripts/after_deploy.sh'
