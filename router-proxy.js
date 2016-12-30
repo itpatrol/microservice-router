@@ -133,27 +133,69 @@ function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
 }
 
 /**
- * Finx target URL.
+ * Compare route to router.path items.
+ */
+function matchRoute(route, routeItem) {
+  let routeItems = route.split('/');
+  var paths = routeItem.path;
+
+
+  for (var i in paths) {
+    // If route qual saved path
+    if( paths[i] == route) {
+      return true;
+    }
+
+    // If routeItems.length == 1, and did not match
+    if(routeItems.length == 1) {
+      if(paths[i] != route) {
+        continue;
+      }
+    }
+
+    var pathItems = paths[i].split('/');
+    if(pathItems.length != routeItems.length) {
+      continue;
+    }
+    for (var i = 0; i < routeItems.length; i++) {
+      if(pathItems[i].charAt(0) == ':' ) {
+        routeItem.matchVariables[pathItems[i].substring(1)] = routeItems[i];
+      } else {
+        if(routeItems[i] != pathItems[i]) {
+          break;
+        }
+      }
+    }
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Find target URL.
  */
 function FindTarget(route, callback) {
   debug.debug('Find route %s', route);
 
   var availableRoutes = [];
   for (var i in routes) {
-    if (routes[i].path == route) {
-      availableRoutes.push(routes[i])
+    routes[i].matchVariables = {};
+    if(matchRoute(route, routes[i])) {
+      availableRoutes.push(routes[i]);
     }
   }
   debug.debug('Available routes for %s %s', route, JSON.stringify(routes , null, 2));
   if (availableRoutes.length == 0) {
     debug.debug('Not found for %s', route);
-    return callback(new Error('Not found'), null);
+    return callback(new Error('Endpoint not found'), null);
   }
   if (availableRoutes.length == 1) {
     return callback(null, availableRoutes.pop());
   }
 
   var random = Math.floor(Math.random() * (availableRoutes.length) + 1) - 1;
+  console.log(availableRoutes[random]);
   return callback(null, availableRoutes[random]);
 }
 
@@ -180,6 +222,11 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         headers[i] = requestDetails.headers[i];
       }
     }
+
+    for (var i in router.matchVariables) {
+      headers[i] = router.matchVariables[i];
+    }
+
     debug.debug('%s headers %s', route, JSON.stringify(headers , null, 2));
     request({
       uri: router.url + path,

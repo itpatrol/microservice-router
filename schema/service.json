@@ -3,8 +3,12 @@
   "type": "object",
   "properties": {
     "path": {
-      "type": "string",
-      "description": "Base path for microservice.",
+      "type": "array",
+      "description": "Array of supported path.",
+      "items": {
+          "type": "string"
+      },
+      "minItems": 1,
       "required": true
     },
     "url": {
