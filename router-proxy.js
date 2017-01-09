@@ -234,15 +234,15 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       headers: headers,
       body: requestDetails._buffer
     }, function(error, response, body) {
-      body = JSON.parse(body);
       debug.debug('%s Responce: %s', route, response);
-      debug.debug('%s body: %s', route, body);
       if (error) {
         debug.debug('%s Error received: %s', route, error.message);
         debug.debug('%s Restart request: %s %s %s', route, path, method);
         debug.debug('%s Data %s', route, JSON.stringify(jsonData , null, 2));
         return proxyRequest(route, path, method, jsonData, requestDetails, callback);
       }
+      body = JSON.parse(body);
+      debug.debug('%s body: %s', route, body);
       if (body.id) {
         body.url = process.env.BASE_URL + router.path + '/' + body.id;
       }
