@@ -157,16 +157,20 @@ function matchRoute(route, routeItem) {
     if(pathItems.length != routeItems.length) {
       continue;
     }
+    var fullPathMatched = true;
     for (var i = 0; i < routeItems.length; i++) {
       if(pathItems[i].charAt(0) == ':' ) {
         routeItem.matchVariables[pathItems[i].substring(1)] = routeItems[i];
       } else {
         if(routeItems[i] != pathItems[i]) {
+          fullPathMatched = false;
           break;
         }
       }
     }
-    return true;
+    if(fullPathMatched) {
+      return true;
+    }
   }
 
   return false;
@@ -185,7 +189,7 @@ function FindTarget(route, callback) {
       availableRoutes.push(routes[i]);
     }
   }
-  debug.debug('Available routes for %s %s', route, JSON.stringify(routes , null, 2));
+  debug.debug('Available routes for %s %s', route, JSON.stringify(availableRoutes , null, 2));
   if (availableRoutes.length == 0) {
     debug.debug('Not found for %s', route);
     return callback(new Error('Endpoint not found'), null);
@@ -234,7 +238,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       headers: headers,
       body: requestDetails._buffer
     }, function(error, response, body) {
-      debug.debug('%s Responce: %s', route, response);
+      debug.debug('%s Responce: %s', route, JSON.stringify(response, null, 2));
       if (error) {
         debug.debug('%s Error received: %s', route, error.message);
         debug.debug('%s Restart request: %s %s %s', route, path, method);
@@ -242,7 +246,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         return proxyRequest(route, path, method, jsonData, requestDetails, callback);
       }
       body = JSON.parse(body);
-      debug.debug('%s body: %s', route, body);
+      debug.debug('%s body: %s', route, JSON.stringify(body , null, 2));
       if (body.id) {
         body.url = process.env.BASE_URL + router.path + '/' + body.id;
       }
