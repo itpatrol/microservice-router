@@ -5,13 +5,13 @@
   "main": "router-admin.js",
   "scripts": {
     "test": "node_modules/.bin/mocha --timeout 15000",
-    "start-admin": "DEBUG=http:log,cluster:*,router:* node  --max-old-space-size=24 router-admin.js >> `cat .env|grep LOGFILE|awk -F= {'print$2'}` 2>&1 &",
-    "start-proxy": "DEBUG=http:log,cluster:*,router:* node  --max-old-space-size=24 router-proxy.js >> `cat .env|grep LOGFILE|awk -F= {'print$2'}` 2>&1 &",
+    "start-admin": "DEBUG=http:log,cluster:*,router:* node  --max-old-space-size=48 router-admin.js >> `cat .env|grep LOGFILE|awk -F= {'print$2'}` 2>&1 &",
+    "start-proxy": "DEBUG=http:log,cluster:*,router:* node  --max-old-space-size=48 router-proxy.js >> `cat .env|grep LOGFILE|awk -F= {'print$2'}` 2>&1 &",
     "stop-admin": "cat `cat .env|grep PIDFILE|awk -F= {'print$2'}` |xargs kill -2  2>&1 &",
     "stop-proxy": "cat `cat .env|grep PIDFILE|awk -F= {'print$2'}`.proxy |xargs kill -2  2>&1 &",
     "jscs": "jscs --fix router-admin.js router-proxy.js",
-    "devel-start-admin": "DEBUG=* node  --max-old-space-size=24 router-admin.js",
-    "devel-start-proxy": "DEBUG=* node  --max-old-space-size=24 router-proxy.js"
+    "devel-start-admin": "DEBUG=* node  --max-old-space-size=48 router-admin.js",
+    "devel-start-proxy": "DEBUG=* node  --max-old-space-size=48 router-proxy.js"
   },
   "repository": {
     "type": "git",
