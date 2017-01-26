@@ -20,6 +20,7 @@ var mControlCluster = new Cluster({
   pid: process.env.PIDFILE + '.proxy',
   port: process.env.PROXY_PORT,
   count: process.env.WORKERS,
+  hostname: process.env.HOSTNAME,
   callbacks: {
     POST: ProxyRequestPOST,
     GET: ProxyRequestGet,
