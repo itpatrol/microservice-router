@@ -27,6 +27,7 @@ var mControlCluster = new Cluster({
   pid: process.env.PIDFILE,
   port: process.env.PORT,
   count: process.env.WORKERS,
+  hostname: process.env.HOSTNAME,
   callbacks: {
     validate: mservice.validate,
     POST: mservice.post,
