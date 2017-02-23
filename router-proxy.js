@@ -261,9 +261,16 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
           }
         }
       }
+      var responseHeaders = {};
+      for (var i in response.headers) {
+        if(i.substring(0,1) == 'x') {
+          responseHeaders[i] = response.headers[i];
+        }
+      }
       callback(null, {
         code: response.statusCode,
-        answer: body
+        answer: body,
+        headers: responseHeaders
       });
     });
   })
