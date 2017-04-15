@@ -1,5 +1,5 @@
 {
-  "name": "zenci-microservice-router",
+  "name": "microservice-router",
   "version": "0.2.0",
   "description": "URL router for micro services",
   "main": "router-admin.js",
