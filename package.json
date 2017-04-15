@@ -1,6 +1,6 @@
 {
   "name": "microservice-router",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "URL router for micro services",
   "main": "router-admin.js",
   "scripts": {
@@ -15,23 +15,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/itpatrol/zenci-microservice-router.git"
+    "url": "git+https://github.com/itpatrol/microservice-router.git"
   },
   "author": "Gormartsen",
   "license": "SEE LICENSE IN <LICENSE.txt>",
   "bugs": {
-    "url": "https://github.com/itpatrol/zenci-microservice-router/issues"
+    "url": "https://github.com/itpatrol/microservice-router/issues"
   },
-  "homepage": "https://github.com/itpatrol/zenci-microservice-router#readme",
+  "homepage": "https://github.com/itpatrol/microservice-router#readme",
   "dependencies": {
     "debug": "^2.2.0",
     "dotenv": "^2.0.0",
-    "zenci-manager": "github:itpatrol/zenci-manager",
-    "zenci-microservice": "github:itpatrol/zenci-microservice"
+    "microservice-cluster": "github:itpatrol/microservice-cluster",
+    "microservice": "github:itpatrol/microservice"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^3.0.0",
-    "zenci-microservice-client": "github:itpatrol/zenci-microservice-client"
+    "microservice-client": "github:itpatrol/microservice-client"
   }
 }

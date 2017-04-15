@@ -3,7 +3,7 @@
  */
 'use strict';
 
-const Cluster = require('zenci-manager');
+const Cluster = require('microservice-cluster');
 const request = require('request');
 const MongoClient = require('mongodb').MongoClient;
 const debugF = require('debug');
@@ -37,9 +37,7 @@ if (!mControlCluster.isMaster) {
   if (process.env.INTERVAL) {
     interval = process.env.INTERVAL;
   }
-  setInterval(function() {
-    //    debug.debug('Current routes %s', JSON.stringify(routes , null, 2));
-    updateRouteVariable()}, interval);
+  setInterval(function() { updateRouteVariable()}, interval);
 }
 
 /**
@@ -143,33 +141,33 @@ function matchRoute(route, routeItem) {
 
   for (var i in paths) {
     // If route qual saved path
-    if( paths[i] == route) {
+    if (paths[i] == route) {
       return true;
     }
 
     // If routeItems.length == 1, and did not match
-    if(routeItems.length == 1) {
-      if(paths[i] != route) {
+    if (routeItems.length == 1) {
+      if (paths[i] != route) {
         continue;
       }
     }
 
     var pathItems = paths[i].split('/');
-    if(pathItems.length != routeItems.length) {
+    if (pathItems.length != routeItems.length) {
       continue;
     }
     var fullPathMatched = true;
     for (var i = 0; i < routeItems.length; i++) {
-      if(pathItems[i].charAt(0) == ':' ) {
+      if (pathItems[i].charAt(0) == ':') {
         routeItem.matchVariables[pathItems[i].substring(1)] = routeItems[i];
       } else {
-        if(routeItems[i] != pathItems[i]) {
+        if (routeItems[i] != pathItems[i]) {
           fullPathMatched = false;
           break;
         }
       }
     }
-    if(fullPathMatched) {
+    if (fullPathMatched) {
       return true;
     }
   }
@@ -186,7 +184,7 @@ function FindTarget(route, callback) {
   var availableRoutes = [];
   for (var i in routes) {
     routes[i].matchVariables = {};
-    if(matchRoute(route, routes[i])) {
+    if (matchRoute(route, routes[i])) {
       availableRoutes.push(routes[i]);
     }
   }
@@ -200,7 +198,7 @@ function FindTarget(route, callback) {
   }
 
   var random = Math.floor(Math.random() * (availableRoutes.length) + 1) - 1;
-  console.log(availableRoutes[random]);
+  debug.log(availableRoutes[random]);
   return callback(null, availableRoutes[random]);
 }
 
@@ -223,7 +221,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
 
     var headers = {};
     for (var i in requestDetails.headers) {
-      if (i != 'host' ) {
+      if (i != 'host') {
         headers[i] = requestDetails.headers[i];
       }
     }
@@ -263,7 +261,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       }
       var responseHeaders = {};
       for (var i in response.headers) {
-        if(i.substring(0,1) == 'x') {
+        if (i.substring(0,1) == 'x') {
           responseHeaders[i] = response.headers[i];
         }
       }

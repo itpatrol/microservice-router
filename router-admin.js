@@ -3,8 +3,8 @@
  */
 'use strict';
 
-const Cluster = require('zenci-manager');
-const Microservice = require('zenci-microservice');
+const Cluster = require('microservice-cluster');
+const Microservice = require('microservice');
 const MongoClient = require('mongodb').MongoClient;
 const debugF = require('debug');
 
