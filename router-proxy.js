@@ -3,7 +3,7 @@
  */
 'use strict';
 
-const Cluster = require('microservice-cluster');
+const Cluster = require('@microservice-framework/microservice-cluster');
 const request = require('request');
 const MongoClient = require('mongodb').MongoClient;
 const debugF = require('debug');

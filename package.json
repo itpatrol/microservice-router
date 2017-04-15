@@ -1,7 +1,7 @@
 {
-  "name": "microservice-router",
+  "name": "@microservice-framework/microservice-router",
   "version": "1.0.0",
-  "description": "URL router for micro services",
+  "description": "Microservice framework router",
   "main": "router-admin.js",
   "scripts": {
     "test": "node_modules/.bin/mocha --timeout 15000",
@@ -15,23 +15,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/itpatrol/microservice-router.git"
+    "url": "git+https://github.com/microservice-framework/microservice-router.git"
   },
   "author": "Gormartsen",
   "license": "SEE LICENSE IN <LICENSE.txt>",
   "bugs": {
-    "url": "https://github.com/itpatrol/microservice-router/issues"
+    "url": "https://github.com/microservice-framework/microservice-router/issues"
   },
-  "homepage": "https://github.com/itpatrol/microservice-router#readme",
+  "homepage": "https://github.com/microservice-framework/microservice-router#readme",
   "dependencies": {
+    "@microservice-framework/microservice": "^1.0.3",
+    "@microservice-framework/microservice-cluster": "^1.0.1",
     "debug": "^2.2.0",
-    "dotenv": "^2.0.0",
-    "microservice-cluster": "github:itpatrol/microservice-cluster",
-    "microservice": "github:itpatrol/microservice"
+    "dotenv": "^2.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^3.0.0",
-    "microservice-client": "github:itpatrol/microservice-client"
+    "@microservice-framework/microservice-client": "^1.0.1",
   }
 }
