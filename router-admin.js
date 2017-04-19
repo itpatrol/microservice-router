@@ -17,7 +17,7 @@ require('dotenv').config();
 
 
 var mservice = new Microservice({
-  mongoUrl: process.env.MONGO_URL,
+  mongoUrl: process.env.MONGO_URL + process.env.MONGO_OPTIONS,
   mongoTable: process.env.MONGO_TABLE,
   secureKey: process.env.SECURE_KEY,
   schema: process.env.SCHEMA
