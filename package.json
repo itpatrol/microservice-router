@@ -5,20 +5,18 @@
   "main": "router-admin.js",
   "scripts": {
     "test": "node_modules/.bin/mocha --timeout 15000",
-    "start-admin": "DEBUG=http:log,cluster:*,router:* node  --max-old-space-size=520 router-admin.js >> `cat .env|grep LOGFILE|awk -F= {'print$2'}` 2>&1 &",
-    "start-proxy": "DEBUG=http:log,cluster:*,router:* node  --max-old-space-size=520 router-proxy.js >> `cat .env|grep LOGFILE|awk -F= {'print$2'}` 2>&1 &",
-    "stop-admin": "cat `cat .env|grep PIDFILE|awk -F= {'print$2'}` |xargs kill -2  2>&1 &",
-    "stop-proxy": "cat `cat .env|grep PIDFILE|awk -F= {'print$2'}`.proxy |xargs kill -2  2>&1 &",
-    "jscs": "jscs --fix router-admin.js router-proxy.js",
-    "devel-start-admin": "DEBUG=* node  --max-old-space-size=520 router-admin.js",
-    "devel-start-proxy": "DEBUG=* node  --max-old-space-size=520 router-proxy.js"
+    "start-admin": "DEBUG=http:log,cluster:*,router:* node  --max-old-space-size=520 router-admin.js",
+    "start-proxy": "DEBUG=http:log,cluster:*,router:* node  --max-old-space-size=520 router-proxy.js",
+    "stop-admin": "ADMIN=true node kill.js",
+    "stop-proxy": "PROXY=true node kill.js",
+    "jscs": "jscs --fix router-admin.js router-proxy.js kill.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/microservice-framework/microservice-router.git"
   },
   "author": "Gormartsen",
-  "license": "SEE LICENSE IN <LICENSE.txt>",
+  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/microservice-framework/microservice-router/issues"
   },
@@ -32,6 +30,6 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^3.0.0",
-    "@microservice-framework/microservice-client": "^1.0.1",
+    "@microservice-framework/microservice-client": "^1.0.1"
   }
 }

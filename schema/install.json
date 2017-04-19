@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "mongo_url": {
+      "type": "string",
+      "description": "Mongo URL",
+      "default": "mongodb://localhost:27017/mfw",
+      "required": true
+    },
+    "mongo_table": {
+      "type": "string",
+      "description": "Mongo Table",
+      "default": "routes",
+      "required": true
+    },
+    "mongo_options": {
+      "type": "string",
+      "description": "Mongo Options (example: ?replicaSet=rs1&slaveOk=true)",
+      "default": ""
+    },
+    "hostname": {
+      "type": "string",
+      "description": "IP or hostname of the server",
+      "default": "localhost",
+      "required": true
+    },
+    "port": {
+      "type": "number",
+      "description": "Admin port",
+      "default": 3000,
+      "required": true
+    },
+    "proxy_port": {
+      "type": "number",
+      "description": "Proxy port",
+      "default": 3100,
+      "required": true
+    },
+    "workers": {
+      "type": "number",
+      "description": "Number of workers",
+      "default": 2,
+      "required": true
+    },
+    "interval": {
+      "type": "number",
+      "description": "How often to clean expired services.",
+      "default": 30000,
+      "required": true
+    },
+    "base_url": {
+      "type": "string",
+      "description": "Proxy URL",
+      "default": "http://localhost:3100/",
+      "required": true
+    },
+    "schema": {
+      "type": "string",
+      "description": "Do not change",
+      "default": "service.json",
+      "required": true
+    }
+
+  }
+}
