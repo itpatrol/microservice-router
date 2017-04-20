@@ -279,7 +279,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
  */
 function updateRouteVariable() {
 
-  MongoClient.connect(process.env.MONGO_URL + process.env.MONGO_OPTIONS, function(err, db) {
+  MongoClient.connect(process.env.MONGO_URL + process.env.MONGO_PREFIX + process.env.MONGO_OPTIONS, function(err, db) {
     if (err) {
       // If error, do nothing.
       debug.debug('Error %s', err.message);

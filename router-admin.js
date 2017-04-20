@@ -17,7 +17,7 @@ require('dotenv').config();
 
 
 var mservice = new Microservice({
-  mongoUrl: process.env.MONGO_URL + process.env.MONGO_OPTIONS,
+  mongoUrl: process.env.MONGO_URL + process.env.MONGO_PREFIX + process.env.MONGO_OPTIONS,
   mongoTable: process.env.MONGO_TABLE,
   secureKey: process.env.SECURE_KEY,
   schema: process.env.SCHEMA
@@ -51,7 +51,7 @@ if (mControlCluster.isMaster) {
  */
 function cleanRouteTable() {
   debug.log('Clean routes');
-  MongoClient.connect(process.env.MONGO_URL + process.env.MONGO_OPTIONS, function(err, db) {
+  MongoClient.connect(process.env.MONGO_URL + process.env.MONGO_PREFIX + process.env.MONGO_OPTIONS, function(err, db) {
     if (err) {
       // If error, do nothing.
       debug.debug('Error %s', err.message);
