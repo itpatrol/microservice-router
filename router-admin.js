@@ -45,6 +45,7 @@ if (mControlCluster.isMaster) {
   }
   setInterval(cleanRouteTable , interval);
 }
+
 /**
  * Update route infor each 10 sec.
  */

@@ -20,8 +20,7 @@
     "hostname": {
       "type": "string",
       "description": "IP or hostname of the server",
-      "default": "localhost",
-      "required": true
+      "default": ""
     },
     "port": {
       "type": "number",

@@ -13,7 +13,7 @@
     },
     "url": {
       "type": "string",
-      "description": "url to access servive http://ip:port.",
+      "description": "url to access service http://ip:port.",
       "required": true
     }
   }
