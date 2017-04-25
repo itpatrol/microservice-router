@@ -1,35 +1,32 @@
 # microservice-router
-Ready to Microservice framework router.
 
-Create .env file with example content:
-```
-MONGO_URL="mongodb://%%MONGO_HOST%%/%%MONGO_DATABASE%%%%MONGO_OPTION%%"
-MONGO_TABLE="routes"
+[![Gitter](https://img.shields.io/gitter/room/microservice-framework/chat.svg?style=flat-square)](https://gitter.im/microservice-framework/chat)
+[![npm](https://img.shields.io/npm/dt/@microservice-framework/microservice-router.svg?style=flat-square)](https://www.npmjs.com/~microservice-framework)
+[![microservice-frame.work](https://img.shields.io/badge/online%20docs-200-green.svg?style=flat-square)](http://microservice-frame.work)
 
-HOSTNAME="%%SERVER_IP%%"
+Proxy-Router for [microservice-framework](https://www.npmjs.com/~microservice-framework)
 
-PORT=3000
-PROXY_PORT=3100
+## Setup using mfw-cli
 
-SCHEMA=service.json
+- Create `myproject` first:
+  
+  ```bash
+  # mkdir myproject
+  # cd myproject
+  # mfw setup 
+  ```
 
-SECURE_KEY=%%SECURE_KEY%%
+- Install router service
+  ```bash
+  # mfw install @microservice-framework/microservice-router --save
+  ```
+- Start service
+  ```bash
+  # mfw start all
+  ```
+- Configure NGINX to direct requests to router instances:
 
-PIDFILE=%%PIDS_DIR%%/microservice-router.pid
-LOGFILE=%%LOGS_DIR%%/microservice-router.log
-
-WORKERS=2
-INTERVAL=30000
-
-BASE_URL="http://%%API_WEB_URL%%/"
-
-```
-Please replace `%%NAME%%` with your values.
-
-
-We suggest to setup nginx proxy to balance API requests:
-
-```nginx
+  ```nginx
     upstream apiv1 {
         server api1.server.com:3100;
         server api2.server.com:3100;
@@ -81,23 +78,4 @@ We suggest to setup nginx proxy to balance API requests:
           proxy_buffer_size 32k;
         }
     }
-```
-
-Based on this config:
-
-BASE_URL="https://my-server.com/api/v1/"
-
-Start up admin and proxy services:
-
-```bash
-npm run start-admin
-npm run start-proxy
-```
-
-When you need to stop service:
-
-```bash
-npm run stop-admin
-npm run stop-proxy
-```
-
+   ```

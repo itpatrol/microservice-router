@@ -3,7 +3,7 @@
     "mongo_url": {
       "type": "string",
       "description": "Mongo URL",
-      "default": "mongodb://localhost:27017/mfw",
+      "default": "mongodb://localhost:27017/",
       "required": true
     },
     "mongo_table": {
@@ -11,6 +11,11 @@
       "description": "Mongo Table",
       "default": "routes",
       "required": true
+    },
+    "mongo_prefix": {
+      "type": "string",
+      "description": "Mongo prefix(db)",
+      "default": "mfw"
     },
     "mongo_options": {
       "type": "string",
