@@ -38,8 +38,8 @@ Proxy-Router for [microservice-framework](https://www.npmjs.com/~microservice-fr
     server {
         listen       443 ssl;
         server_name  my-server.com www.my-server.com;
-	underscores_in_headers on;
-	large_client_header_buffers 4 64k;
+	      underscores_in_headers on;
+	      large_client_header_buffers 4 64k;
         ssl_certificate ssl/my-server.com.crt;
         ssl_certificate_key ssl/my-server.com.key;
         ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
