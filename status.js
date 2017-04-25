@@ -1,9 +1,13 @@
 'use strict';
 const fs = require('fs');
 require('dotenv').config();
+var pidproxy;
+var pid;
 
-var pidproxy = fs.readFileSync(process.env.PIDFILE + '.proxy').toString('utf8');
-var pid = fs.readFileSync(process.env.PIDFILE).toString('utf8');
+try{
+  pidproxy = fs.readFileSync(process.env.PIDFILE + '.proxy').toString('utf8');
+  pid = fs.readFileSync(process.env.PIDFILE).toString('utf8');
+}catch(e) {}
 
 console.log(JSON.stringify({
   "microservice-router:admin" : {
