@@ -7,6 +7,10 @@ const Cluster = require('@microservice-framework/microservice-cluster');
 const request = require('request');
 const MongoClient = require('mongodb').MongoClient;
 const debugF = require('debug');
+const dgram = require('dgram');
+const client = dgram.createSocket('udp4');
+const url = require('url');
+const signature = require('./includes/signature.js');
 
 var debug = {
   log: debugF('proxy:log'),
@@ -265,6 +269,10 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
           responseHeaders[i] = response.headers[i];
         }
       }
+
+      if(response.statusCode == 200){
+        sendBroadcastMessage(router, method, path, body);
+      }
       callback(null, {
         code: response.statusCode,
         answer: body,
@@ -272,6 +280,41 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       });
     });
   })
+}
+
+/**
+ * Proxy request to backend server.
+ */
+function sendBroadcastMessage(route, method, path, message) {
+  debug.debug('UDP broadcast %O %s %s %O', route, method, path, message);
+  var broadcastMessage = {
+    method: method,
+    route: route.path,
+    sope: route.scope,
+    path: path,
+    message: message
+  };
+
+  for (var i in routes) {
+    var routeItem = routes[i];
+    if(routeItem.path.indexOf('ws') != -1){
+      var URL = url.parse(routeItem.url);
+      broadcastMessage.signature = ['sha256', signature('sha256', JSON.stringify(broadcastMessage), routeItem.secureKey)];
+      debug.debug('UDP broadcast to %O %O', routeItem, URL);
+      var bufferedMessage = Buffer.from(JSON.stringify(broadcastMessage));
+      var client = dgram.createSocket('udp4');
+      client.send(bufferedMessage, URL.port, URL.hostname, function(err){
+        if(err) {
+          debug.debug('UDP broadcast Error: %O', err);
+          client.close();
+        }
+      });
+      client.on('message', function(message, remote) {
+        debug.debug('Received from server: ' + message);
+        client.close();
+      });
+    }
+  }
 }
 
 /**
