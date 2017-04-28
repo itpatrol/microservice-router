@@ -270,7 +270,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         }
       }
 
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         sendBroadcastMessage(router, method, path, body);
       }
       callback(null, {
@@ -290,7 +290,7 @@ function sendBroadcastMessage(route, method, path, message) {
 
   for (var i in routes) {
     var routeItem = routes[i];
-    if(routeItem.path.indexOf('ws') != -1){
+    if (routeItem.path.indexOf('ws') != -1) {
 
       var broadcastMessage = {
         method: method,
@@ -298,27 +298,29 @@ function sendBroadcastMessage(route, method, path, message) {
         scope: route.scope,
         path: path
       };
-      switch(routeItem.methods[method.toLowerCase()]) {
+      switch (routeItem.methods[method.toLowerCase()]) {
         case 'data': {
-            broadcastMessage.message = message;
+          broadcastMessage.message = message;
           break;
         }
         case 'meta': {
-            broadcastMessage.meta = true;
+          broadcastMessage.meta = true;
           break;
         }
-        default:
+        default: {
           continue;
+        }
       }
       var URL = url.parse(routeItem.url);
 
-      broadcastMessage.signature = ['sha256', signature('sha256', JSON.stringify(broadcastMessage), routeItem.secureKey)];
+      broadcastMessage.signature = ['sha256',
+        signature('sha256', JSON.stringify(broadcastMessage), routeItem.secureKey)];
 
       debug.debug('UDP broadcast to %O %O', routeItem, URL);
       var bufferedMessage = Buffer.from(JSON.stringify(broadcastMessage));
       var client = dgram.createSocket('udp4');
-      client.send(bufferedMessage, URL.port, URL.hostname, function(err){
-        if(err) {
+      client.send(bufferedMessage, URL.port, URL.hostname, function(err) {
+        if (err) {
           debug.debug('UDP broadcast Error: %O', err);
           client.close();
         }
@@ -336,7 +338,8 @@ function sendBroadcastMessage(route, method, path, message) {
  */
 function updateRouteVariable() {
 
-  MongoClient.connect(process.env.MONGO_URL + process.env.MONGO_PREFIX + process.env.MONGO_OPTIONS, function(err, db) {
+  MongoClient.connect(process.env.MONGO_URL + process.env.MONGO_PREFIX +
+    process.env.MONGO_OPTIONS, function(err, db) {
     if (err) {
       // If error, do nothing.
       debug.debug('Error %s', err.message);
