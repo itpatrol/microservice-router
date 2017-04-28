@@ -287,19 +287,33 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
  */
 function sendBroadcastMessage(route, method, path, message) {
   debug.debug('UDP broadcast %O %s %s %O', route, method, path, message);
-  var broadcastMessage = {
-    method: method,
-    route: route.path,
-    scope: route.scope,
-    path: path,
-    message: message
-  };
 
   for (var i in routes) {
     var routeItem = routes[i];
     if(routeItem.path.indexOf('ws') != -1){
+
+      var broadcastMessage = {
+        method: method,
+        route: route.path,
+        scope: route.scope,
+        path: path
+      };
+      switch(routeItem.methods[method.toLowerCase()]) {
+        case 'data': {
+            broadcastMessage.message = message;
+          break;
+        }
+        case 'meta': {
+            broadcastMessage.meta = true;
+          break;
+        }
+        default:
+          continue;
+      }
       var URL = url.parse(routeItem.url);
+
       broadcastMessage.signature = ['sha256', signature('sha256', JSON.stringify(broadcastMessage), routeItem.secureKey)];
+
       debug.debug('UDP broadcast to %O %O', routeItem, URL);
       var bufferedMessage = Buffer.from(JSON.stringify(broadcastMessage));
       var client = dgram.createSocket('udp4');
