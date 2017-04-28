@@ -290,7 +290,7 @@ function sendBroadcastMessage(route, method, path, message) {
   var broadcastMessage = {
     method: method,
     route: route.path,
-    sope: route.scope,
+    scope: route.scope,
     path: path,
     message: message
   };
