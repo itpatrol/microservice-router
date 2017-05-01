@@ -285,8 +285,8 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
 /**
  * Proxy request to backend server.
  */
-function sendBroadcastMessage(route, method, path, message) {
-  debug.debug('UDP broadcast %O %s %s %O', route, method, path, message);
+function sendBroadcastMessage(router, method, path, message) {
+  debug.debug('UDP broadcast %O %s %s %O', router, method, path, message);
 
   for (var i in routes) {
     var routeItem = routes[i];
@@ -294,8 +294,9 @@ function sendBroadcastMessage(route, method, path, message) {
 
       var broadcastMessage = {
         method: method,
-        route: route.path,
-        scope: route.scope,
+        route: router.path,
+        scope: router.scope,
+        loaders: router.matchVariables,
         path: path
       };
       switch (routeItem.methods[method.toLowerCase()]) {
