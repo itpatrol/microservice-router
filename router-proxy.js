@@ -231,7 +231,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
     }
 
     for (var i in router.matchVariables) {
-      headers[i] = router.matchVariables[i];
+      headers['mfw-' + i] = router.matchVariables[i];
     }
 
     debug.debug('%s headers %s', route, JSON.stringify(headers , null, 2));
@@ -271,7 +271,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       }
 
       if (response.statusCode == 200) {
-        sendBroadcastMessage(router, method, path, body);
+        sendBroadcastMessage(router, method, requestDetails.url, body);
       }
       callback(null, {
         code: response.statusCode,
