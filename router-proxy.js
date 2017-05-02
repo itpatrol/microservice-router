@@ -319,19 +319,23 @@ function sendBroadcastMessage(router, method, path, message) {
 
       debug.debug('UDP broadcast to %O %O', routeItem, URL);
       var bufferedMessage = Buffer.from(JSON.stringify(broadcastMessage));
-      var client = dgram.createSocket('udp4');
-      client.send(bufferedMessage, URL.port, URL.hostname, function(err) {
-        if (err) {
-          debug.debug('UDP broadcast Error: %O', err);
-          client.close();
-        }
-      });
-      client.on('message', function(message, remote) {
-        debug.debug('Received from server: ' + message);
-        client.close();
-      });
+      sendBroadcastMessageToClient(bufferedMessage, URL);
     }
   }
+}
+
+function sendBroadcastMessageToClient(bufferedMessage, URL){
+  let client = dgram.createSocket('udp4');
+  client.send(bufferedMessage, URL.port, URL.hostname, function(err) {
+    if (err) {
+      debug.debug('UDP broadcast Error: %O', err);
+      client.close();
+    }
+  });
+  client.on('message', function(message, remote) {
+    debug.debug('Received from server: ' + message);
+    client.close();
+  });
 }
 
 /**
