@@ -4,18 +4,18 @@ require('dotenv').config();
 var pidproxy;
 var pid;
 
-try{
+try {
   pidproxy = fs.readFileSync(process.env.PIDFILE + '.proxy').toString('utf8');
   pid = fs.readFileSync(process.env.PIDFILE).toString('utf8');
 }catch(e) {}
 
 console.log(JSON.stringify({
-  "microservice-router:admin" : {
+  'microservice-router:admin': {
     pid: pid,
     start: 'start-admin',
     stop: 'stop-admin'
   },
-  "microservice-router:proxy" : {
+  'microservice-router:proxy': {
     pid: pidproxy,
     start: 'start-proxy',
     stop: 'stop-proxy'
