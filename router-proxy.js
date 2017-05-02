@@ -324,7 +324,7 @@ function sendBroadcastMessage(router, method, path, message) {
   }
 }
 
-function sendBroadcastMessageToClient(bufferedMessage, URL){
+function sendBroadcastMessageToClient(bufferedMessage, URL) {
   let client = dgram.createSocket('udp4');
   client.send(bufferedMessage, URL.port, URL.hostname, function(err) {
     if (err) {
