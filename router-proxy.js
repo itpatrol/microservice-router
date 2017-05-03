@@ -187,9 +187,11 @@ function FindTarget(route, callback) {
 
   var availableRoutes = [];
   for (var i in routes) {
-    routes[i].matchVariables = {};
-    if (matchRoute(route, routes[i])) {
-      availableRoutes.push(routes[i]);
+    // Making copy of the router.
+    let routeItem = JSON.parse(JSON.stringify(routes[i]));
+    routeItem.matchVariables = {};
+    if (matchRoute(route, routeItem)) {
+      availableRoutes.push(routeItem);
     }
   }
   debug.debug('Available routes for %s %s', route, JSON.stringify(availableRoutes , null, 2));
