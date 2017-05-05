@@ -11,6 +11,7 @@ const dgram = require('dgram');
 const client = dgram.createSocket('udp4');
 const url = require('url');
 const signature = require('./includes/signature.js');
+const ExplorerClass = require('./includes/explorerClass.js');
 
 var debug = {
   log: debugF('proxy:log'),
@@ -49,6 +50,10 @@ if (!mControlCluster.isMaster) {
  * Proxy GET requests.
  */
 function ProxyRequestGet(jsonData, requestDetails, callback) {
+  if (requestDetails.url == '') {
+    var Explorer = new ExplorerClass(requestDetails);
+    return Explorer.process(callback);
+  }
   let cutPosition = requestDetails.url.lastIndexOf('/');
   let route = requestDetails.url.substring(0, cutPosition);
   let path = requestDetails.url.substring(cutPosition + 1);
