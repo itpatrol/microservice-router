@@ -30,7 +30,8 @@ var mControlCluster = new Cluster({
     GET: ProxyRequestGet,
     PUT: ProxyRequestPUT,
     DELETE: ProxyRequestDELETE,
-    SEARCH: ProxyRequestSEARCH
+    SEARCH: ProxyRequestSEARCH,
+    OPTIONS: ProxyRequestOPTIONS,
   }
 });
 
@@ -48,17 +49,9 @@ if (!mControlCluster.isMaster) {
  * Proxy GET requests.
  */
 function ProxyRequestGet(jsonData, requestDetails, callback) {
-  var url = requestDetails.url.split('/');
-
-  var route = '';
-  for (var i = 0; i < url.length - 1; i++) {
-    if (i != url.length - 2) {
-      route = route + url[i] + '/';
-    } else {
-      route = route + url[i]
-    }
-  }
-  var path = url[url.length - 1];
+  let cutPosition = requestDetails.url.lastIndexOf('/');
+  let route = requestDetails.url.substring(0, cutPosition);
+  let path = requestDetails.url.substring(cutPosition + 1);
   proxyRequest(route, path, 'GET', jsonData, requestDetails, callback);
 }
 
@@ -66,17 +59,11 @@ function ProxyRequestGet(jsonData, requestDetails, callback) {
  * Proxy POST requests.
  */
 function ProxyRequestPOST(jsonData, requestDetails, callback) {
-  var url = requestDetails.url.split('/');
-
-  var route = '';
-  for (var i = 0; i < url.length; i++) {
-    if (i != url.length - 1) {
-      route = route + url[i] + '/';
-    } else {
-      route = route + url[i]
-    }
+  let route = requestDetails.url;
+  let path = '';
+  if (requestDetails.url.charAt(requestDetails.url.length - 1) == '/') {
+    route = requestDetails.url.substring(0, requestDetails.url.length - 1);
   }
-  var path = '';
   proxyRequest(route, path, 'POST', jsonData, requestDetails, callback);
 }
 
@@ -84,17 +71,9 @@ function ProxyRequestPOST(jsonData, requestDetails, callback) {
  * Proxy PUT requests.
  */
 function ProxyRequestPUT(jsonData, requestDetails, callback) {
-  var url = requestDetails.url.split('/');
-
-  var route = '';
-  for (var i = 0; i < url.length - 1; i++) {
-    if (i != url.length - 2) {
-      route = route + url[i] + '/';
-    } else {
-      route = route + url[i]
-    }
-  }
-  var path = url[url.length - 1];
+  let cutPosition = requestDetails.url.lastIndexOf('/');
+  let route = requestDetails.url.substring(0, cutPosition);
+  let path = requestDetails.url.substring(cutPosition + 1);
   proxyRequest(route, path, 'PUT', jsonData, requestDetails, callback);
 }
 
@@ -102,17 +81,9 @@ function ProxyRequestPUT(jsonData, requestDetails, callback) {
  * Proxy DELETE requests.
  */
 function ProxyRequestDELETE(jsonData, requestDetails, callback) {
-  var url = requestDetails.url.split('/');
-
-  var route = '';
-  for (var i = 0; i < url.length - 1; i++) {
-    if (i != url.length - 2) {
-      route = route + url[i] + '/';
-    } else {
-      route = route + url[i]
-    }
-  }
-  var path = url[url.length - 1];
+  let cutPosition = requestDetails.url.lastIndexOf('/');
+  let route = requestDetails.url.substring(0, cutPosition);
+  let path = requestDetails.url.substring(cutPosition + 1);
   proxyRequest(route, path, 'DELETE', jsonData, requestDetails, callback);
 }
 
@@ -121,20 +92,27 @@ function ProxyRequestDELETE(jsonData, requestDetails, callback) {
  * Proxy SEARCH requests.
  */
 function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
-  var url = requestDetails.url.split('/');
-
-  var route = '';
-  for (var i = 0; i < url.length; i++) {
-    if (i != url.length - 1) {
-      route = route + url[i] + '/';
-    } else {
-      route = route + url[i]
-    }
+  let route = requestDetails.url;
+  let path = '';
+  if (requestDetails.url.charAt(requestDetails.url.length - 1) == '/') {
+    route = requestDetails.url.substring(0, requestDetails.url.length - 1);
   }
-  var path = '';
+
   proxyRequest(route, path, 'SEARCH', jsonData, requestDetails, callback);
 }
 
+
+/**
+ * Proxy OPTIONS requests.
+ */
+function ProxyRequestOPTIONS(jsonData, requestDetails, callback) {
+  let route = requestDetails.url;
+  let path = '';
+  if (requestDetails.url.charAt(requestDetails.url.length - 1) == '/') {
+    route = requestDetails.url.substring(0, requestDetails.url.length - 1);
+  }
+  proxyRequest(route, path, 'OPTIONS', jsonData, requestDetails, callback);
+}
 /**
  * Compare route to router.path items.
  */
@@ -202,10 +180,29 @@ function FindTarget(route, callback) {
   if (availableRoutes.length == 1) {
     return callback(null, availableRoutes.pop());
   }
+  return callback(null, getMinLoadedRouter(availableRoutes));
+}
 
-  var random = Math.floor(Math.random() * (availableRoutes.length) + 1) - 1;
-  debug.log(availableRoutes[random]);
-  return callback(null, availableRoutes[random]);
+/**
+ * Get Router with minimum CPU used.
+ */
+function getMinLoadedRouter(availableRoutes) {
+  let minRouter = availableRoutes.pop();
+  minRouter.cpu = minRouter.metrics.reduce(function(a, b) {
+    return a.cpu + b.cpu + a.loadavg[0] + b.loadavg[0];
+  });
+  debug.debug('MinRouter %O', minRouter);
+  for (let i in availableRoutes) {
+    availableRoutes[i].cpu = availableRoutes[i].metrics.reduce(function(a, b) {
+      return a.cpu + b.cpu + a.loadavg[0] + b.loadavg[0];
+    });
+    if (availableRoutes[i].cpu < minRouter.cpu) {
+      minRouter = availableRoutes[i];
+    }
+    debug.debug('MinRouter %O', minRouter);
+    debug.debug('availableRoutes %s %O',i, availableRoutes[i]);
+  }
+  return minRouter;
 }
 
 /**
@@ -220,10 +217,10 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       return callback(err, null);
     }
 
-    debug.log('Route %s result %s', route, JSON.stringify(router , null, 2));
+    debug.log('Route %s result %O', route, router);
     debug.debug('%s Request: %s %s', route, path, method);
-    debug.debug('%s Data %s', route, JSON.stringify(jsonData , null, 2));
-    debug.debug('%s requestDetails %s', route, JSON.stringify(requestDetails , null, 2));
+    debug.debug('%s Data %O', route, jsonData);
+    debug.debug('%s requestDetails %O', route, requestDetails);
 
     var headers = {};
     for (var i in requestDetails.headers) {
@@ -236,7 +233,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       headers['mfw-' + i] = router.matchVariables[i];
     }
 
-    debug.debug('%s headers %s', route, JSON.stringify(headers , null, 2));
+    debug.debug('%s headers %O', route, headers);
     request({
       uri: router.url + path,
       method: method,
@@ -247,21 +244,26 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       if (error) {
         debug.debug('%s Error received: %s', route, error.message);
         debug.debug('%s Restart request: %s %s %s', route, path, method);
-        debug.debug('%s Data %s', route, JSON.stringify(jsonData , null, 2));
+        debug.debug('%s Data %O', route, jsonData);
         return proxyRequest(route, path, method, jsonData, requestDetails, callback);
       }
       body = JSON.parse(body);
-      debug.debug('%s body: %s', route, JSON.stringify(body , null, 2));
-      if (body.id) {
-        body.url = process.env.BASE_URL + router.path + '/' + body.id;
+      debug.debug('%s body: %O', route, body);
+
+      if (method != 'OPTIONS') {
+        if (body.url) {
+          body.url = process.env.BASE_URL + body.url;
+        } else if (body.id) {
+          body.url = process.env.BASE_URL + route + '/' + body.id;
+        }
       }
-      if (body._id) {
-        body.url = process.env.BASE_URL + router.path + '/' + body._id;
-      }
+
       if (body instanceof Array) {
         for (var i in body) {
-          if (body[i]._id) {
-            body[i].url = process.env.BASE_URL + router.path  + '/' + body[i]._id;
+          if (body[i].url) {
+            body[i].url =  process.env.BASE_URL + body[i].url;
+          } else if (body[i].id) {
+            body[i].url = process.env.BASE_URL + route  + '/' + body[i].id;
           }
         }
       }
