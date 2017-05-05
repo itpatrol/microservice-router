@@ -24,8 +24,10 @@
   "homepage": "https://github.com/microservice-framework/microservice-router#readme",
   "dependencies": {
     "@microservice-framework/microservice": "^1.2.1",
+    "@microservice-framework/microservice-client": "^1.1.1",
     "@microservice-framework/microservice-cluster": "^1.2.0",
     "debug": "^2.2.0",
+    "dot": "^1.1.1",
     "dotenv": "^2.0.0"
   },
   "devDependencies": {

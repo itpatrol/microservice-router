@@ -1,0 +1,114 @@
+<html>
+  <head>
+    <title>API Explorer</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" media="all" />
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" media="all" />
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+body {
+  background-color: #fff;
+  padding: 15px;
+}
+
+.path {
+
+}
+.path .title {
+  padding: 5px;
+  padding-left: 17px;
+  background-color: white;
+}
+.path .title .label {
+  background: #eee;
+  color: #444;
+  float: right;
+  margin: 0px 5px;
+}
+
+.path .title .label.version {
+  background: #54b523;
+  color: white;
+}
+
+.path .title .label.scope {
+  background: #e6360f;
+  color: white;
+}
+
+.path .description {
+  padding-left: 35px;
+  color: #ddd;
+}
+
+.method-GET .description {
+  color: #3c8ce7;
+}
+.method-POST .description {
+  color: #3ce870;
+}
+
+.method-PUT .description {
+  color: #e8ce3c;
+}
+
+.method-DELETE .description {
+  color: #e8563c;
+}
+
+.method-SEARCH .description {
+  color: #ac3ce8;
+}
+
+.method {
+
+}
+
+.method .title {
+  background-color: transparent;
+  padding-left: 18px;
+  color: #444;
+}
+.method .title .opeartion{
+  background: black;
+  padding: 5px;
+  color: white;
+}
+
+.method .title .fa{
+  color: #d7e4ed;
+  padding-right: 5px;
+  font-size: 75%;
+}
+
+.method .description {
+  padding-left: 53px;
+}
+
+.root {
+  position: relative;
+  padding: 2em 0;
+  margin-top: 2em;
+  margin-bottom: 2em;
+  border-bottom: 1px solid #ccc;
+}
+.root::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 18px;
+  height: 100%;
+  width: 2px;
+  background: #d7e4ed;
+}
+
+
+    </style>
+  </head>
+  <body>
+   Simple example here
+   <div class="root">
+   {{=it.lines}}
+   </div>
+  </body>
+</html>
