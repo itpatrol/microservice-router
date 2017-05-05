@@ -38,13 +38,19 @@ function ExplorerClass(requestDetails, callback) {
   });
   self.once('done', function(map) {
     self.debug.explorer('map %s %s: %O', requestDetails.headers.accept, self.mode, map);
+    let resultMap = [];
+    for(var i in map) {
+      if(!map[i].err) {
+        resultMap.push(map[i]);
+      }
+    }
     if(self.mode == 'json') {
       return self.callback(null, {
         code: 200,
-        answer: map
+        answer: resultMap
       });
     }
-    return self.processMapToHTML(map);
+    return self.processMapToHTML(resultMap);
   });
   self.on('errorService', function(err, path, service) {
     self.debug.explorer('Error options %O %s %O', err, path, service);
@@ -89,9 +95,7 @@ ExplorerClass.prototype.processMapToHTML = function(map) {;
   var self = this;
   let servicesHTML = '';
   for(var i in map) {
-    if(!map[i].err) {
-      servicesHTML = servicesHTML + dots.service(map[i]);
-    }
+    servicesHTML = servicesHTML + dots.service(map[i]);
   }
   return self.callback(null, {
     code: 200,
