@@ -46,13 +46,28 @@ if (!mControlCluster.isMaster) {
   setInterval(function() { updateRouteVariable()}, interval);
 }
 
+function applyAccessToken(requestDetails) {
+  if(requestDetails.url.indexOf('?') != -1){
+    let cutPosition = requestDetails.url.lastIndexOf('?');
+    let access_token = requestDetails.url.substring(cutPosition + 1);
+    requestDetails.url = requestDetails.url.substring(0, cutPosition);
+    if(access_token != process.env.SECURE_KEY) {
+      requestDetails.headers.access_token = access_token;
+    } else {
+      requestDetails.isSecure = true;
+    }
+    console.log(requestDetails);
+    console.log(process.env);
+  }
+}
 /**
  * Proxy GET requests.
  */
 function ProxyRequestGet(jsonData, requestDetails, callback) {
+  applyAccessToken(requestDetails);
   if (requestDetails.url == '') {
-    var Explorer = new ExplorerClass(requestDetails);
-    return Explorer.process(callback);
+    var Explorer = new ExplorerClass(requestDetails, callback);
+    return Explorer.process();
   }
   let cutPosition = requestDetails.url.lastIndexOf('/');
   let route = requestDetails.url.substring(0, cutPosition);
@@ -64,6 +79,7 @@ function ProxyRequestGet(jsonData, requestDetails, callback) {
  * Proxy POST requests.
  */
 function ProxyRequestPOST(jsonData, requestDetails, callback) {
+  applyAccessToken(requestDetails);
   let route = requestDetails.url;
   let path = '';
   if (requestDetails.url.charAt(requestDetails.url.length - 1) == '/') {
@@ -76,6 +92,7 @@ function ProxyRequestPOST(jsonData, requestDetails, callback) {
  * Proxy PUT requests.
  */
 function ProxyRequestPUT(jsonData, requestDetails, callback) {
+  applyAccessToken(requestDetails);
   let cutPosition = requestDetails.url.lastIndexOf('/');
   let route = requestDetails.url.substring(0, cutPosition);
   let path = requestDetails.url.substring(cutPosition + 1);
@@ -86,6 +103,7 @@ function ProxyRequestPUT(jsonData, requestDetails, callback) {
  * Proxy DELETE requests.
  */
 function ProxyRequestDELETE(jsonData, requestDetails, callback) {
+  applyAccessToken(requestDetails);
   let cutPosition = requestDetails.url.lastIndexOf('/');
   let route = requestDetails.url.substring(0, cutPosition);
   let path = requestDetails.url.substring(cutPosition + 1);
@@ -97,6 +115,7 @@ function ProxyRequestDELETE(jsonData, requestDetails, callback) {
  * Proxy SEARCH requests.
  */
 function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
+  applyAccessToken(requestDetails);
   let route = requestDetails.url;
   let path = '';
   if (requestDetails.url.charAt(requestDetails.url.length - 1) == '/') {
@@ -111,6 +130,7 @@ function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
  * Proxy OPTIONS requests.
  */
 function ProxyRequestOPTIONS(jsonData, requestDetails, callback) {
+  applyAccessToken(requestDetails);
   let route = requestDetails.url;
   let path = '';
   if (requestDetails.url.charAt(requestDetails.url.length - 1) == '/') {

@@ -13,13 +13,14 @@ doT.templateSettings.strip = false;
 const dots = doT.process({ path: "./html", strip: false});
 
 
-function ExplorerClass(requestDetails) {
+function ExplorerClass(requestDetails, callback) {
   EventEmitter.call(this);
   var self = this;
   self.requestDetails = requestDetails;
   self.mode = 'json';
   self.servicesCount = 0;
   self.map = [];
+  self.callback = callback;
   if(requestDetails.headers.accept.indexOf('text/html') != -1) {
     self.mode = 'html';
   }
@@ -46,11 +47,12 @@ function ExplorerClass(requestDetails) {
     return self.processMapToHTML(map);
   });
   self.on('errorService', function(err, path, service) {
+    self.debug.explorer('Error options %O %s %O', err, path, service);
     self.map.push({
       path: path,
       scope: service.scope,
       provides: service.provides,
-      err: err,
+      err: err.message,
     });
     if(self.map.length == self.servicesCount) {
       self.emit('done', self.map);
@@ -58,6 +60,8 @@ function ExplorerClass(requestDetails) {
   });
 
   self.on('service', function(path, service, options) {
+    self.debug.explorer('Service %s, %O, %O', path, service, options);
+
     self.map.push({
       path: path,
       scope: service.scope,
@@ -85,7 +89,9 @@ ExplorerClass.prototype.processMapToHTML = function(map) {;
   var self = this;
   let servicesHTML = '';
   for(var i in map) {
-    servicesHTML = servicesHTML + dots.service(map[i]);
+    if(!map[i].err) {
+      servicesHTML = servicesHTML + dots.service(map[i]);
+    }
   }
   return self.callback(null, {
     code: 200,
@@ -107,16 +113,14 @@ ExplorerClass.prototype.processService = function(path, service) {
   }
   if (self.requestDetails.headers.access_token) {
     clientSettings.accessToken = self.requestDetails.headers.access_token;
-  } else {
+  } else if(self.requestDetails.isSecure){
     clientSettings.secureKey = service.secureKey;
   }
   let msClient = new MicroserviceClient(clientSettings);
   msClient.options({}, function(err, options){
     if(err) {
-      self.debug.explorer('Error %O', err);
       return self.emit('errorService', err, path, service);
     }
-    self.debug.explorer('Service %O', options);
     return self.emit('service', path, service, options);
   });
 }
@@ -125,9 +129,8 @@ ExplorerClass.prototype.processService = function(path, service) {
  *
  * @param {object} module - module data.
  */
-ExplorerClass.prototype.process = function(callback) {
+ExplorerClass.prototype.process = function() {
   var self = this;
-  self.callback = callback;
   MongoClient.connect(process.env.MONGO_URL + process.env.MONGO_PREFIX +
     process.env.MONGO_OPTIONS, function(err, db) {
     if (err) {
