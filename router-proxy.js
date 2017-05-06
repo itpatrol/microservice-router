@@ -55,6 +55,7 @@ function applyAccessToken(requestDetails) {
       requestDetails.headers.access_token = access_token;
     } else {
       requestDetails.isSecure = true;
+      requestDetails.SecureKey = access_token;
     }
     console.log(requestDetails);
     console.log(process.env);
@@ -129,8 +130,19 @@ function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
 /**
  * Proxy OPTIONS requests.
  */
-function ProxyRequestOPTIONS(jsonData, requestDetails, callback) {
+function ProxyRequestOPTIONS(jsonData, requestDetails, callbacks, callback) {
   applyAccessToken(requestDetails);
+  if(requestDetails.headers['access-control-request-method']) {
+    return callback(null, {
+      code: 200,
+      answer: {},
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': "POST, GET, OPTIONS, DELETE, PUT, SEARCH",
+        'Access-Control-Allow-Headers': 'content-type,signature, access_token, token'
+      }
+    });
+  }
   let route = requestDetails.url;
   let path = '';
   if (requestDetails.url.charAt(requestDetails.url.length - 1) == '/') {
@@ -292,7 +304,11 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
           }
         }
       }
-      var responseHeaders = {};
+      var responseHeaders = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': "POST, GET, OPTIONS, DELETE, PUT, SEARCH",
+        'Access-Control-Allow-Headers': 'content-type,signature, access_token, token'
+      };
       for (var i in response.headers) {
         if (i.substring(0,1) == 'x') {
           responseHeaders[i] = response.headers[i];
