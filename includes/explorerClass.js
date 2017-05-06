@@ -50,7 +50,11 @@ function ExplorerClass(requestDetails, callback) {
         answer: resultMap
       });
     }
-    return self.processMapToHTML(resultMap);
+    let access_token = self.requestDetails.headers.access_token;
+    if(self.requestDetails.isSecure) {
+      access_token = self.requestDetails.SecureKey;
+    }
+    return self.processMapToHTML(resultMap, self.requestDetails.isSecure, access_token);
   });
   self.on('errorService', function(err, path, service) {
     self.debug.explorer('Error options %O %s %O', err, path, service);
@@ -91,15 +95,24 @@ ExplorerClass.prototype.debug = {
  *
  * @param {object} module - module data.
  */
-ExplorerClass.prototype.processMapToHTML = function(map) {;
+ExplorerClass.prototype.processMapToHTML = function(map, isSecure, accessToken) {;
   var self = this;
+  console.log("isSecure" + isSecure);
+  console.log("access_token" + accessToken);
   let servicesHTML = '';
   for(var i in map) {
     servicesHTML = servicesHTML + dots.service(map[i]);
   }
+  var html = {
+    lines: servicesHTML,
+    url: process.env.BASE_URL,
+    isSecure: isSecure,
+    accessToken: accessToken
+  }
+
   return self.callback(null, {
     code: 200,
-    answer: dots.html({lines: servicesHTML}),
+    answer: dots.html(html),
     headers: {
       'content-type': 'text/html'
     }

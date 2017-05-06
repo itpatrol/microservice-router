@@ -5,6 +5,85 @@
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" media="all" />
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://microservice-frame.work/js/microservice-client.min.js"></script>
+    <script>
+$(function() {
+  $('.method-item').hide();
+  $('.client-request').hide();
+  {{? it.isSecure }}
+    var secureKey = "XXXX1"
+  {{??}}
+    var accessToken = "{{=it.accessToken}}"
+  {{?}}
+  /*var client = new MicroserviceClient({
+    URL: "http://localhost:2100/auth",
+    {{? it.isSecure }}
+    secureKey: "XXXX1"
+    {{??}}
+    accessToken: "{{=it.accessToken}}"
+    {{?}}
+  });
+  client.search({}, function(err, handlerResponse){
+    console.log(err);
+    console.log(handlerResponse);
+    $('#result').html(JSON.stringify(handlerResponse, null, 2));
+  });*/
+  $('.client-request').click(function(e){
+    e.preventDefault();
+    $('div.textarea-description').html();
+    var clientSettings = {
+      URL: "http://localhost:2100/auth",
+    }
+    client = new MicroserviceClient(clientSettings);
+    if(secureKey) {
+      clientSettings.secureKey = secureKey;
+    } else if(accessToken){
+      clientSettings.accessToken = accessToken;
+    }
+    var method = $('#method-select').attr('data-method');
+    var data = $('#data').val();
+    try{
+      data = JSON.parse(data);
+    }catch(e){
+      $('div.textarea-description').html(e);
+      return;
+    }
+    var recordID = $('#recordid').val();
+    switch(method){
+      case 'POST': {
+        break;
+      }
+      case 'GET': {
+        break;
+      }
+      case 'PUT': {
+        break;
+      }
+      case 'DELETE': {
+        break;
+      }
+      case 'SEARCH': {
+        client.search(data, function(err, handlerResponse){
+          console.log(err);
+          console.log(handlerResponse);
+          $('#result').html(JSON.stringify(handlerResponse, null, 2));
+        });
+        break;
+      }
+    }
+  });
+  $('#method-select a[data-method]').click(function(e){
+    var control = $(this);
+    var method = control.attr('data-method')
+    $('#method-select span.title').html(method);
+    $('#method-select').attr('data-method', method);
+    $('.method-item').hide();
+    $('.method-item.method-' + method ).show();
+    $('.client-request').show();
+    e.preventDefault();
+  });
+});
+    </script>   
     <style>
 body {
   background-color: #fff;
@@ -102,13 +181,51 @@ body {
   background: #d7e4ed;
 }
 
+div.textarea-description {
+  color: red;
+  padding: 10px;
+}
 
     </style>
   </head>
   <body>
-   Simple example here
-   <div class="root">
-   {{=it.lines}}
-   </div>
+     Simple example here
+     <div class="root">
+       {{=it.lines}}
+     </div>
+    <div class="console">
+      <div class="input-group">
+        <div class="input-group-addon">
+          <span id="method-addon">/auth</span>
+        </div>        
+        <div class="input-group-btn" id="method-select">
+          <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+            <span class="title">Select method</span> <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu ">
+            <li><a href="#" data-method="POST">POST</a></li>
+            <li><a href="#" data-method="GET">GET</a></li>
+            <li><a href="#" data-method="PUT">PUT</a></li>
+            <li><a href="#" data-method="DELETE">DELETE</a></li>
+            <li><a href="#" data-method="SEARCH">SEARCH</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="method-item method-GET method-DELETE method-PUT">
+        <div class="form-group">
+          <label for="recordid">ID</label>
+          <input class="form-control" id="recordid">
+        </div>
+      </div>
+      <div class="method-item method-PUT method-POST method-SEARCH">      
+        <div class="form-group">
+          <label for="data">Data</label>
+          <textarea class="form-control" id="data"></textarea>
+          <div class="textarea-description"></div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-success client-request">submit</button>
+    </div>
+    <pre id="result"></pre>   
   </body>
 </html>
