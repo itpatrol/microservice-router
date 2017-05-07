@@ -47,10 +47,14 @@ if (!mControlCluster.isMaster) {
 }
 
 function applyAccessToken(requestDetails) {
+    console.log(requestDetails);
   if(requestDetails.url.indexOf('?') != -1){
     let cutPosition = requestDetails.url.lastIndexOf('?');
     let access_token = requestDetails.url.substring(cutPosition + 1);
     requestDetails.url = requestDetails.url.substring(0, cutPosition);
+    if(!access_token || access_token == ''){
+      return;
+    }
     if(access_token != process.env.SECURE_KEY) {
       requestDetails.headers.access_token = access_token;
     } else {
@@ -58,7 +62,6 @@ function applyAccessToken(requestDetails) {
       requestDetails.SecureKey = access_token;
     }
     console.log(requestDetails);
-    console.log(process.env);
   }
 }
 /**
@@ -307,7 +310,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       var responseHeaders = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': "POST, GET, OPTIONS, DELETE, PUT, SEARCH",
-        'Access-Control-Allow-Headers': 'content-type,signature, access_token, token'
+        'Access-Control-Allow-Headers': 'content-type, signature, access_token, token'
       };
       for (var i in response.headers) {
         if (i.substring(0,1) == 'x') {
