@@ -16,7 +16,7 @@
   </head>
   <body>
     <header>
-{{=it.name}}    v:{{=it.version}}
+      <span class="title">{{=it.name}}    v:{{=it.version}}</span>
   {{? it.isSecure }}
 <span class="label label-default secure">secure key used</span>
   {{?? it.accessTokenDetails !== false }}
