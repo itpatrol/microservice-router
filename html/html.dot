@@ -23,7 +23,7 @@
 <span class="label label-default access">
       {{? it.accessTokenDetails.expireAt == -1}}
 never expire token.
-      {{?? it.expireIn !== false }}
+      {{?? it.expireIn !== false && it.expireIn !== ''}}
         expire in {{=it.expireIn}}
       {{??}}
         expired
