@@ -2,9 +2,9 @@
   <head>
     <meta name="viewport" content="width=device-width, user-scalable=no" />
     <title>API Explorer version {{=it.version}}</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" media="all" />
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" media="all" />
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" media="all" />
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="//code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="http://microservice-frame.work/js/microservice-client.min.js"></script>
     <script>
