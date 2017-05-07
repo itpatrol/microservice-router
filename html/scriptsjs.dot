@@ -42,7 +42,7 @@ $(function() {
     $('div.textarea-description').html('');
     var path = $('#clientpath').val();
     var clientSettings = {
-      URL: "http://localhost:2100" + path,
+      URL: "/" + path,
     }
     client = new MicroserviceClient(clientSettings);
     if(secureKey) {
