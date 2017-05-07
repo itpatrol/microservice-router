@@ -16,18 +16,22 @@
   {{ for(var method in it.options.methods) { }}
         <div class="col-xs-12 method method-{{=method}}">
           <span class="title">
-            <i class="fa fa-minus" aria-hidden="true"></i> <i class="fa fa-minus" aria-hidden="true"></i> 
+            <i class="fa fa-minus" aria-hidden="true"></i> <i class="fa fa-minus" aria-hidden="true"></i>
               <span class="operation">
-              {{=method}}
-              {{? method === 'GET'}}
-                  /:{{=it.options.id.title}}
-              {{?? method === 'PUT'}}
-                  /:{{=it.options.id.title}}
-              {{?? method === 'DELETE'}}
-                  /:{{=it.options.id.title}}
-              {{?}}
+                <a href="" class="try" data-url="/{{=it.path}}" data-method="{{=method}}">
+                {{=method}}
+                {{? method === 'GET'}}
+                    /:{{=it.options.id.title}}
+                {{?? method === 'PUT'}}
+                    /:{{=it.options.id.title}}
+                {{?? method === 'DELETE'}}
+                    /:{{=it.options.id.title}}
+                {{?? method === 'POST'}}
+<span class="properties" style="display:none">{{=JSON.stringify(it.options.properties, null, 2)}}</span>
+                {{?}}
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+                </a>
               </span>
-            </span>
           </span>
           <p class="description">{{=it.options.methods[method].description}}</p>
         </div>
