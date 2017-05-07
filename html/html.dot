@@ -18,9 +18,9 @@
     <header>
       <span class="title">{{=it.name}}    v:{{=it.version}}</span>
   {{? it.isSecure }}
-<span class="label label-default secure">secure key used</span>
+<span class="token secure">secure key used</span>
   {{?? it.accessTokenDetails !== false }}
-<span class="label label-default access">
+<span class="token access">
       {{? it.accessTokenDetails.expireAt == -1}}
 never expire token.
       {{?? it.expireIn !== false && it.expireIn !== ''}}
@@ -95,7 +95,12 @@ never expire token.
       </div>
       {{??}}
         <div class="col-xs-12 col-sm-6 col-sm-offset-3">
-          <p>Access Token or Secure KEY required to navigate API.</p>
+          <center>
+            <div class="shield">
+              <i class="fa fa-lock" aria-hidden="true"></i>
+            </div>
+            <p>Access Token or Secure KEY required to navigate API.</p>
+          </center>
           <div class="input-group">
             <input id="accesstoken" class="form-control" placeholder="Access Token">
             <span class="input-group-btn">

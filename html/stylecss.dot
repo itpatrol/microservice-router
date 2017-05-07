@@ -10,6 +10,7 @@ header {
   top: 0;
   left: 0;
   z-index: 10000;
+  width: 100%;
 }
 header span.title {  
   background-color: #444;
@@ -19,16 +20,19 @@ header span.title {
   border-bottom-right-radius: 5px;
 }
 
-header .label {
-  margin-left: 20px;
+header .token {
+  float: right;
+  font-weight: bold;
+  padding: 2px 10px;
+  border-bottom-left-radius: 5px;
 }
 
-header .label.secure {
+header .token.secure {
   background-color: #e6360f;
   color: white;
 }
 
-header .label.access {
+header .token.access {
   background-color: #1094e6;
   color: white;
 }
@@ -54,7 +58,7 @@ header .label.access {
 }
 
 .path .title .label.scope {
-  background: #e6360f;
+  background: #444;
   color: white;
 }
 
@@ -141,7 +145,7 @@ div.textarea-description {
 @media (min-width: 769px) {
   .console {
     position: fixed;
-    top:0;
+    top:15px;
     right: 0;
     bottom: 0;
     left:50%;
@@ -180,4 +184,9 @@ a.try .fa {
   background-color: #888;
   border: 1px solid #888;
 
+}
+
+.shield {
+  font-size: 12em;
+  color: #444;
 }
