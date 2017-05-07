@@ -12,7 +12,7 @@ header {
   z-index: 10000;
 }
 header span.title {  
-  background-color: #54b523;
+  background-color: #444;
   font-weight: bold;
   color: white;
   padding: 5px 10px;
@@ -163,4 +163,21 @@ a.try .fa {
   color: #ea982c !important;
   padding-left: 5px;
 }
-    
+
+.btn-success.dropdown-toggle {
+  background-color: #444;
+  border: 1px solid #444;
+}
+.btn-success.active.focus,
+.btn-success.active:focus,
+.btn-success.active:hover,
+.btn-success:active.focus,
+.btn-success:active:focus,
+.btn-success:active:hover,
+.open>.dropdown-toggle.btn-success.focus,
+.open>.dropdown-toggle.btn-success:focus,
+.open>.dropdown-toggle.btn-success:hover {
+  background-color: #888;
+  border: 1px solid #888;
+
+}
