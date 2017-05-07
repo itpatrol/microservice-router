@@ -57,6 +57,11 @@
       "default": "http://localhost:3100/",
       "required": true
     },
+    "template_path": {
+      "type": "string",
+      "description": "Path to API exloper HTML templates.",
+      "default": "./html",
+    },
     "schema": {
       "type": "string",
       "description": "Do not change",

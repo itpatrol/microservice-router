@@ -1,6 +1,6 @@
 $(function() {
   {{? it.isSecure }}
-    var secureKey = "XXXX1"
+    var secureKey = true;
   {{??}}
   var secureKey = false;
     {{? it.accessToken !== false }}
@@ -25,6 +25,7 @@ $(function() {
       $('#data').val('{\n  "query": {},\n  "limit": 10\n}');
     }
     $('#clientpath').val(url);
+    $('#clientsecure').val(control.attr('data-secure-key'));
     $('.method-item').hide();
     $('.method-item.method-' + method ).show();
     $('.isSecureKey').hide();
@@ -37,6 +38,7 @@ $(function() {
   $('.client-request').hide();
   $('.client-request').click(function(e){
     e.preventDefault();
+    var control = $(this);
     $('div.textarea-description').html('');
     var path = $('#clientpath').val();
     var clientSettings = {
@@ -44,7 +46,7 @@ $(function() {
     }
     client = new MicroserviceClient(clientSettings);
     if(secureKey) {
-      clientSettings.secureKey = secureKey;
+      clientSettings.secureKey = $('#clientsecure').val();
     } else if(accessToken){
       clientSettings.accessToken = accessToken;
     }

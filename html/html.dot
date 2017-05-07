@@ -50,6 +50,7 @@ never expire token.
     
               <div class="input-group">
                 <input id="clientpath" class="form-control" >
+                <input id="clientsecure" type="hidden" >
                 <div class="input-group-btn" id="method-select">
                   <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
                     <span class="title">Select method</span> <span class="caret"></span>

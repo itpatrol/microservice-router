@@ -10,7 +10,11 @@ const MongoClient = require('mongodb').MongoClient;
 const MicroserviceClient = require('@microservice-framework/microservice-client');
 const doT = require('dot');
 doT.templateSettings.strip = false;
-const dots = doT.process({ path: './html', strip: false});
+let templatePath = './html';
+if (process.env.TEMPLATE_PATH) {
+  templatePath = process.env.TEMPLATE_PATH;
+}
+const dots = doT.process({ path: templatePath, strip: false});
 
 
 function ExplorerClass(requestDetails, callback) {
@@ -91,6 +95,7 @@ function ExplorerClass(requestDetails, callback) {
       path: path,
       scope: service.scope,
       provides: service.provides,
+      secureKey: service.secureKey,
       options: options
     });
     if (self.map.length == self.servicesCount) {
@@ -115,6 +120,7 @@ ExplorerClass.prototype.processMapToHTML = function(map, isSecure, accessToken) 
 
   let servicesHTML = '';
   for (var i in map) {
+    map[i].isSecure = self.requestDetails.isSecure;
     servicesHTML = servicesHTML + dots.service(map[i]);
   }
   if (map.length == 0) {
