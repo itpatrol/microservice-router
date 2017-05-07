@@ -20,9 +20,7 @@ header span.title {
 }
 
 header .label {
-  position: absolute;
   margin-left: 20px;
-  margin-top: 4px;
 }
 
 header .label.secure {
