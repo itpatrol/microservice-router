@@ -97,17 +97,43 @@ ExplorerClass.prototype.debug = {
  */
 ExplorerClass.prototype.processMapToHTML = function(map, isSecure, accessToken) {;
   var self = this;
-  console.log("isSecure" + isSecure);
-  console.log("access_token" + accessToken);
+
   let servicesHTML = '';
   for(var i in map) {
     servicesHTML = servicesHTML + dots.service(map[i]);
   }
+  var version = 'unknown';
+  if(process.env.mfw_package_version) {
+    version = process.env.mfw_package_version;
+  } else if (process.env.npm_package_version) {
+    version = process.env.npm_package_version;
+  }
+
+  var name = 'unknown';
+  if(process.env.mfw_package_name) {
+    name = process.env.mfw_package_name;
+  } else if (process.env.npm_package_name) {
+    name = process.env.npm_package_name;
+  }
+
+  var description = '';
+  if(process.env.mfw_package_description) {
+    description = process.env.mfw_package_description;
+  } else if (process.env.npm_package_description) {
+    description = process.env.npm_package_description;
+  }
+
   var html = {
     lines: servicesHTML,
+    version: version,
+    name: name,
+    description: description,
     url: process.env.BASE_URL,
-    isSecure: isSecure,
-    accessToken: accessToken
+    scriptjs: dots.scriptsjs({
+      isSecure: isSecure,
+      accessToken: accessToken
+    }),
+    stylecss: dots.stylecss({})
   }
 
   return self.callback(null, {
