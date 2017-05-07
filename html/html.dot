@@ -17,8 +17,23 @@
   <body>
     <header>
 {{=it.name}}    v:{{=it.version}}
+  {{? it.isSecure }}
+<span class="label label-default secure">secure key used</span>
+  {{?? it.accessTokenDetails !== false }}
+<span class="label label-default access">
+      {{? it.accessTokenDetails.expireAt == -1}}
+never expire token.
+      {{?? it.expireIn !== false }}
+        expire in {{=it.expireIn}}
+      {{??}}
+        expired
+      {{?}}
+</span>
+  {{?}}
+</span>
     </header>
     <div >
+      {{? it.isSecure || it.accessToken }}
       <div class="row">
         <div class="col-xs-12 col-md-6">
           <p>
@@ -67,7 +82,7 @@
                   <div class="textarea-description"></div>
                 </div>
               </div>
-              <button type="submit" class="btn btn-success client-request">submit</button>
+              <button type="submit" class="btn btn-success client-request">Submit</button>
             </div>
             <div class="col-xs-12">
               <hr>
@@ -77,6 +92,17 @@
           </div>
         </div>
       </div>
+      {{??}}
+        <div class="col-xs-12 col-sm-6 col-sm-offset-3">
+          <p>Access Token or Secure KEY required to navigate API.</p>
+          <div class="input-group">
+            <input id="accesstoken" class="form-control" placeholder="Access Token">
+            <span class="input-group-btn">
+            <button type="submit" class="btn btn-success" id="submitAccessToken">Submit</button>
+            </span>
+          </div>
+        </div>
+      {{?}}
     </div>
 
     

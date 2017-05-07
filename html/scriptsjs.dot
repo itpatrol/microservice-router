@@ -3,9 +3,13 @@ $(function() {
     var secureKey = "XXXX1"
   {{??}}
   var secureKey = false;
+    {{? it.accessToken !== false }}
     var accessToken = "{{=it.accessToken}}"
+    {{?}}
   {{?}}
-
+  $('#submitAccessToken').click(function(e){
+    location.href = "?" + $('#accesstoken').val();
+  });
   $('a.try').click(function(e){
     e.preventDefault();
     var control = $(this);

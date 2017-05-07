@@ -19,6 +19,7 @@ function ExplorerClass(requestDetails, callback) {
   self.requestDetails = requestDetails;
   self.mode = 'json';
   self.servicesCount = 0;
+  self.accessTokenDetails = false;
   self.map = [];
   self.callback = callback;
   if (requestDetails.headers.accept.indexOf('text/html') != -1) {
@@ -30,6 +31,20 @@ function ExplorerClass(requestDetails, callback) {
   });
   self.once('services', function(services) {
     self.debug.explorer('services %O', services);
+    if (!self.requestDetails.isSecure) {
+      let accessToken = self.requestDetails.headers.access_token;
+      if (services['auth']) {
+        let clientSettings = {
+          URL: services['auth'].url,
+          secureKey: services['auth'].secureKey,
+        }
+        let msClient = new MicroserviceClient(clientSettings);
+        msClient.search({
+          accessToken: accessToken}, function(err, answer) {
+          self.accessTokenDetails = answer[0];
+        });
+      }
+    }
     for (let path in services) {
       self.servicesCount = self.servicesCount + 1;
       let service = services[path];
@@ -102,6 +117,9 @@ ExplorerClass.prototype.processMapToHTML = function(map, isSecure, accessToken) 
   for (var i in map) {
     servicesHTML = servicesHTML + dots.service(map[i]);
   }
+  if (map.length == 0) {
+    accessToken = false;
+  }
   var version = 'unknown';
   if (process.env.mfw_package_version) {
     version = process.env.mfw_package_version;
@@ -122,6 +140,23 @@ ExplorerClass.prototype.processMapToHTML = function(map, isSecure, accessToken) 
   } else if (process.env.npm_package_description) {
     description = process.env.npm_package_description;
   }
+  var expireIn = false;
+
+  if (self.accessTokenDetails.expireAt !== -1) {
+    let expireInsec = Math.round((self.accessTokenDetails.expireAt - Date.now()) / 1000);
+    expireIn = '';
+    if (expireInsec > 3600) {
+      expireIn = expireIn + Math.floor(expireInsec / 3600) + ' hours ';
+      expireInsec = expireInsec -  Math.floor(expireInsec / 3600) * 3600;
+    }
+    if (expireInsec > 60) {
+      expireIn = expireIn + Math.floor(expireInsec / 60) + ' min ';
+      expireInsec = expireInsec -  Math.floor(expireInsec / 60) * 60;
+    }
+    if (expireInsec > 0) {
+      expireIn = expireIn + Math.round(expireInsec) + ' sec ';
+    }
+  }
 
   var html = {
     lines: servicesHTML,
@@ -129,6 +164,10 @@ ExplorerClass.prototype.processMapToHTML = function(map, isSecure, accessToken) 
     name: name,
     description: description,
     url: process.env.BASE_URL,
+    isSecure: isSecure,
+    accessToken: accessToken,
+    accessTokenDetails: self.accessTokenDetails,
+    expireIn: expireIn,
     scriptjs: dots.scriptsjs({
       isSecure: isSecure,
       accessToken: accessToken
