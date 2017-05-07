@@ -10,7 +10,7 @@ const MongoClient = require('mongodb').MongoClient;
 const MicroserviceClient = require('@microservice-framework/microservice-client');
 const doT = require('dot');
 doT.templateSettings.strip = false;
-const dots = doT.process({ path: "./html", strip: false});
+const dots = doT.process({ path: './html', strip: false});
 
 
 function ExplorerClass(requestDetails, callback) {
@@ -21,7 +21,7 @@ function ExplorerClass(requestDetails, callback) {
   self.servicesCount = 0;
   self.map = [];
   self.callback = callback;
-  if(requestDetails.headers.accept.indexOf('text/html') != -1) {
+  if (requestDetails.headers.accept.indexOf('text/html') != -1) {
     self.mode = 'html';
   }
   self.once('error', function(err) {
@@ -30,7 +30,7 @@ function ExplorerClass(requestDetails, callback) {
   });
   self.once('services', function(services) {
     self.debug.explorer('services %O', services);
-    for(let path in services) {
+    for (let path in services) {
       self.servicesCount = self.servicesCount + 1;
       let service = services[path];
       self.processService(path, service);
@@ -39,22 +39,22 @@ function ExplorerClass(requestDetails, callback) {
   self.once('done', function(map) {
     self.debug.explorer('map %s %s: %O', requestDetails.headers.accept, self.mode, map);
     let resultMap = [];
-    for(var i in map) {
-      if(!map[i].err) {
+    for (var i in map) {
+      if (!map[i].err) {
         resultMap.push(map[i]);
       }
     }
-    if(self.mode == 'json') {
+    if (self.mode == 'json') {
       return self.callback(null, {
         code: 200,
         answer: resultMap
       });
     }
-    let access_token = self.requestDetails.headers.access_token;
-    if(self.requestDetails.isSecure) {
-      access_token = self.requestDetails.SecureKey;
+    let accessToken = self.requestDetails.headers.access_token;
+    if (self.requestDetails.isSecure) {
+      accessToken = self.requestDetails.SecureKey;
     }
-    return self.processMapToHTML(resultMap, self.requestDetails.isSecure, access_token);
+    return self.processMapToHTML(resultMap, self.requestDetails.isSecure, accessToken);
   });
   self.on('errorService', function(err, path, service) {
     self.debug.explorer('Error options %O %s %O', err, path, service);
@@ -64,7 +64,7 @@ function ExplorerClass(requestDetails, callback) {
       provides: service.provides,
       err: err.message,
     });
-    if(self.map.length == self.servicesCount) {
+    if (self.map.length == self.servicesCount) {
       self.emit('done', self.map);
     }
   });
@@ -78,7 +78,7 @@ function ExplorerClass(requestDetails, callback) {
       provides: service.provides,
       options: options
     });
-    if(self.map.length == self.servicesCount) {
+    if (self.map.length == self.servicesCount) {
       self.emit('done', self.map);
     }
   });
@@ -99,25 +99,25 @@ ExplorerClass.prototype.processMapToHTML = function(map, isSecure, accessToken) 
   var self = this;
 
   let servicesHTML = '';
-  for(var i in map) {
+  for (var i in map) {
     servicesHTML = servicesHTML + dots.service(map[i]);
   }
   var version = 'unknown';
-  if(process.env.mfw_package_version) {
+  if (process.env.mfw_package_version) {
     version = process.env.mfw_package_version;
   } else if (process.env.npm_package_version) {
     version = process.env.npm_package_version;
   }
 
   var name = 'unknown';
-  if(process.env.mfw_package_name) {
+  if (process.env.mfw_package_name) {
     name = process.env.mfw_package_name;
   } else if (process.env.npm_package_name) {
     name = process.env.npm_package_name;
   }
 
   var description = '';
-  if(process.env.mfw_package_description) {
+  if (process.env.mfw_package_description) {
     description = process.env.mfw_package_description;
   } else if (process.env.npm_package_description) {
     description = process.env.npm_package_description;
@@ -156,12 +156,12 @@ ExplorerClass.prototype.processService = function(path, service) {
   }
   if (self.requestDetails.headers.access_token) {
     clientSettings.accessToken = self.requestDetails.headers.access_token;
-  } else if(self.requestDetails.isSecure){
+  } else if (self.requestDetails.isSecure) {
     clientSettings.secureKey = service.secureKey;
   }
   let msClient = new MicroserviceClient(clientSettings);
-  msClient.options({}, function(err, options){
-    if(err) {
+  msClient.options({}, function(err, options) {
+    if (err) {
       return self.emit('errorService', err, path, service);
     }
     return self.emit('service', path, service, options);
@@ -196,13 +196,13 @@ ExplorerClass.prototype.process = function() {
       let found = false;
       for (let i in results) {
         let service = results[i];
-        for (let j in service.path){
+        for (let j in service.path) {
           let path = service.path[j];
           services[path] = service;
-          found= true;
+          found = true;
         }
       }
-      if(!found) {
+      if (!found) {
         return self.emit('error', new Error('No services available'));
       }
       self.emit('services', services);

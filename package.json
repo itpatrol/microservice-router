@@ -10,7 +10,7 @@
     "stop-admin": "ADMIN=true node kill.js",
     "stop-proxy": "PROXY=true node kill.js",
     "status": "node status.js",
-    "jscs": "jscs --fix *.js"
+    "jscs": "jscs --fix *.js includes/*.js"
   },
   "repository": {
     "type": "git",

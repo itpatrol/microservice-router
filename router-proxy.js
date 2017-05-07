@@ -47,21 +47,19 @@ if (!mControlCluster.isMaster) {
 }
 
 function applyAccessToken(requestDetails) {
-    console.log(requestDetails);
-  if(requestDetails.url.indexOf('?') != -1){
+  if (requestDetails.url.indexOf('?') != -1) {
     let cutPosition = requestDetails.url.lastIndexOf('?');
-    let access_token = requestDetails.url.substring(cutPosition + 1);
+    let accessToken = requestDetails.url.substring(cutPosition + 1);
     requestDetails.url = requestDetails.url.substring(0, cutPosition);
-    if(!access_token || access_token == ''){
+    if (!accessToken || accessToken == '') {
       return;
     }
-    if(access_token != process.env.SECURE_KEY) {
-      requestDetails.headers.access_token = access_token;
+    if (accessToken != process.env.SECURE_KEY) {
+      requestDetails.headers.access_token = accessToken;
     } else {
       requestDetails.isSecure = true;
-      requestDetails.SecureKey = access_token;
+      requestDetails.SecureKey = accessToken;
     }
-    console.log(requestDetails);
   }
 }
 /**
@@ -135,13 +133,13 @@ function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
  */
 function ProxyRequestOPTIONS(jsonData, requestDetails, callbacks, callback) {
   applyAccessToken(requestDetails);
-  if(requestDetails.headers['access-control-request-method']) {
+  if (requestDetails.headers['access-control-request-method']) {
     return callback(null, {
       code: 200,
       answer: {},
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': "POST, GET, OPTIONS, DELETE, PUT, SEARCH",
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
         'Access-Control-Allow-Headers': 'content-type,signature, access_token, token'
       }
     });
@@ -309,7 +307,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       }
       var responseHeaders = {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': "POST, GET, OPTIONS, DELETE, PUT, SEARCH",
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
         'Access-Control-Allow-Headers': 'content-type, signature, access_token, token'
       };
       for (var i in response.headers) {
