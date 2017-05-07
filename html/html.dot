@@ -1,5 +1,6 @@
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
     <title>API Explorer</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" media="all" />
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" media="all" />
@@ -16,19 +17,6 @@ $(function() {
   var secureKey = false;
     var accessToken = "{{=it.accessToken}}"
   {{?}}
-  /*var client = new MicroserviceClient({
-    URL: "http://localhost:2100/auth",
-    {{? it.isSecure }}
-    secureKey: "XXXX1"
-    {{??}}
-    accessToken: "{{=it.accessToken}}"
-    {{?}}
-  });
-  client.search({}, function(err, handlerResponse){
-    console.log(err);
-    console.log(handlerResponse);
-    $('#result').html(JSON.stringify(handlerResponse, null, 2));
-  });*/
   $('.client-request').click(function(e){
     e.preventDefault();
     $('div.textarea-description').html('');
@@ -58,8 +46,10 @@ $(function() {
     switch(method){
       case 'POST': {
         client.post(data, function(err, handlerResponse){
-          console.log(err);
-          console.log(handlerResponse);
+          if(err){
+            location.href = "#answer";
+            return $('#result').html(JSON.stringify(err.message, null, 2));
+          }
           $('#result').html(JSON.stringify(handlerResponse, null, 2));
         });
 
@@ -71,7 +61,7 @@ $(function() {
           return client.get(recordID,recordToken, function(err, handlerResponse){
             if(err){
               location.href = "#answer";
-              return $('#result').html(JSON.stringify(err, null, 2));
+              return $('#result').html(JSON.stringify(err.message, null, 2));
             }
             $('#result').html(JSON.stringify(handlerResponse, null, 2));
           });
@@ -79,7 +69,7 @@ $(function() {
         client.get(recordID, function(err, handlerResponse){
           if(err){
             location.href = "#answer";
-            return $('#result').html(JSON.stringify(err, null, 2));
+            return $('#result').html(JSON.stringify(err.message, null, 2));
           }
           $('#result').html(JSON.stringify(handlerResponse, null, 2));
         });
@@ -91,7 +81,7 @@ $(function() {
           return client.put(recordID, recordToken, data, function(err, handlerResponse){
             if(err){
               location.href = "#answer";
-              return $('#result').html(JSON.stringify(err, null, 2));
+              return $('#result').html(JSON.stringify(err.message, null, 2));
             }
             $('#result').html(JSON.stringify(handlerResponse, null, 2));
           });
@@ -100,7 +90,7 @@ $(function() {
         client.put(recordID, data, function(err, handlerResponse){
           if(err){
             location.href = "#answer";
-            return $('#result').html(JSON.stringify(err, null, 2));
+            return $('#result').html(JSON.stringify(err.message, null, 2));
           }
           $('#result').html(JSON.stringify(handlerResponse, null, 2));
         });
@@ -111,7 +101,7 @@ $(function() {
           return client.delete(recordID,recordToken, function(err, handlerResponse){
             if(err){
               location.href = "#answer";
-              return $('#result').html(JSON.stringify(err, null, 2));
+              return $('#result').html(JSON.stringify(err.message, null, 2));
             }
             $('#result').html(JSON.stringify(handlerResponse, null, 2));
           });
@@ -119,7 +109,7 @@ $(function() {
         client.delete(recordID, function(err, handlerResponse){
           if(err){
             location.href = "#answer";
-            return $('#result').html(JSON.stringify(err, null, 2));
+            return $('#result').html(JSON.stringify(err.message, null, 2));
           }
           $('#result').html(JSON.stringify(handlerResponse, null, 2));
         });
@@ -130,7 +120,7 @@ $(function() {
         client.search(data, function(err, handlerResponse){
           if(err){
             location.href = "#answer";
-            return $('#result').html(JSON.stringify(err, null, 2));
+            return $('#result').html(JSON.stringify(err.message, null, 2));
           }
           $('#result').html(JSON.stringify(handlerResponse, null, 2));
         });
@@ -257,71 +247,87 @@ div.textarea-description {
 }
 
 .console {
-  position: fixed;
-  bottom: 0;
-  height: 250px;
   background-color: #444;
   color: #eee;
-  left: 0;
-  right: 0;
-  padding: 10px 15px;
-  overflow: auto;
+  padding: 10px 15px 30px;
+}
+
+@media (min-width: 769px) {
+  .console {
+    position: fixed;
+    top:0;
+    right: 0;
+    bottom: 0;
+    left:50%;
+    overflow: auto;
+  }
+}
+
+.console pre {
+  color: #f5f5f5;
+  background-color: #444;
 }
     </style>
   </head>
   <body>
-     Simple example here
-     <div class="root">
-       {{=it.lines}}
-     </div>
-    <div class="console">
+    Simple example here
+    <div class="root">
       <div class="row">
         <div class="col-xs-12 col-md-6">
-          <h3> <i class="fa fa-sign-in" aria-hidden="true"></i> Request </h3>
-
-          <div class="input-group">
-            <div class="input-group-addon">
-              <span id="method-addon">/auth</span>
-            </div>        
-            <div class="input-group-btn" id="method-select">
-              <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
-                <span class="title">Select method</span> <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu ">
-                <li><a href="#" data-method="POST">POST</a></li>
-                <li><a href="#" data-method="GET">GET</a></li>
-                <li><a href="#" data-method="PUT">PUT</a></li>
-                <li><a href="#" data-method="DELETE">DELETE</a></li>
-                <li><a href="#" data-method="SEARCH">SEARCH</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="method-item method-GET method-DELETE method-PUT">
-            <div class="form-group">
-              <label for="recordid">ID</label>
-              <input class="form-control" id="recordid">
-            </div>
-          </div>
-          <div class="method-item isSecureKey method-GET method-DELETE method-PUT">
-            <div class="form-group">
-              <label for="token">Token</label>
-              <input class="form-control" id="recordtoken">
-            </div>
-          </div>
-          <div class="method-item method-PUT method-POST method-SEARCH">      
-            <div class="form-group">
-              <label for="data">Data</label>
-              <textarea class="form-control" id="data"></textarea>
-              <div class="textarea-description"></div>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-success client-request">submit</button>
+          {{=it.lines}}
         </div>
         <div class="col-xs-12 col-md-6">
-          <h3 id="answer"> <i class="fa fa-sign-out" aria-hidden="true"></i> Answer </h3>
-          <pre id="result"></pre>
+          <div class="console clearfix">
+            <div class="col-xs-12">
+              <h3> <i class="fa fa-sign-in" aria-hidden="true"></i> Request </h3>
+    
+              <div class="input-group">
+                <div class="input-group-addon">
+                  <span id="method-addon">/auth</span>
+                </div>        
+                <div class="input-group-btn" id="method-select">
+                  <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+                    <span class="title">Select method</span> <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu ">
+                    <li><a href="#" data-method="POST">POST</a></li>
+                    <li><a href="#" data-method="GET">GET</a></li>
+                    <li><a href="#" data-method="PUT">PUT</a></li>
+                    <li><a href="#" data-method="DELETE">DELETE</a></li>
+                    <li><a href="#" data-method="SEARCH">SEARCH</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="method-item method-GET method-DELETE method-PUT">
+                <div class="form-group">
+                  <label for="recordid">ID</label>
+                  <input class="form-control" id="recordid">
+                </div>
+              </div>
+              <div class="method-item isSecureKey method-GET method-DELETE method-PUT">
+                <div class="form-group">
+                  <label for="token">Token</label>
+                  <input class="form-control" id="recordtoken">
+                </div>
+              </div>
+              <div class="method-item method-PUT method-POST method-SEARCH">      
+                <div class="form-group">
+                  <label for="data">Data</label>
+                  <textarea class="form-control" id="data"></textarea>
+                  <div class="textarea-description"></div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-success client-request">submit</button>
+            </div>
+            <div class="col-xs-12">
+              <h3 id="answer"> <i class="fa fa-sign-out" aria-hidden="true"></i> Answer </h3>
+              <pre id="result"></pre>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+
     
   </body>
 </html>
