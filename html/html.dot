@@ -1,280 +1,32 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <title>API Explorer</title>
+    <title>API Explorer version {{=it.version}}</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" media="all" />
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" media="all" />
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="http://microservice-frame.work/js/microservice-client.min.js"></script>
     <script>
-$(function() {
-  $('.method-item').hide();
-  $('.client-request').hide();
-  {{? it.isSecure }}
-    var secureKey = "XXXX1"
-  {{??}}
-  var secureKey = false;
-    var accessToken = "{{=it.accessToken}}"
-  {{?}}
-  $('.client-request').click(function(e){
-    e.preventDefault();
-    $('div.textarea-description').html('');
-    var clientSettings = {
-      URL: "http://localhost:2100/auth",
-    }
-    client = new MicroserviceClient(clientSettings);
-    if(secureKey) {
-      clientSettings.secureKey = secureKey;
-    } else if(accessToken){
-      clientSettings.accessToken = accessToken;
-    }
-    var method = $('#method-select').attr('data-method');
-    var data = $('#data').val();
-    var dataOnly = ['POST', 'PUT', 'SEARCH'];
-    if(dataOnly.indexOf(method) != -1){
-      try{
-        data = JSON.parse(data);
-      }catch(e){
-        $('div.textarea-description').html(e);
-        return;
-      }
-    }
-    var recordID = $('#recordid').val();
-    var recordToken = $('#recordtoken').val();
-    console.log(clientSettings);
-    switch(method){
-      case 'POST': {
-        client.post(data, function(err, handlerResponse){
-          if(err){
-            location.href = "#answer";
-            return $('#result').html(JSON.stringify(err.message, null, 2));
-          }
-          $('#result').html(JSON.stringify(handlerResponse, null, 2));
-        });
-
-        break;
-      }
-      case 'GET': {
-        if(secureKey){
-          console.log("GET(secureKey): " +secureKey + recordID + ' ' + recordToken);
-          return client.get(recordID,recordToken, function(err, handlerResponse){
-            if(err){
-              location.href = "#answer";
-              return $('#result').html(JSON.stringify(err.message, null, 2));
-            }
-            $('#result').html(JSON.stringify(handlerResponse, null, 2));
-          });
-        }
-        client.get(recordID, function(err, handlerResponse){
-          if(err){
-            location.href = "#answer";
-            return $('#result').html(JSON.stringify(err.message, null, 2));
-          }
-          $('#result').html(JSON.stringify(handlerResponse, null, 2));
-        });
-
-        break;
-      }
-      case 'PUT': {
-        if(secureKey){
-          return client.put(recordID, recordToken, data, function(err, handlerResponse){
-            if(err){
-              location.href = "#answer";
-              return $('#result').html(JSON.stringify(err.message, null, 2));
-            }
-            $('#result').html(JSON.stringify(handlerResponse, null, 2));
-          });
-        }
-
-        client.put(recordID, data, function(err, handlerResponse){
-          if(err){
-            location.href = "#answer";
-            return $('#result').html(JSON.stringify(err.message, null, 2));
-          }
-          $('#result').html(JSON.stringify(handlerResponse, null, 2));
-        });
-        break;
-      }
-      case 'DELETE': {
-        if(secureKey){
-          return client.delete(recordID,recordToken, function(err, handlerResponse){
-            if(err){
-              location.href = "#answer";
-              return $('#result').html(JSON.stringify(err.message, null, 2));
-            }
-            $('#result').html(JSON.stringify(handlerResponse, null, 2));
-          });
-        }
-        client.delete(recordID, function(err, handlerResponse){
-          if(err){
-            location.href = "#answer";
-            return $('#result').html(JSON.stringify(err.message, null, 2));
-          }
-          $('#result').html(JSON.stringify(handlerResponse, null, 2));
-        });
-
-        break;
-      }
-      case 'SEARCH': {
-        client.search(data, function(err, handlerResponse){
-          if(err){
-            location.href = "#answer";
-            return $('#result').html(JSON.stringify(err.message, null, 2));
-          }
-          $('#result').html(JSON.stringify(handlerResponse, null, 2));
-        });
-        break;
-      }
-    }
-  });
-  $('#method-select a[data-method]').click(function(e){
-    var control = $(this);
-    var method = control.attr('data-method')
-    $('#method-select span.title').html(method);
-    $('#method-select').attr('data-method', method);
-    $('.method-item').hide();
-    $('.method-item.method-' + method ).show();
-    $('.isSecureKey').hide();
-    if(secureKey !== false && ['GET', 'PUT', 'DELETE'].indexOf(method) != -1) {
-      $('.isSecureKey').show();
-    }
-    $('.client-request').show();
-    e.preventDefault();
-  });
-});
-    </script>   
-    <style>
-body {
-  background-color: #fff;
-  padding: 15px;
-}
-
-.path {
-
-}
-.path .title {
-  padding: 5px;
-  padding-left: 17px;
-  background-color: white;
-}
-.path .title .label {
-  background: #eee;
-  color: #444;
-  float: right;
-  margin: 0px 5px;
-}
-
-.path .title .label.version {
-  background: #54b523;
-  color: white;
-}
-
-.path .title .label.scope {
-  background: #e6360f;
-  color: white;
-}
-
-.path .description {
-  padding-left: 35px;
-  color: #ddd;
-}
-
-.method-GET .description {
-  color: #3c8ce7;
-}
-.method-POST .description {
-  color: #3ce870;
-}
-
-.method-PUT .description {
-  color: #e8ce3c;
-}
-
-.method-DELETE .description {
-  color: #e8563c;
-}
-
-.method-SEARCH .description {
-  color: #ac3ce8;
-}
-
-.method {
-
-}
-
-.method .title {
-  background-color: transparent;
-  padding-left: 18px;
-  color: #444;
-}
-.method .title .opeartion{
-  background: black;
-  padding: 5px;
-  color: white;
-}
-
-.method .title .fa{
-  color: #d7e4ed;
-  padding-right: 5px;
-  font-size: 75%;
-}
-
-.method .description {
-  padding-left: 53px;
-}
-
-.root {
-  position: relative;
-  padding: 2em 0;
-  margin-top: 2em;
-  margin-bottom: 2em;
-  border-bottom: 1px solid #ccc;
-}
-.root::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 18px;
-  height: 100%;
-  width: 2px;
-  background: #d7e4ed;
-}
-
-div.textarea-description {
-  color: red;
-  padding: 10px;
-}
-
-.console {
-  background-color: #444;
-  color: #eee;
-  padding: 10px 15px 30px;
-}
-
-@media (min-width: 769px) {
-  .console {
-    position: fixed;
-    top:0;
-    right: 0;
-    bottom: 0;
-    left:50%;
-    overflow: auto;
-  }
-}
-
-.console pre {
-  color: #f5f5f5;
-  background-color: #444;
-}
-    </style>
+{{=it.scriptjs}}
+    </script>  
+    <style>   
+{{=it.stylecss}}  
+    </style>    
   </head>
   <body>
-    Simple example here
-    <div class="root">
+    <header>
+{{=it.name}}    v:{{=it.version}}
+    </header>
+    <div >
       <div class="row">
         <div class="col-xs-12 col-md-6">
+          <p>
+          {{=it.description}}
+          </p>
+          <div class="root">
           {{=it.lines}}
+          </div>
         </div>
         <div class="col-xs-12 col-md-6">
           <div class="console clearfix">
@@ -282,9 +34,7 @@ div.textarea-description {
               <h3> <i class="fa fa-sign-in" aria-hidden="true"></i> Request </h3>
     
               <div class="input-group">
-                <div class="input-group-addon">
-                  <span id="method-addon">/auth</span>
-                </div>        
+                <input id="clientpath" class="form-control" >
                 <div class="input-group-btn" id="method-select">
                   <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
                     <span class="title">Select method</span> <span class="caret"></span>
@@ -313,13 +63,14 @@ div.textarea-description {
               <div class="method-item method-PUT method-POST method-SEARCH">      
                 <div class="form-group">
                   <label for="data">Data</label>
-                  <textarea class="form-control" id="data"></textarea>
+                  <textarea class="form-control" id="data" rows=10>{}</textarea>
                   <div class="textarea-description"></div>
                 </div>
               </div>
               <button type="submit" class="btn btn-success client-request">submit</button>
             </div>
             <div class="col-xs-12">
+              <hr>
               <h3 id="answer"> <i class="fa fa-sign-out" aria-hidden="true"></i> Answer </h3>
               <pre id="result"></pre>
             </div>

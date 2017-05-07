@@ -1,0 +1,160 @@
+$(function() {
+  {{? it.isSecure }}
+    var secureKey = "XXXX1"
+  {{??}}
+  var secureKey = false;
+    var accessToken = "{{=it.accessToken}}"
+  {{?}}
+
+  $('a.try').click(function(e){
+    e.preventDefault();
+    var control = $(this);
+    var method = control.attr('data-method');
+    var url = control.attr('data-url');
+    $('#method-select').attr('data-method', method);
+    $('#method-select span.title').html(method);
+    if(method == 'POST') {
+      var properties = control.find('span.properties').html();
+      $('#data').val(properties);
+    }
+    if(method == 'SEARCH') {
+      $('#data').val('{\n  "query": {},\n  "limit": 10\n}');
+    }
+    $('#clientpath').val(url);
+    $('.method-item').hide();
+    $('.method-item.method-' + method ).show();
+    $('.isSecureKey').hide();
+    if(secureKey !== false && ['GET', 'PUT', 'DELETE'].indexOf(method) != -1) {
+      $('.isSecureKey').show();
+    }
+    $('.client-request').show();
+  });
+  $('.method-item').hide();
+  $('.client-request').hide();
+  $('.client-request').click(function(e){
+    e.preventDefault();
+    $('div.textarea-description').html('');
+    var path = $('#clientpath').val();
+    var clientSettings = {
+      URL: "http://localhost:2100" + path,
+    }
+    client = new MicroserviceClient(clientSettings);
+    if(secureKey) {
+      clientSettings.secureKey = secureKey;
+    } else if(accessToken){
+      clientSettings.accessToken = accessToken;
+    }
+    var method = $('#method-select').attr('data-method');
+    var data = $('#data').val();
+    var dataOnly = ['POST', 'PUT', 'SEARCH'];
+    if(dataOnly.indexOf(method) != -1){
+      try{
+        data = JSON.parse(data);
+      }catch(e){
+        $('div.textarea-description').html(e);
+        return;
+      }
+    }
+    var recordID = $('#recordid').val();
+    var recordToken = $('#recordtoken').val();
+    console.log(clientSettings);
+    switch(method){
+      case 'POST': {
+        client.post(data, function(err, handlerResponse){
+          if(err){
+            location.href = "#answer";
+            return $('#result').html(err);
+          }
+          $('#result').html(JSON.stringify(handlerResponse, null, 2));
+        });
+
+        break;
+      }
+      case 'GET': {
+        if(secureKey){
+          console.log("GET(secureKey): " +secureKey + recordID + ' ' + recordToken);
+          return client.get(recordID,recordToken, function(err, handlerResponse){
+            if(err){
+              location.href = "#answer";
+              return $('#result').html(err);
+            }
+            $('#result').html(JSON.stringify(handlerResponse, null, 2));
+          });
+        }
+        client.get(recordID, function(err, handlerResponse){
+          if(err){
+            location.href = "#answer";
+            return $('#result').html(err);
+          }
+          $('#result').html(JSON.stringify(handlerResponse, null, 2));
+        });
+
+        break;
+      }
+      case 'PUT': {
+        if(secureKey){
+          return client.put(recordID, recordToken, data, function(err, handlerResponse){
+            if(err){
+              location.href = "#answer";
+              return $('#result').html(err);
+            }
+            $('#result').html(JSON.stringify(handlerResponse, null, 2));
+          });
+        }
+
+        client.put(recordID, data, function(err, handlerResponse){
+          if(err){
+            location.href = "#answer";
+            return $('#result').html(err);
+          }
+          $('#result').html(JSON.stringify(handlerResponse, null, 2));
+        });
+        break;
+      }
+      case 'DELETE': {
+        if(secureKey){
+          return client.delete(recordID,recordToken, function(err, handlerResponse){
+            if(err){
+              location.href = "#answer";
+              return $('#result').html(err);
+            }
+            $('#result').html(JSON.stringify(handlerResponse, null, 2));
+          });
+        }
+        client.delete(recordID, function(err, handlerResponse){
+          if(err){
+            location.href = "#answer";
+            return $('#result').html(err);
+          }
+          $('#result').html(JSON.stringify(handlerResponse, null, 2));
+        });
+
+        break;
+      }
+      case 'SEARCH': {
+        client.search(data, function(err, handlerResponse){
+          if(err){
+            location.href = "#answer";
+            return $('#result').html(err);
+          }
+          $('#result').html(JSON.stringify(handlerResponse, null, 2));
+        });
+        break;
+      }
+    }
+  });
+  $('#method-select a[data-method]').click(function(e){
+    var control = $(this);
+    var method = control.attr('data-method')
+    $('#method-select span.title').html(method);
+    $('#method-select').attr('data-method', method);
+    $('.method-item').hide();
+    $('.method-item.method-' + method ).show();
+    $('.isSecureKey').hide();
+    if(secureKey !== false && ['GET', 'PUT', 'DELETE'].indexOf(method) != -1) {
+      $('.isSecureKey').show();
+    }
+    $('.client-request').show();
+    e.preventDefault();
+  });
+});
