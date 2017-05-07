@@ -44,12 +44,12 @@ $(function() {
     var clientSettings = {
       URL: "{{=it.url}}" + path,
     }
-    client = new MicroserviceClient(clientSettings);
     if(secureKey) {
       clientSettings.secureKey = $('#clientsecure').val();
     } else if(accessToken){
       clientSettings.accessToken = accessToken;
     }
+    client = new MicroserviceClient(clientSettings);
     var method = $('#method-select').attr('data-method');
     var data = $('#data').val();
     var dataOnly = ['POST', 'PUT', 'SEARCH'];
