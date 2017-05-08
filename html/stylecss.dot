@@ -38,12 +38,13 @@ header .token.access {
 }
 
 .path {
-
+  padding-bottom: 25px;
 }
 .path .title {
   padding: 5px;
   padding-left: 17px;
   background-color: white;
+  font-weight: bold;
 }
 .path .title .label {
   background: #eee;
@@ -94,6 +95,7 @@ header .token.access {
   background-color: transparent;
   padding-left: 18px;
   color: #444;
+  font-weight: 300;
 }
 .method .title .opeartion{
   background: black;

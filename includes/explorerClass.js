@@ -63,6 +63,13 @@ function ExplorerClass(requestDetails, callback) {
         resultMap.push(map[i]);
       }
     }
+    resultMap.sort(function(a,b) {
+      if (a.path < b.path)
+        return -1;
+      if (a.path > b.path)
+        return 1;
+      return 0;
+    });
     if (self.mode == 'json') {
       return self.callback(null, {
         code: 200,
