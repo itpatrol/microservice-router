@@ -1,7 +1,7 @@
 <div class="row path">
   <div class="col-xs-12">
     <span class="title">
-      /{{=it.path}}
+      <i class="fa fa-circle-o" aria-hidden="true"></i> /{{=it.path}}
       <span class="label label-default version">
         v: {{=it.options.version}}
       </span>

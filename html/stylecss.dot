@@ -42,9 +42,13 @@ header .token.access {
 }
 .path .title {
   padding: 5px;
-  padding-left: 17px;
+  padding-left: 13px;
   background-color: white;
   font-weight: bold;
+}
+.path .title .fa {
+  color: #ddd;
+  padding-right: 5px
 }
 .path .title .label {
   background: #eee;
