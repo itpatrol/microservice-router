@@ -12,6 +12,7 @@ $(function() {
   });
   $('a.try').click(function(e){
     e.preventDefault();
+    $('.console').scrollTop(0);
     var control = $(this);
     var method = control.attr('data-method');
     var url = control.attr('data-url');

@@ -206,7 +206,9 @@ ExplorerClass.prototype.processService = function(path, service) {
     clientSettings.secureKey = service.secureKey;
   }
   let msClient = new MicroserviceClient(clientSettings);
-  msClient.options({}, function(err, options) {
+  msClient.options({
+    path: path
+  }, function(err, options) {
     if (err) {
       return self.emit('errorService', err, path, service);
     }
