@@ -7,9 +7,11 @@ $(function() {
     var accessToken = "{{=it.accessToken}}"
     {{?}}
   {{?}}
+
   $('#submitAccessToken').click(function(e){
     location.href = "?" + $('#accesstoken').val();
   });
+
   $('a.try').click(function(e){
     e.preventDefault();
     $('.console').scrollTop(0);
@@ -35,8 +37,10 @@ $(function() {
     }
     $('.client-request').show();
   });
+
   $('.method-item').hide();
   $('.client-request').hide();
+
   $('.client-request').click(function(e){
     e.preventDefault();
     var control = $(this);
@@ -45,11 +49,13 @@ $(function() {
     var clientSettings = {
       URL: "{{=it.url}}" + path,
     }
+
     if(secureKey) {
       clientSettings.secureKey = $('#clientsecure').val();
     } else if(accessToken){
       clientSettings.accessToken = accessToken;
     }
+
     client = new MicroserviceClient(clientSettings);
     var method = $('#method-select').attr('data-method');
     var data = $('#data').val();
@@ -62,11 +68,13 @@ $(function() {
         return;
       }
     }
+
     var recordID = $('#recordid').val();
     var recordToken = $('#recordtoken').val();
-    console.log(clientSettings);
+
     switch(method){
       case 'POST': {
+        $('#result').html('processing..');
         client.post(data, function(err, handlerResponse){
           if(err){
             location.href = "#answer";
@@ -78,6 +86,7 @@ $(function() {
         break;
       }
       case 'GET': {
+        $('#result').html('processing..');
         if(secureKey){
           console.log("GET(secureKey): " +secureKey + recordID + ' ' + recordToken);
           return client.get(recordID,recordToken, function(err, handlerResponse){
@@ -99,6 +108,7 @@ $(function() {
         break;
       }
       case 'PUT': {
+        $('#result').html('processing..');
         if(secureKey){
           return client.put(recordID, recordToken, data, function(err, handlerResponse){
             if(err){
@@ -119,6 +129,7 @@ $(function() {
         break;
       }
       case 'DELETE': {
+        $('#result').html('processing..');
         if(secureKey){
           return client.delete(recordID,recordToken, function(err, handlerResponse){
             if(err){
@@ -139,6 +150,7 @@ $(function() {
         break;
       }
       case 'SEARCH': {
+        $('#result').html('processing..');
         client.search(data, function(err, handlerResponse){
           if(err){
             location.href = "#answer";
@@ -150,6 +162,7 @@ $(function() {
       }
     }
   });
+
   $('#method-select a[data-method]').click(function(e){
     var control = $(this);
     var method = control.attr('data-method')
