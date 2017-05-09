@@ -6,6 +6,10 @@
 
 Proxy-Router for [microservice-framework](https://www.npmjs.com/~microservice-framework)
 
+# Change Log
+- 1.2.5 
+  - built in explorer ![exloper](https://files.gitter.im/microservice-framework/chat/Quaa/Screen-Shot-2017-05-08-at-10.38.51-PM.png)
+
 ## Setup using mfw-cli
 
 - Create `myproject` first:

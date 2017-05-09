@@ -186,7 +186,7 @@ ExplorerClass.prototype.processMapToHTML = function(map, isSecure, accessToken) 
     scriptjs: dots.scriptsjs({
       isSecure: isSecure,
       accessToken: accessToken,
-      url: process.env.BASE_URL,
+      url: process.env.BASE_URL.replace(/\/$/, ''),
     }),
     stylecss: dots.stylecss({})
   }
