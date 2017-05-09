@@ -46,10 +46,16 @@ header .token.access {
   background-color: white;
   font-weight: bold;
 }
+
 .path .title .fa {
   color: #ddd;
   padding-right: 5px
 }
+
+.path:hover .title .fa {
+  color: #444;
+}
+
 .path .title .label {
   background: #eee;
   color: #444;
