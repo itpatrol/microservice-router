@@ -3,16 +3,21 @@
     <span class="title">
       <i class="fa fa-circle-o" aria-hidden="true"></i> /{{=it.path}}
       <span class="label label-default version">
+        {{?it.options}}
         v: {{=it.options.version}}
+        {{?}}
       </span>
       <span class="label label-default scope">
         scope: {{=it.scope}}
       </span>
     </span>
     <p class="description">
+      {{?it.options}}
       {{=it.options.description}}
+      {{?}}
     </p>
   </div>
+  {{?it.options}}
   {{ for(var method in it.options.methods) { }}
         <div class="col-xs-12 method method-{{=method}}">
           <span class="title">
@@ -40,4 +45,5 @@
           <p class="description">{{=it.options.methods[method].description}}</p>
         </div>
   {{ } }}
+  {{?}}
 </div>
