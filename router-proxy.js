@@ -285,7 +285,12 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         debug.debug('%s Data %O', route, jsonData);
         return proxyRequest(route, path, method, jsonData, requestDetails, callback);
       }
-      body = JSON.parse(body);
+      try {
+        body = JSON.parse(body);
+      } catch(e) {
+        debug.debug('JSON.parse(body) Error received: %O', e);
+        return callback(new Error('Service respond is not JSON.'));
+      }
       debug.debug('%s body: %O', route, body);
 
       if (method != 'OPTIONS') {

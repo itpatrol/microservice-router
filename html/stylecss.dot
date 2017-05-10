@@ -12,7 +12,7 @@ header {
   z-index: 10000;
   width: 100%;
 }
-header span.title {  
+header span.title {
   background-color: #444;
   font-weight: bold;
   color: white;
@@ -173,7 +173,7 @@ div.textarea-description {
 
 a.try {
   color: #444;
-  
+
 }
 a.try .fa {
   color: #ea982c !important;

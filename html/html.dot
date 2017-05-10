@@ -9,10 +9,10 @@
     <script src="http://microservice-frame.work/js/microservice-client.min.js"></script>
     <script>
 {{=it.scriptjs}}
-    </script>  
-    <style>   
-{{=it.stylecss}}  
-    </style>    
+    </script>
+    <style>
+{{=it.stylecss}}
+    </style>
   </head>
   <body>
     <header>
@@ -47,7 +47,7 @@ never expire token.
           <div class="console clearfix">
             <div class="col-xs-12">
               <h3> <i class="fa fa-sign-in" aria-hidden="true"></i> Request </h3>
-    
+
               <div class="input-group">
                 <input id="clientpath" class="form-control" >
                 <input id="clientsecure" type="hidden" >
@@ -76,7 +76,7 @@ never expire token.
                   <input class="form-control" id="recordtoken">
                 </div>
               </div>
-              <div class="method-item method-PUT method-POST method-SEARCH">      
+              <div class="method-item method-PUT method-POST method-SEARCH">
                 <div class="form-group">
                   <label for="data">Data</label>
                   <textarea class="form-control" id="data" rows=10>{}</textarea>
@@ -111,6 +111,6 @@ never expire token.
       {{?}}
     </div>
 
-    
+
   </body>
 </html>

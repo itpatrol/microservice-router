@@ -45,8 +45,11 @@ function ExplorerClass(requestDetails, callback) {
         let msClient = new MicroserviceClient(clientSettings);
         msClient.search({
           accessToken: accessToken}, function(err, answer) {
-          self.accessTokenDetails = answer[0];
-        });
+            if (err) {
+              return self.emit('done');
+            }
+            self.accessTokenDetails = answer[0];
+          });
       }
     }
     for (let path in services) {
@@ -86,6 +89,9 @@ function ExplorerClass(requestDetails, callback) {
   });
   self.on('errorService', function(err, path, service) {
     self.debug.explorer('Error options %O %s %O', err, path, service);
+    if (typeof err === 'string') {
+      err = new Error(err);
+    }
     self.map.push({
       path: path,
       scope: service.scope,
@@ -130,7 +136,13 @@ ExplorerClass.prototype.processMapToHTML = function(map, isSecure, accessToken) 
   let servicesHTML = '';
   for (var i in map) {
     map[i].isSecure = self.requestDetails.isSecure;
-    servicesHTML = servicesHTML + dots.service(map[i]);
+    var serviceHTML = '';
+    try {
+      serviceHTML = dots.service(map[i])
+    } catch(e) {
+      self.debug.explorer('Error on dot template error: %O service: %O', e, map[i]);
+    }
+    servicesHTML = servicesHTML + serviceHTML;
   }
   if (map.length == 0) {
     accessToken = false;
@@ -172,32 +184,34 @@ ExplorerClass.prototype.processMapToHTML = function(map, isSecure, accessToken) 
       expireIn = expireIn + Math.round(expireInsec) + ' sec ';
     }
   }
-
-  var html = {
-    lines: servicesHTML,
-    version: version,
-    name: name,
-    description: description,
-    url: process.env.BASE_URL,
-    isSecure: isSecure,
-    accessToken: accessToken,
-    accessTokenDetails: self.accessTokenDetails,
-    expireIn: expireIn,
-    scriptjs: dots.scriptsjs({
+  try {
+    var html = {
+      lines: servicesHTML,
+      version: version,
+      name: name,
+      description: description,
+      url: process.env.BASE_URL,
       isSecure: isSecure,
       accessToken: accessToken,
-      url: process.env.BASE_URL.replace(/\/$/, ''),
-    }),
-    stylecss: dots.stylecss({})
-  }
-
-  return self.callback(null, {
-    code: 200,
-    answer: dots.html(html),
-    headers: {
-      'content-type': 'text/html'
+      accessTokenDetails: self.accessTokenDetails,
+      expireIn: expireIn,
+      scriptjs: dots.scriptsjs({
+        isSecure: isSecure,
+        accessToken: accessToken,
+        url: process.env.BASE_URL.replace(/\/$/, ''),
+      }),
+      stylecss: dots.stylecss({})
     }
-  });
+    return self.callback(null, {
+      code: 200,
+      answer: dots.html(html),
+      headers: {
+        'content-type': 'text/html'
+      }
+    });
+  } catch(e) {
+    return self.callback(e);
+  }
 }
 /**
  * Process explorer request.

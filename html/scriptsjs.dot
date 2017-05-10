@@ -21,8 +21,61 @@ $(function() {
     $('#method-select').attr('data-method', method);
     $('#method-select span.title').html(method);
     if(method == 'POST') {
-      var properties = control.find('span.properties').html();
-      $('#data').val(properties);
+      var parseProperty = function(property) {
+        var returnValue = false;
+        switch(property.type) {
+          case 'number':
+          case 'boolean':
+          case 'string': {
+              returnValue = '' + property.type.toUpperCase() + ': ';
+              if(property.required) {
+                returnValue = returnValue + '[required] ';
+              }
+              return returnValue + property.description;
+              break;
+            }
+          case 'object': {
+            returnValue = {};
+            if(property.properties) {
+              for(var name in property.properties) {
+                var value = parseProperty(property.properties[name]);
+                if(value !== false) {
+                  returnValue[name] = value;
+                }
+              }
+              return returnValue;
+            }
+            if(property.required) {
+              return returnValue;
+            }
+            return false;
+          }
+          case 'array': {
+            returnValue = [];
+            var item = parseProperty(property.items);
+            if(item !== false) {
+              returnValue.push(item);
+            }
+            return returnValue;
+          }
+        }
+      }
+      try{
+        var properties = JSON.parse(control.find('span.properties').html());
+        var postObject = {};
+        for(var name in properties) {
+          if(name == 'created' || name == 'changed') {
+            continue;
+          }
+          var property = parseProperty(properties[name]);
+          if(property !== false) {
+            postObject[name] = property
+          }
+        }
+        $('#data').val(JSON.stringify(postObject, null, 2));
+      } catch(e) {
+        $('#data').val(JSON.stringify(e));
+      }
     }
     if(method == 'SEARCH') {
       $('#data').val('{\n  "query": {},\n  "limit": 10\n}');
