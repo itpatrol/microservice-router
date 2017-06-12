@@ -48,6 +48,9 @@ function ExplorerClass(requestDetails, callback) {
             if (err) {
               return self.emit('done');
             }
+            if(!answer[0]) {
+              return self.emit('done');
+            }
             self.accessTokenDetails = answer[0];
           });
       }
