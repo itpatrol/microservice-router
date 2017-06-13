@@ -1,6 +1,6 @@
 {
   "name": "@microservice-framework/microservice-router",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "Microservice framework router",
   "main": "router-admin.js",
   "scripts": {
@@ -28,7 +28,8 @@
     "@microservice-framework/microservice-cluster": "^1.2.1",
     "debug": "^2.2.0",
     "dot": "^1.1.1",
-    "dotenv": "^2.0.0"
+    "dotenv": "^2.0.0",
+    "fs-extra": "^3.0.1"
   },
   "devDependencies": {
     "@microservice-framework/microservice-client": "^1.2.2",

@@ -278,7 +278,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       headers: headers,
       body: requestDetails._buffer
     }, function(error, response, body) {
-      debug.debug('%s Responce: %s', route, JSON.stringify(response, null, 2));
+
       if (error) {
         debug.debug('%s Error received: %s', route, error.message);
         debug.debug('%s Restart request: %s %s %s', route, path, method);
