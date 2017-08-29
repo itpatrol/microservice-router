@@ -7,6 +7,10 @@
 Proxy-Router for [microservice-framework](https://www.npmjs.com/~microservice-framework)
 
 # Change Log
+- 1.2.8
+  - bugfix release
+- 1.2.7
+  - bugfix release
 - 1.2.6
   - bugfix release
   - POST explorer improvements
