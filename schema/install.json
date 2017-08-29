@@ -60,7 +60,7 @@
     "template_path": {
       "type": "string",
       "description": "Path to API exloper HTML templates.",
-      "default": "./html",
+      "default": "./html"
     },
     "schema": {
       "type": "string",
@@ -68,6 +68,5 @@
       "default": "service.json",
       "required": true
     }
-
   }
 }
