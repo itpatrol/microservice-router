@@ -56,6 +56,7 @@ function applyAccessToken(requestDetails) {
     }
     if (accessToken != process.env.SECURE_KEY) {
       requestDetails.headers.access_token = accessToken;
+      requestDetails.headers['Access-Token'] = accessToken;
     } else {
       requestDetails.isSecure = true;
       requestDetails.SecureKey = accessToken;
@@ -140,7 +141,7 @@ function ProxyRequestOPTIONS(jsonData, requestDetails, callbacks, callback) {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
-        'Access-Control-Allow-Headers': 'content-type,signature, access_token, token'
+        'Access-Control-Allow-Headers': 'content-type, signature, access_token, token, Access-Token'
       }
     });
   }
@@ -226,14 +227,23 @@ function FindTarget(route, callback) {
  */
 function getMinLoadedRouter(availableRoutes) {
   let minRouter = availableRoutes.pop();
-  minRouter.cpu = minRouter.metrics.reduce(function(a, b) {
-    return a.cpu + b.cpu + a.loadavg[0] + b.loadavg[0];
+  let totalCPU = minRouter.metrics.reduce(function(a, b) {
+
+    return {
+      cpu : parseFloat(a.cpu) + parseFloat(b.cpu) + a.loadavg[0] + b.loadavg[0],
+      loadavg: [0]
+    };
   });
+  minRouter.cpu = totalCPU.cpu;
   debug.debug('MinRouter %O', minRouter);
   for (let i in availableRoutes) {
-    availableRoutes[i].cpu = availableRoutes[i].metrics.reduce(function(a, b) {
-      return a.cpu + b.cpu + a.loadavg[0] + b.loadavg[0];
+    let totalCPU = availableRoutes[i].metrics.reduce(function(a, b) {
+      return {
+        cpu : parseFloat(a.cpu) + parseFloat(b.cpu) + a.loadavg[0] + b.loadavg[0],
+        loadavg: [0]
+      };
     });
+    availableRoutes[i].cpu = totalCPU.cpu;
     if (availableRoutes[i].cpu < minRouter.cpu) {
       minRouter = availableRoutes[i];
     }
@@ -313,7 +323,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       var responseHeaders = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
-        'Access-Control-Allow-Headers': 'content-type, signature, access_token, token'
+        'Access-Control-Allow-Headers': 'content-type, signature, access_token, token, Access-Token'
       };
       for (var i in response.headers) {
         if (i.substring(0,1) == 'x') {
