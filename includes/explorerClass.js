@@ -40,8 +40,8 @@ function ExplorerClass(requestDetails, callback) {
       if(self.requestDetails.headers.access_token) {
         accessToken = self.requestDetails.headers.access_token;
       };
-      if(self.requestDetails.headers['Access-Token']) {
-        accessToken = self.requestDetails.headers['Access-Token'];
+      if(self.requestDetails.headers['access-token']) {
+        accessToken = self.requestDetails.headers['access-token'];
       };
       if (services['auth']) {
         let clientSettings = {
@@ -94,8 +94,8 @@ function ExplorerClass(requestDetails, callback) {
     if(self.requestDetails.headers.access_token) {
       accessToken = self.requestDetails.headers.access_token;
     };
-    if(self.requestDetails.headers['Access-Token']) {
-      accessToken = self.requestDetails.headers['Access-Token'];
+    if(self.requestDetails.headers['access-token']) {
+      accessToken = self.requestDetails.headers['access-token'];
     };
 
     if (self.requestDetails.isSecure) {
@@ -243,8 +243,8 @@ ExplorerClass.prototype.processService = function(path, service) {
   if (self.requestDetails.headers.access_token) {
     accessToken = self.requestDetails.headers.access_token;
   }
-  if (self.requestDetails.headers['Access-Token']) {
-    accessToken = self.requestDetails.headers['Access-Token'];
+  if (self.requestDetails.headers['access-token']) {
+    accessToken = self.requestDetails.headers['access-token'];
   }
   if (accessToken) {
     clientSettings.accessToken = accessToken;

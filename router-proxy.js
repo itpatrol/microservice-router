@@ -56,7 +56,7 @@ function applyAccessToken(requestDetails) {
     }
     if (accessToken != process.env.SECURE_KEY) {
       requestDetails.headers.access_token = accessToken;
-      requestDetails.headers['Access-Token'] = accessToken;
+      requestDetails.headers['access-token'] = accessToken;
     } else {
       requestDetails.isSecure = true;
       requestDetails.SecureKey = accessToken;
@@ -141,7 +141,8 @@ function ProxyRequestOPTIONS(jsonData, requestDetails, callbacks, callback) {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
-        'Access-Control-Allow-Headers': 'content-type, signature, access_token, token, Access-Token'
+        'Access-Control-Allow-Headers': 'content-type, signature, access_token, token, Access-Token',
+        'Access-Control-Expose-Headers': 'x-total-count',
       }
     });
   }
@@ -323,7 +324,8 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       var responseHeaders = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
-        'Access-Control-Allow-Headers': 'content-type, signature, access_token, token, Access-Token'
+        'Access-Control-Allow-Headers': 'content-type, signature, access_token, token, Access-Token',
+        'Access-Control-Expose-Headers': 'x-total-count',
       };
       for (var i in response.headers) {
         if (i.substring(0,1) == 'x') {

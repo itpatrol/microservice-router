@@ -7,6 +7,8 @@
 Proxy-Router for [microservice-framework](https://www.npmjs.com/~microservice-framework)
 
 # Change Log
+- 1.3.1
+  - Add to access control header - x-total-count
 - 1.3.0
   - preparing switch from access_token header to 'Access-Token'
 - 1.2.8
