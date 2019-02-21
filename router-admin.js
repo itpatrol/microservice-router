@@ -16,8 +16,22 @@ var debug = {
 require('dotenv').config();
 
 
+let MongoURL = '';
+if (process.env.MONGO_URL) {
+  MongoURL = MongoURL + process.env.MONGO_URL;
+}
+
+if (process.env.MONGO_PREFIX) {
+  MongoURL = MongoURL + process.env.MONGO_PREFIX;
+}
+
+if (process.env.MONGO_OPTIONS) {
+  MongoURL = MongoURL + process.env.MONGO_OPTIONS;
+}
+
+
 var mservice = new Microservice({
-  mongoUrl: process.env.MONGO_URL + process.env.MONGO_PREFIX + process.env.MONGO_OPTIONS,
+  mongoUrl: MongoURL,
   mongoTable: process.env.MONGO_TABLE,
   secureKey: process.env.SECURE_KEY,
   schema: process.env.SCHEMA
