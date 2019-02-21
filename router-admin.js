@@ -44,7 +44,7 @@ var mControlCluster = new Cluster({
   hostname: process.env.HOSTNAME,
   callbacks: {
     validate: mservice.validate,
-    POST: mservice.post,
+    POST: adminPOST,
     GET: mservice.get,
     PUT: mservice.put,
     DELETE: mservice.delete,
@@ -58,6 +58,17 @@ if (mControlCluster.isMaster) {
     interval = process.env.INTERVAL;
   }
   setInterval(cleanRouteTable , interval);
+}
+
+/**
+ * POST Handler.
+ */
+function adminPOST(jsonData, requestDetails, callback) {
+  // Version 1.x compatibility.
+  if(!jsonData.type) {
+    jsonData.type = "handler"
+  }
+  mservice.post(jsonData, requestDetails, callback)
 }
 
 /**
