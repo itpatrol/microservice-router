@@ -195,50 +195,48 @@ function matchRoute(targetRequest, routeItem) {
   }
 
   if(checkPath(routeItem.path)) {
-    if(routeItem.conditions && routeItem.conditions.length) {
-      for(let condition of routeItem.conditions ) {
-        // check headers
-        if(condition.headers && condition.headers.length) {
-          for(let header of condition.headers ) {
-            if(!targetRequest.requestDetails.headers[header.name]) {
+    if(routeItem.conditions) {
+      // check headers
+      if(routeItem.conditions.headers && routeItem.conditions.headers.length) {
+        for(let header of routeItem.conditions.headers ) {
+          if(!targetRequest.requestDetails.headers[header.name]) {
+            return false
+          }
+          let receivedHeaderValue = targetRequest.requestDetails.headers[header.name]
+          if(header.isRegex) {
+            let pattern = new RegExp(header.value, "i")
+            if(!pattern.test(receivedHeaderValue)) {
               return false
             }
-            let receivedHeaderValue = targetRequest.requestDetails.headers[header.name]
-            if(header.isRegex) {
-              let pattern = new RegExp(header.value, "i")
-              if(!pattern.test(receivedHeaderValue)) {
-                return false
-              }
-            } else {
-              if(receivedHeaderValue !== header.value) {
-                return false
-              }
+          } else {
+            if(receivedHeaderValue !== header.value) {
+              return false
             }
           }
         }
-        // check methods
-        if(condition.methods && condition.methods.length) {
-          if(condition.methods.indexOf(targetRequest.method) == -1) {
-            return false;
-          }
+      }
+      // check methods
+      if(routeItem.conditions.methods && routeItem.conditions.methods.length) {
+        if(routeItem.conditions.methods.indexOf(targetRequest.method) == -1) {
+          return false;
         }
-        // check payload
-        if(condition.payload && condition.payload.length
-          && targetRequest.jsonData) {
-          for(let payload of condition.payload ) {
-            if(!targetRequest.jsonData[payload.name]) {
+      }
+      // check payload
+      if(routeItem.conditions.payload && routeItem.conditions.payload.length
+        && targetRequest.jsonData) {
+        for(let payload of routeItem.conditions.payload ) {
+          if(!targetRequest.jsonData[payload.name]) {
+            return false
+          }
+          let receivedPayloadValue = targetRequest.jsonData[payload.name]
+          if(header.isRegex) {
+            let pattern = new RegExp(payload.value, "i")
+            if(!pattern.test(receivedPayloadValue)) {
               return false
             }
-            let receivedPayloadValue = targetRequest.jsonData[payload.name]
-            if(header.isRegex) {
-              let pattern = new RegExp(payload.value, "i")
-              if(!pattern.test(receivedPayloadValue)) {
-                return false
-              }
-            } else {
-              if(receivedPayloadValue !== payload.value) {
-                return false
-              }
+          } else {
+            if(receivedPayloadValue !== payload.value) {
+              return false
             }
           }
         }

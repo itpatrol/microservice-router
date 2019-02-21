@@ -2,6 +2,97 @@
   "id": "/Service",
   "type": "object",
   "properties": {
+    "type": {
+      "type": "string",
+      "description": "Microservice type. Default is handler.",
+      "enum": ["hook", "handler"]
+    },
+    "hook": {
+      "type": "array",
+      "description": "Only for hook. Supported hooks.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hook": {
+            "type": "string",
+            "enum": ["before", "after"],
+            "required": true
+          },
+          "type": {
+            "type": "string",
+            "enum": ["modify", "copy"],
+            "required": true
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "conditions": {
+      "type": "object",
+      "properties": {
+        "headers": {
+          "type": "array",
+          "description": "Header matching conditions.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Header name",
+                "required": true
+              },
+              "value": {
+                "type": "string",
+                "description": "Header value",
+                "required": true
+              },
+              "isRegex": {
+                "type": "boolean",
+                "description": "Header value is regex to match"
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "methods": {
+          "type": "array",
+          "description": "Request method matching conditions.",
+          "items": {
+            "type": "string",
+            "enum": ["GET", "POST", "PUT", "DELETE", "SEARCH", "OPTIONS"]
+          },
+          "minItems": 1
+        },
+        "payload": {
+          "type": "array",
+          "description": "Data conditions.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Field name of the object",
+                "required": true
+              },
+              "value": {
+                "type": "string",
+                "description": "Field value",
+                "required": true
+              },
+              "isRegex": {
+                "type": "boolean",
+                "description": "Field value is regex to match"
+              }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "scope": {
+      "type": "string",
+      "description": "Scope to provide access by access token."
+    },
     "path": {
       "type": "array",
       "description": "Array of supported path.",
