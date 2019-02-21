@@ -156,43 +156,97 @@ function ProxyRequestOPTIONS(jsonData, requestDetails, callbacks, callback) {
 /**
  * Compare route to router.path items.
  */
-function matchRoute(route, routeItem) {
-  let routeItems = route.split('/');
-  var paths = routeItem.path;
+function matchRoute(targetRequest, routeItem) {
+  let routeItems = targetRequest.route.split('/');
 
-
-  for (var i in paths) {
-    // If route qual saved path
-    if (paths[i] == route) {
-      return true;
-    }
-
-    // If routeItems.length == 1, and did not match
-    if (routeItems.length == 1) {
-      if (paths[i] != route) {
+  let checkPath = function(paths){
+    for (var i in paths) {
+      // If route qual saved path
+      if (paths[i] == targetRequest.route) {
+        return true;
+      }
+  
+      // If routeItems.length == 1, and did not match
+      if (routeItems.length == 1) {
+        if (paths[i] != targetRequest.route) {
+          continue;
+        }
+      }
+  
+      var pathItems = paths[i].split('/');
+      if (pathItems.length != routeItems.length) {
         continue;
       }
+      var fullPathMatched = true;
+      for (var i = 0; i < routeItems.length; i++) {
+        if (pathItems[i].charAt(0) == ':') {
+          routeItem.matchVariables[pathItems[i].substring(1)] = routeItems[i];
+        } else {
+          if (routeItems[i] != pathItems[i]) {
+            fullPathMatched = false;
+            break;
+          }
+        }
+      }
+      if (fullPathMatched) {
+        return true;
+      }
     }
+  }
 
-    var pathItems = paths[i].split('/');
-    if (pathItems.length != routeItems.length) {
-      continue;
-    }
-    var fullPathMatched = true;
-    for (var i = 0; i < routeItems.length; i++) {
-      if (pathItems[i].charAt(0) == ':') {
-        routeItem.matchVariables[pathItems[i].substring(1)] = routeItems[i];
-      } else {
-        if (routeItems[i] != pathItems[i]) {
-          fullPathMatched = false;
-          break;
+  if(checkPath(routeItem.path)) {
+    if(routeItem.conditions && routeItem.conditions.length) {
+      for(let condition of routeItem.conditions ) {
+        // check headers
+        if(condition.headers && condition.headers.length) {
+          for(let header of condition.headers ) {
+            if(!targetRequest.requestDetails.headers[header.name]) {
+              return false
+            }
+            let receivedHeaderValue = targetRequest.requestDetails.headers[header.name]
+            if(header.isRegex) {
+              let pattern = new RegExp(header.value, "i")
+              if(!pattern.test(receivedHeaderValue)) {
+                return false
+              }
+            } else {
+              if(receivedHeaderValue !== header.value) {
+                return false
+              }
+            }
+          }
+        }
+        // check methods
+        if(condition.methods && condition.methods.length) {
+          if(condition.methods.indexOf(targetRequest.method) == -1) {
+            return false;
+          }
+        }
+        // check payload
+        if(condition.payload && condition.payload.length
+          && targetRequest.jsonData) {
+          for(let payload of condition.payload ) {
+            if(!targetRequest.jsonData[payload.name]) {
+              return false
+            }
+            let receivedPayloadValue = targetRequest.jsonData[payload.name]
+            if(header.isRegex) {
+              let pattern = new RegExp(payload.value, "i")
+              if(!pattern.test(receivedPayloadValue)) {
+                return false
+              }
+            } else {
+              if(receivedPayloadValue !== payload.value) {
+                return false
+              }
+            }
+          }
         }
       }
     }
-    if (fullPathMatched) {
-      return true;
-    }
+    return true;
   }
+  
 
   return false;
 }
@@ -200,15 +254,21 @@ function matchRoute(route, routeItem) {
 /**
  * Find target URL.
  */
-function FindTarget(route, callback) {
-  debug.debug('Find route %s', route);
+function FindTarget(targetRequest, callback) {
+  debug.debug('Find route %s', targetRequest.route);
 
   var availableRoutes = [];
   for (var i in routes) {
+    // Version 1.x compatibility. 
+    // If no type provided we assume it's "handler"
+    if(routes[i].type && routes[i].type.toLowerCase() == 'hook') {
+      // skip if not "handler" router.
+      continue;
+    }
     // Making copy of the router.
     let routeItem = JSON.parse(JSON.stringify(routes[i]));
     routeItem.matchVariables = {};
-    if (matchRoute(route, routeItem)) {
+    if (matchRoute(targetRequest, routeItem)) {
       availableRoutes.push(routeItem);
     }
   }
@@ -259,8 +319,14 @@ function getMinLoadedRouter(availableRoutes) {
  */
 function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
   debug.debug('Route base: %s', route);
-
-  FindTarget(route, function(err, router) {
+  let targetRequest = {
+    route: route,
+    path: path,
+    method: method,
+    jsonData: jsonData,
+    requestDetails: requestDetails
+  }
+  FindTarget(targetRequest, function(err, router) {
     if (err) {
       debug.debug('Route %s err %s', route, err.message);
       return callback(err, null);
