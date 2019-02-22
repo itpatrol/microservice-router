@@ -5,7 +5,7 @@
     "type": {
       "type": "string",
       "description": "Microservice type. Default is handler.",
-      "enum": ["hook", "handler"]
+      "enum": ["hook", "handler", "websocket"]
     },
     "hook": {
       "type": "array",

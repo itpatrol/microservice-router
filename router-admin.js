@@ -16,7 +16,7 @@ var debug = {
 require('dotenv').config();
 
 
-let MongoURL = '';
+var MongoURL = '';
 if (process.env.MONGO_URL) {
   MongoURL = MongoURL + process.env.MONGO_URL;
 }
@@ -68,6 +68,9 @@ function adminPOST(jsonData, requestDetails, callback) {
   if(!jsonData.type) {
     jsonData.type = "handler"
   }
+  if(!jsonData.path == 'ws') {
+    jsonData.type = "websocket"
+  }
   mservice.post(jsonData, requestDetails, callback)
 }
 
@@ -76,8 +79,7 @@ function adminPOST(jsonData, requestDetails, callback) {
  */
 function cleanRouteTable() {
   debug.log('Clean routes');
-  MongoClient.connect(process.env.MONGO_URL + process.env.MONGO_PREFIX + process.env.MONGO_OPTIONS,
-    function(err, db) {
+  MongoClient.connect(MongoURL, function(err, db) {
     if (err) {
       // If error, do nothing.
       debug.debug('Error %s', err.message);

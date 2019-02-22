@@ -21,6 +21,19 @@ var debug = {
 
 require('dotenv').config();
 
+var MongoURL = '';
+if (process.env.MONGO_URL) {
+  MongoURL = MongoURL + process.env.MONGO_URL;
+}
+
+if (process.env.MONGO_PREFIX) {
+  MongoURL = MongoURL + process.env.MONGO_PREFIX;
+}
+
+if (process.env.MONGO_OPTIONS) {
+  MongoURL = MongoURL + process.env.MONGO_OPTIONS;
+}
+
 var mControlCluster = new Cluster({
   pid: process.env.PIDFILE + '.proxy',
   port: process.env.PROXY_PORT,
@@ -37,7 +50,7 @@ var mControlCluster = new Cluster({
 });
 
 if (!mControlCluster.isMaster) {
-  var routes = [];
+  var globalServices = [];
   updateRouteVariable();
   var interval = 6000;
   if (process.env.INTERVAL) {
@@ -205,7 +218,7 @@ function checkConditions(conditions, requestDetails, jsonData) {
 }
 
 /**
- * Compare route to router.path items.
+ * Check if route match request.
  */
 function matchRoute(targetRequest, routeItem) {
   let routeItems = targetRequest.route.split('/');
@@ -258,19 +271,19 @@ function matchRoute(targetRequest, routeItem) {
 /**
  * Find target URL.
  */
-function FindTarget(targetRequest, callback) {
+function FindTarget(targetRequest, type, callback) {
   debug.debug('Find route %s', targetRequest.route);
 
   var availableRoutes = [];
-  for (var i in routes) {
+  for (let i in globalServices) {
     // Version 1.x compatibility. 
     // If no type provided we assume it's "handler"
-    if(routes[i].type && routes[i].type.toLowerCase() == 'hook') {
+    if(globalServices[i].type && globalServices[i].type.toLowerCase() != 'handler') {
       // skip if not "handler" router.
       continue;
     }
     // Making copy of the router.
-    let routeItem = JSON.parse(JSON.stringify(routes[i]));
+    let routeItem = JSON.parse(JSON.stringify(globalServices[i]));
     routeItem.matchVariables = {};
     if (matchRoute(targetRequest, routeItem)) {
       availableRoutes.push(routeItem);
@@ -421,39 +434,38 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
 function sendBroadcastMessage(router, method, path, message) {
   debug.debug('UDP broadcast %O %s %s %O', router, method, path, message);
 
-  for (var i in routes) {
-    var routeItem = routes[i];
-    if (routeItem.path.indexOf('ws') != -1) {
-
-      var broadcastMessage = {
-        method: method,
-        route: router.path,
-        scope: router.scope,
-        loaders: router.matchVariables,
-        path: path
-      };
-      switch (routeItem.methods[method.toLowerCase()]) {
-        case 'data': {
-          broadcastMessage.message = message;
-          break;
-        }
-        case 'meta': {
-          broadcastMessage.meta = true;
-          break;
-        }
-        default: {
-          continue;
-        }
-      }
-      var URL = url.parse(routeItem.url);
-
-      broadcastMessage.signature = ['sha256',
-        signature('sha256', JSON.stringify(broadcastMessage), routeItem.secureKey)];
-
-      debug.debug('UDP broadcast to %O %O', routeItem, URL);
-      var bufferedMessage = Buffer.from(JSON.stringify(broadcastMessage));
-      sendBroadcastMessageToClient(bufferedMessage, URL);
+  for (let routeItem of globalServices) {
+    if (routeItem.type !== 'websocket') {
+      continue
     }
+    var broadcastMessage = {
+      method: method,
+      route: router.path,
+      scope: router.scope,
+      loaders: router.matchVariables,
+      path: path
+    };
+    switch (routeItem.methods[method.toLowerCase()]) {
+      case 'data': {
+        broadcastMessage.message = message;
+        break;
+      }
+      case 'meta': {
+        broadcastMessage.meta = true;
+        break;
+      }
+      default: {
+        continue;
+      }
+    }
+    var URL = url.parse(routeItem.url);
+
+    broadcastMessage.signature = ['sha256',
+      signature('sha256', JSON.stringify(broadcastMessage), routeItem.secureKey)];
+
+    debug.debug('UDP broadcast to %O %O', routeItem, URL);
+    var bufferedMessage = Buffer.from(JSON.stringify(broadcastMessage));
+    sendBroadcastMessageToClient(bufferedMessage, URL);
   }
 }
 
@@ -476,8 +488,7 @@ function sendBroadcastMessageToClient(bufferedMessage, URL) {
  */
 function updateRouteVariable() {
 
-  MongoClient.connect(process.env.MONGO_URL + process.env.MONGO_PREFIX +
-    process.env.MONGO_OPTIONS, function(err, db) {
+  MongoClient.connect(MongoURL, function(err, db) {
     if (err) {
       // If error, do nothing.
       debug.debug('Error %s', err.message);
@@ -499,14 +510,21 @@ function updateRouteVariable() {
 
         return;
       }
-      var newRoutes = [];
-      for (var i in results) {
+      let newServices = [];
+      for (let route of results) {
         // get only changed in 60 sec.
-        if (results[i].changed > Date.now() - 60 * 1000) {
-          newRoutes.push(results[i]);
+        if (route.changed > Date.now() - 60 * 1000) {
+          if(!route.type) {
+            // Version 1.x compatibility.
+            route.type = 'handler'
+            if (route.path == 'ws') {
+              route.type = 'websocket'
+            }
+          }
+          newServices.push(route);
         }
       }
-      routes = newRoutes;
+      globalServices = newServices;
     });
   });
 }
