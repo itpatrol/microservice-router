@@ -170,45 +170,45 @@ function ProxyRequestOPTIONS(jsonData, requestDetails, callbacks, callback) {
  * Check Conditions for request.
  */
 function checkConditions(conditions, requestDetails, jsonData) {
-  if(conditions.headers && conditions.headers.length) {
-    for(let header of conditions.headers ) {
-      if(!requestDetails.headers[header.name]) {
+  if (conditions.headers && conditions.headers.length) {
+    for (let header of conditions.headers ) {
+      if (!requestDetails.headers[header.name]) {
         return false
       }
       let receivedHeaderValue = requestDetails.headers[header.name]
-      if(header.isRegex) {
+      if (header.isRegex) {
         let pattern = new RegExp(header.value, "i")
-        if(!pattern.test(receivedHeaderValue)) {
+        if (!pattern.test(receivedHeaderValue)) {
           return false
         }
       } else {
-        if(receivedHeaderValue !== header.value) {
+        if (receivedHeaderValue !== header.value) {
           return false
         }
       }
     }
   }
   // check methods
-  if(conditions.methods && conditions.methods.length) {
-    if(conditions.methods.indexOf(targetRequest.method) == -1) {
+  if (conditions.methods && conditions.methods.length) {
+    if (conditions.methods.indexOf(targetRequest.method) == -1) {
       return false;
     }
   }
   // check payload
-  if(conditions.payload && conditions.payload.length
+  if (conditions.payload && conditions.payload.length
     && jsonData) {
-    for(let payload of conditions.payload ) {
-      if(!jsonData[payload.name]) {
+    for (let payload of conditions.payload ) {
+      if (!jsonData[payload.name]) {
         return false
       }
       let receivedPayloadValue = jsonData[payload.name]
-      if(header.isRegex) {
+      if (header.isRegex) {
         let pattern = new RegExp(payload.value, "i")
-        if(!pattern.test(receivedPayloadValue)) {
+        if (!pattern.test(receivedPayloadValue)) {
           return false
         }
       } else {
-        if(receivedPayloadValue !== payload.value) {
+        if (receivedPayloadValue !== payload.value) {
           return false
         }
       }
@@ -224,9 +224,9 @@ function matchRoute(targetRequest, routeItem) {
   let routeItems = targetRequest.route.split('/');
 
   
-  if(routeItem.path && routeItem.path.length == 1 && routeItem.path[0] == '*') {
-    if(routeItem.conditions) {
-      if(!checkConditions(routeItem.conditions, targetRequest.requestDetails, targetRequest.jsonData)) {
+  if (routeItem.path && routeItem.path.length == 1 && routeItem.path[0] == '*') {
+    if (routeItem.conditions) {
+      if (!checkConditions(routeItem.conditions, targetRequest.requestDetails, targetRequest.jsonData)) {
         return false
       }
     }
@@ -267,11 +267,11 @@ function matchRoute(targetRequest, routeItem) {
       }
     }
   }
-  if(!checkPath(routeItem.path)) {
+  if (!checkPath(routeItem.path)) {
     return false
   }
-  if(routeItem.conditions) {
-    if(!checkConditions(routeItem.conditions, targetRequest.requestDetails, targetRequest.jsonData)) {
+  if (routeItem.conditions) {
+    if (!checkConditions(routeItem.conditions, targetRequest.requestDetails, targetRequest.jsonData)) {
       return false
     }
   }
@@ -286,10 +286,10 @@ function HookCall(targetRequest, phase, callback) {
   // send Broadcast
   let beforeBroadcastTargets = findHookTarget(targetRequest, phase, 'broadcast')
   _request(function(){
-    if(beforeBroadcastTargets instanceof Error) {
+    if (beforeBroadcastTargets instanceof Error) {
       return beforeBroadcastTargets
     }
-    if(!beforeBroadcastTargets.length) {
+    if (!beforeBroadcastTargets.length) {
       return false
     }
     let router = beforeBroadcastTargets.pop()
@@ -315,7 +315,7 @@ function HookCall(targetRequest, phase, callback) {
     }
   }, function(err, response, body){
     // No action on broadcast hook.
-    if(err) {
+    if (err) {
       debug.log('broadcast failed %O', err);
     }
     debug.log('broadcast sent');
@@ -323,7 +323,7 @@ function HookCall(targetRequest, phase, callback) {
   // send Notify
   _request(function(){
     let beforeNotifyTargets = findHookTarget(targetRequest, phase, 'notify')
-    if(beforeNotifyTargets instanceof Error) {
+    if (beforeNotifyTargets instanceof Error) {
       return beforeNotifyTargets
     }
     let router = false
@@ -354,7 +354,7 @@ function HookCall(targetRequest, phase, callback) {
     }
   }, function(err, response, body){
     // No action on notify hook.
-    if(err) {
+    if (err) {
       debug.log('notify failed %O', err);
     }
     debug.log('notify sent');
@@ -363,7 +363,7 @@ function HookCall(targetRequest, phase, callback) {
   // send proxy
   _request(function(){
     let beforeProxyTargets = findHookTarget(targetRequest, phase, 'proxy')
-    if(beforeProxyTargets instanceof Error) {
+    if (beforeProxyTargets instanceof Error) {
       return beforeProxyTargets
     }
     let router = false
@@ -391,7 +391,7 @@ function HookCall(targetRequest, phase, callback) {
       body: targetRequest.requestDetails._buffer
     }
   }, function(err, response, body){
-    if(err) {
+    if (err) {
       debug.log('proxy failed %O', err);
       return callback(err)
     }
@@ -404,20 +404,20 @@ function HookCall(targetRequest, phase, callback) {
  */
 function findHookTarget(targetRequest, phase, type){
   let allHookTargets = findAllTargets(targetRequest, 'hook')
-  if(allHookTargets instanceof Error) {
+  if (allHookTargets instanceof Error) {
     return allHookTargets
   }
   let finalHookTable = []
-  for(let target of allHookTargets){
+  for (let target of allHookTargets){
     // skip hooks with no hook properties
-    if(!target.hook || !target.hook.length) {
+    if (!target.hook || !target.hook.length) {
       continue
     }
-    for(let phase of target.phase) {
-      if(hook.phase !== phase) {
+    for (let phase of target.phase) {
+      if (hook.phase !== phase) {
         continue
       }
-      if(hook.type !== type) {
+      if (hook.type !== type) {
         continue
       }
       let targetCopy = JSON.parse(JSON.stringify(target))
@@ -426,12 +426,12 @@ function findHookTarget(targetRequest, phase, type){
       finalHookTable.push(targetCopy)
     }
   }
-  if(finalHookTable.length) {
+  if (finalHookTable.length) {
     finalHookTable.sort(function(a, b){
-      if(a.weight < b.weight) {
+      if (a.weight < b.weight) {
         return -1
       }
-      if(a.weight > b.weight) {
+      if (a.weight > b.weight) {
         return 1
       }
       return 0
@@ -448,11 +448,11 @@ function findAllTargets(targetRequest, type) {
 
   var availableRoutes = [];
   for (let i in globalServices) {
-    if(globalServices[i].type && globalServices[i].type.toLowerCase() !== type) {
+    if (globalServices[i].type && globalServices[i].type.toLowerCase() !== type) {
       continue
     }
     // For easy deployment when service need to stop receiving new requests.
-    if(!globalServices[i].online) {
+    if (!globalServices[i].online) {
       continue
     }
     // Making copy of the router.
@@ -477,7 +477,7 @@ function findTarget(targetRequest) {
   debug.debug('Find route %s', targetRequest.route);
 
   let availableRoutes = FindAllTargets(targetRequest, 'handler');
-  if(availableRoutes instanceof Error) {
+  if (availableRoutes instanceof Error) {
     return availableRoutes
   }
   if (availableRoutes.length == 1) {
@@ -521,14 +521,13 @@ function getMinLoadedRouter(availableRoutes) {
 function _request(getRequest, callback) {
   let request = getRequest()
   
-  if(request instanceof Error) {
+  if (request instanceof Error) {
     return callback(request)
   }
-  if(request === false) {
+  if (request === false) {
     return callback(false)
   }
   request(request, function(error, response, body) {
-    let body = false
     if (error) {
       debug.debug('_request Error received: %O', error);
       debug.debug('_request Restart request: %O', request);
@@ -554,22 +553,22 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
     requestDetails: requestDetails
   }
   let endPointTarget = findTarget(targetRequest)
-  if(endPointTarget instanceof Error) {
+  if (endPointTarget instanceof Error) {
     debug.debug('Route %s err %O', route, endPointTarget)
     return callback(endPointTarget, null)
   }
 
   HookCall(targetRequest, 'before', function(err, response, body){
-    if(!err) {
+    if (!err) {
       debug.debug('%s body: %O', route, body);
       let bodyJSON = false
       try {
         bodyJSON = JSON.parse(body);
-      } catch(e) {
+      } catch (e) {
         debug.debug('JSON.parse(body) Error received: %O', e);
         debug.log('Notify before reseived not json')
       }
-      if(bodyJSON) {
+      if (bodyJSON) {
         // need to replace body data
         
       }
@@ -620,7 +619,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       }
       try {
         body = JSON.parse(body);
-      } catch(e) {
+      } catch (e) {
         debug.debug('JSON.parse(body) Error received: %O', e);
         return callback(new Error('Service respond is not JSON.'));
       }
@@ -753,14 +752,14 @@ function updateRouteVariable() {
       for (let route of results) {
         // get only changed in 60 sec.
         if (route.changed > Date.now() - 60 * 1000) {
-          if(!route.type) {
+          if (!route.type) {
             // Version 1.x compatibility.
             route.type = 'handler'
             if (route.path == 'ws') {
               route.type = 'websocket'
             }
           }
-          if(typeof route.online === "undefined") {
+          if (typeof route.online === "undefined") {
             // Version 1.x compatibility.
             route.online = true
           }
