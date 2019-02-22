@@ -8,7 +8,6 @@ const request = require('request');
 const MongoClient = require('mongodb').MongoClient;
 const debugF = require('debug');
 const dgram = require('dgram');
-const client = dgram.createSocket('udp4');
 const url = require('url');
 const signature = require('./includes/signature.js');
 const ExplorerClass = require('./includes/explorerClass.js');
@@ -59,6 +58,9 @@ if (!mControlCluster.isMaster) {
   setInterval(function() { updateRouteVariable()}, interval);
 }
 
+/**
+ * Apply access token if provided as a part of URL.
+ */
 function applyAccessToken(requestDetails) {
   if (requestDetails.url.indexOf('?') != -1) {
     let cutPosition = requestDetails.url.lastIndexOf('?');
@@ -77,6 +79,7 @@ function applyAccessToken(requestDetails) {
     }
   }
 }
+
 /**
  * Proxy GET requests.
  */
@@ -587,23 +590,23 @@ function getMinLoadedRouter(availableRoutes) {
 }
 
 function _request(getRequest, callback) {
-  let request = getRequest()
+  let requestOptions = getRequest()
   
-  if (request instanceof Error) {
-    return callback(request)
+  if (requestOptions instanceof Error) {
+    return callback(requestOptions)
   }
-  if (request === false) {
+  if (requestOptions === false) {
     return callback(false)
   }
-  request(request, function(error, response, body) {
+  request(requestOptions, function(error, response, body) {
     if (error) {
       debug.debug('_request Error received: %O', error);
-      debug.debug('_request Restart request: %O', request);
+      debug.debug('_request Restart request: %O', requestOptions);
       debug.debug('_request %s Data %O', route, jsonData);
       return _request(getRequest, callback);
     }
     
-    debug.debug('%s body: %s', request.uri, body);
+    debug.debug('%s body: %s', requestOptions.uri, body);
     return callback(null, response, body)
   })
 }
@@ -626,7 +629,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
     return callback(endpointTargets, null);
   }
 
-  HookCall(targetRequest, 'before', function(err, response, body){
+  HookCall(targetRequest, 'before', function(){
     // process request to endpoint
     let getEndpointRequest = function(){
       let endpointTargets = FindAllTargets(targetRequest, 'handler');
@@ -681,100 +684,76 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
 
       // process after hooks
       // HookCall requestDetails.headers and _buffer should contain response data.
+      let answerDetails = {
+        headers: response.headers,
+        _buffer: body
+      }
+      let targetAnswer = {
+        route: route,
+        path: path,
+        method: method,
+        jsonData: bodyJSON,
+        requestDetails: answerDetails
+      }
+      HookCall(targetAnswer, 'after', function(){
+        let body = false
+        // Double check updated _buffer after proxy.
+        try {
+          body = JSON.parse(answerDetails._buffer);
+        } catch (e) {
+          debug.debug('JSON.parse(body) Error received: %O', e);
+          return callback(new Error('Service respond is not JSON.'));
+        }
+        // prefix with base_URL all urls
+        if (method != 'OPTIONS') {
+          if (body.url) {
+            body.url = process.env.BASE_URL + body.url;
+          } else if (body.id) {
+            body.url = process.env.BASE_URL + route + '/' + body.id;
+          }
+        }
+        if (body instanceof Array) {
+          for (var i in body) {
+            if (body[i].url) {
+              body[i].url =  process.env.BASE_URL + body[i].url;
+            } else if (body[i].id) {
+              body[i].url = process.env.BASE_URL + route  + '/' + body[i].id;
+            }
+          }
+        }
+
+        let responseHeaders = {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
+          'Access-Control-Allow-Headers': 'content-type, signature, access_token,'
+            + ' token, Access-Token',
+          'Access-Control-Expose-Headers': 'x-total-count',
+        };
+        for (var i in answerDetails.headers) {
+          if (i.substring(0,1) == 'x') {
+            responseHeaders[i] = answerDetails.headers[i];
+          }
+        }
+
+        if (response.statusCode == 200) {
+          sendBroadcastMessage(router, method, requestDetails.url, body);
+        }
+        callback(null, {
+          code: response.statusCode,
+          answer: body,
+          headers: responseHeaders
+        });
+
+      })
     }
     _request(getEndpointRequest, callbackEndpointRequest)
     
-  })
-
-
-  FindTarget(targetRequest, 'handler', function(err, router) {
-    if (err) {
-      debug.debug('Route %s err %s', route, err.message);
-      return callback(err, null);
-    }
-
-    debug.log('Route %s result %O', route, router);
-    debug.debug('%s Request: %s %s', route, path, method);
-    debug.debug('%s Data %O', route, jsonData);
-    debug.debug('%s requestDetails %O', route, requestDetails);
-
-    var headers = {};
-    for (var i in requestDetails.headers) {
-      if (i != 'host') {
-        headers[i] = requestDetails.headers[i];
-      }
-    }
-
-    for (var i in router.matchVariables) {
-      headers['mfw-' + i] = router.matchVariables[i];
-    }
-
-    debug.debug('%s headers %O', route, headers);
-    request({
-      uri: router.url + path,
-      method: method,
-      headers: headers,
-      body: requestDetails._buffer
-    }, function(error, response, body) {
-
-      if (error) {
-        debug.debug('%s Error received: %s', route, error.message);
-        debug.debug('%s Restart request: %s %s %s', route, path, method);
-        debug.debug('%s Data %O', route, jsonData);
-        return proxyRequest(route, path, method, jsonData, requestDetails, callback);
-      }
-      try {
-        body = JSON.parse(body);
-      } catch (e) {
-        debug.debug('JSON.parse(body) Error received: %O', e);
-        return callback(new Error('Service respond is not JSON.'));
-      }
-      debug.debug('%s body: %O', route, body);
-
-      if (method != 'OPTIONS') {
-        if (body.url) {
-          body.url = process.env.BASE_URL + body.url;
-        } else if (body.id) {
-          body.url = process.env.BASE_URL + route + '/' + body.id;
-        }
-      }
-
-      if (body instanceof Array) {
-        for (var i in body) {
-          if (body[i].url) {
-            body[i].url =  process.env.BASE_URL + body[i].url;
-          } else if (body[i].id) {
-            body[i].url = process.env.BASE_URL + route  + '/' + body[i].id;
-          }
-        }
-      }
-      var responseHeaders = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
-        'Access-Control-Allow-Headers': 'content-type, signature, access_token,'
-          + ' token, Access-Token',
-        'Access-Control-Expose-Headers': 'x-total-count',
-      };
-      for (var i in response.headers) {
-        if (i.substring(0,1) == 'x') {
-          responseHeaders[i] = response.headers[i];
-        }
-      }
-
-      if (response.statusCode == 200) {
-        sendBroadcastMessage(router, method, requestDetails.url, body);
-      }
-      callback(null, {
-        code: response.statusCode,
-        answer: body,
-        headers: responseHeaders
-      });
-    });
   })
 }
 
 /**
  * Proxy request to backend server.
+ * deprecated. WS need to be replaced by boracast hook
  */
 function sendBroadcastMessage(router, method, path, message) {
   debug.debug('UDP broadcast %O %s %s %O', router, method, path, message);
@@ -814,6 +793,10 @@ function sendBroadcastMessage(router, method, path, message) {
   }
 }
 
+/**
+ * Send broadcast message to UDP client.
+ * deprecated. WS need to be replaced by boracast hook
+ */
 function sendBroadcastMessageToClient(bufferedMessage, URL) {
   let client = dgram.createSocket('udp4');
   client.send(bufferedMessage, URL.port, URL.hostname, function(err) {
