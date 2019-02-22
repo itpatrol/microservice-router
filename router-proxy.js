@@ -282,87 +282,110 @@ function matchRoute(targetRequest, routeItem) {
  */
 function HookCall(targetRequest, phase, callback) {
   
-  
+  let getHeaders = function(){
+    let headers = {};
+    for (var i in targetRequest.requestDetails.headers) {
+      if (i != 'host') {
+        headers[i] = targetRequest.requestDetails.headers[i];
+      }
+    }
+    for (var i in router.matchVariables) {
+      headers['mfw-' + i] = router.matchVariables[i];
+    }
+    headers['x-origin-url'] = targetRequest.route
+    headers['x-origin-method'] = targetRequest.method
+    headers['x-hook-phase'] = phase
+    debug.debug('%s headers %O', targetRequest.route, headers);
+    return headers;
+  }
   // send Broadcast
   let beforeBroadcastTargets = findHookTarget(targetRequest, phase, 'broadcast')
-  _request(function(){
-    if (beforeBroadcastTargets instanceof Error) {
-      return beforeBroadcastTargets
-    }
-    if (!beforeBroadcastTargets.length) {
-      return false
-    }
-    let router = beforeBroadcastTargets.pop()
-    debug.log('Notify route %s result %O', targetRequest.route, router);
+  if (beforeBroadcastTargets instanceof Array) {
+    let getBroadcastRequest = function(){
+      if (beforeBroadcastTargets instanceof Error) {
+        return beforeBroadcastTargets
+      }
+      if (!beforeBroadcastTargets.length) {
+        return false
+      }
+      let router = beforeBroadcastTargets.pop()
+      debug.log('Notify route %s result %O', targetRequest.route, router);
 
-    let headers = {};
-    for (var i in targetRequest.requestDetails.headers) {
-      if (i != 'host') {
-        headers[i] = targetRequest.requestDetails.headers[i];
+      return {
+        uri: router.url + targetRequest.path,
+        method: 'NOTIFY',
+        headers: getHeaders(),
+        body: targetRequest.requestDetails._buffer
       }
     }
-    for (var i in router.matchVariables) {
-      headers['mfw-' + i] = router.matchVariables[i];
+    let callbackBroadcastRequest = function(err, response, body){
+      // No action on broadcast hook.
+      if (err) {
+        debug.log('broadcast failed %O', err);
+      }
+      debug.log('broadcast sent');
+      // If more in queue left - send more
+      if (beforeBroadcastTargets.length) {
+        _request(getBroadcastRequest, callbackBroadcastRequest)
+      }
     }
+    _request(getBroadcastRequest, callbackBroadcastRequest)
+  }
 
-    headers['x-origin-method'] = targetRequest.method
-    debug.debug('%s headers %O', targetRequest.route, headers);
-    return {
-      uri: router.url + targetRequest.path,
-      method: 'NOTIFY',
-      headers: headers,
-      body: targetRequest.requestDetails._buffer
-    }
-  }, function(err, response, body){
-    // No action on broadcast hook.
-    if (err) {
-      debug.log('broadcast failed %O', err);
-    }
-    debug.log('broadcast sent');
-  })
   // send Notify
-  _request(function(){
-    let beforeNotifyTargets = findHookTarget(targetRequest, phase, 'notify')
-    if (beforeNotifyTargets instanceof Error) {
-      return beforeNotifyTargets
-    }
-    let router = false
-    if (beforeNotifyTargets.length == 1) {
-      router = beforeNotifyTargets.pop();
-    }
-    // TODO: add diferent strategy to choose one of the routes
-    router =  getMinLoadedRouter(beforeNotifyTargets);
-    debug.log('Notify route %s result %O', targetRequest.route, router);
-
-    let headers = {};
-    for (var i in targetRequest.requestDetails.headers) {
-      if (i != 'host') {
-        headers[i] = targetRequest.requestDetails.headers[i];
+  let beforeNotifyTargets = findHookTarget(targetRequest, phase, 'notify')
+  if (beforeNotifyTargets instanceof Array) {
+    let notifyGroups = []
+    for (let target of beforeNotifyTargets) {
+      if (target.group) {
+        if (notifyGroups.indexOf(target.group) != -1) {
+          notifyGroups.push(target.group)
+        }
       }
     }
-    for (var i in router.matchVariables) {
-      headers['mfw-' + i] = router.matchVariables[i];
-    }
+    notifyGroups.sort()
+    if (notifyGroups.length){
+      let currentNotifyGroup = notifyGroups.shift()
+      let getNotifyRequest = function(){
+        if (!currentNotifyGroup) {
+          return false
+        }
+        let beforeNotifyGroupTargets = findHookTarget(targetRequest, phase, 'notify', currentNotifyGroup)
+        if (beforeNotifyGroupTargets instanceof Error) {
+          return beforeNotifyGroupTargets
+        }
+        if (!beforeNotifyGroupTargets.length) {
+          return false
+        }
+        let router = beforeNotifyGroupTargets.pop()
+        debug.log('Notify route %s result %O', targetRequest.route, router);
 
-    headers['x-origin-method'] = targetRequest.method
-    debug.debug('%s headers %O', targetRequest.route, headers);
-    return {
-      uri: router.url + targetRequest.path,
-      method: 'NOTIFY',
-      headers: headers,
-      body: targetRequest.requestDetails._buffer
+        return {
+          uri: router.url + targetRequest.path,
+          method: 'NOTIFY',
+          headers: getHeaders(),
+          body: targetRequest.requestDetails._buffer
+        }
+      }
+      let callbackNotifyRequest = function(err, response, body) {
+        if (err) {
+          debug.log('notify failed %O', err);
+        }
+        debug.log('notify sent');
+        // If more groups left - send more
+        if (notifyGroups.length) {
+          currentNotifyGroup = notifyGroups.shift()
+          _request(getNotifyRequest, callbackNotifyRequest)
+        }
+      }
+      _request(getNotifyRequest, callbackNotifyRequest)
     }
-  }, function(err, response, body){
-    // No action on notify hook.
-    if (err) {
-      debug.log('notify failed %O', err);
-    }
-    debug.log('notify sent');
-  })
+  }
+
 
   // send proxy
   _request(function(){
-    let beforeProxyTargets = findHookTarget(targetRequest, phase, 'proxy')
+    let beforeProxyTargets = findHookTarget(targetRequest, phase, 'adapter')
     if (beforeProxyTargets instanceof Error) {
       return beforeProxyTargets
     }
@@ -373,21 +396,11 @@ function HookCall(targetRequest, phase, callback) {
     // TODO: add diferent strategy to choose one of the routes
     router =  getMinLoadedRouter(beforeNotifyTargets);
     debug.log('Notify route %s result %O', targetRequest.route, router);
-    let headers = {};
-    for (var i in targetRequest.requestDetails.headers) {
-      if (i != 'host') {
-        headers[i] = targetRequest.requestDetails.headers[i];
-      }
-    }
-    for (var i in router.matchVariables) {
-      headers['mfw-' + i] = router.matchVariables[i];
-    }
-    headers['x-origin-method'] = targetRequest.method
-    debug.debug('%s headers %O', targetRequest.route, headers);
+
     return {
       uri: router.url + targetRequest.path,
       method: 'NOTIFY',
-      headers: headers,
+      headers: getHeaders(),
       body: targetRequest.requestDetails._buffer
     }
   }, function(err, response, body){
@@ -402,7 +415,7 @@ function HookCall(targetRequest, phase, callback) {
 /**
  * Find all hook routes by stage.
  */
-function findHookTarget(targetRequest, phase, type){
+function findHookTarget(targetRequest, phase, type, group){
   let allHookTargets = findAllTargets(targetRequest, 'hook')
   if (allHookTargets instanceof Error) {
     return allHookTargets
@@ -413,7 +426,7 @@ function findHookTarget(targetRequest, phase, type){
     if (!target.hook || !target.hook.length) {
       continue
     }
-    for (let phase of target.phase) {
+    for (let hook of target.hook) {
       if (hook.phase !== phase) {
         continue
       }
@@ -422,20 +435,24 @@ function findHookTarget(targetRequest, phase, type){
       }
       let targetCopy = JSON.parse(JSON.stringify(target))
       delete targetCopy.hook
-      targetCopy.weight = hook.weight
+      if (hook.group) {
+        targetCopy.group = hook.group
+      } else {
+        targetCopy.group = '_default'
+      }
+
       finalHookTable.push(targetCopy)
     }
   }
-  if (finalHookTable.length) {
-    finalHookTable.sort(function(a, b){
-      if (a.weight < b.weight) {
-        return -1
-      }
-      if (a.weight > b.weight) {
-        return 1
-      }
-      return 0
+  if (typeof group !== "undefined") {
+    finalHookTable.filter(function(elem){
+      return elem.group == group
     })
+  }
+  if (!finalHookTable.length) {
+    debug.debug('Not found for %s', route);
+    debug.log('Hook instance %s not found', group);
+    return new Error('Hook instance not found');
   }
   return finalHookTable
 }
@@ -560,7 +577,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
 
   HookCall(targetRequest, 'before', function(err, response, body){
     if (!err) {
-      debug.debug('%s body: %O', route, body);
+      debug.debug('%s body: %s', route, body);
       let bodyJSON = false
       try {
         bodyJSON = JSON.parse(body);
@@ -570,9 +587,15 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       }
       if (bodyJSON) {
         // need to replace body data
-        
+        requestDetails._buffer = body
       }
       // need to set headers x-set-XXXXX
+      for (var i in response.headers) {
+        if (i.substring(0,5) == 'x-set-') {
+          let headerName = i.substr(6)
+          requestDetails.headers[headerName] = response.headers[i];
+        }
+      }
     }
 
     // process request to endpoint

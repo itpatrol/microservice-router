@@ -13,15 +13,19 @@
       "items": {
         "type": "object",
         "properties": {
-          "hook": {
+          "phase": {
             "type": "string",
             "enum": ["before", "after"],
             "required": true
           },
           "type": {
             "type": "string",
-            "enum": ["proxy", "notify", "broadcast"],
+            "enum": ["adapter", "notify", "broadcast"],
             "required": true
+          },
+          "group": {
+            "type": "string",
+            "description": "Group for notify and adapter. NOTIFY will be send one per group. Order is natural sorting."
           }
         }
       },
@@ -92,6 +96,10 @@
     "scope": {
       "type": "string",
       "description": "Scope to provide access by access token."
+    },
+    "online": {
+      "type": "boolean",
+      "description": "Is service online or offline. For CI/CD."
     },
     "path": {
       "type": "array",
