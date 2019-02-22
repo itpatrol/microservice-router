@@ -7,7 +7,7 @@ var pid;
 try {
   pidproxy = fs.readFileSync(process.env.PIDFILE + '.proxy').toString('utf8');
   pid = fs.readFileSync(process.env.PIDFILE).toString('utf8');
-}catch(e) {}
+} catch (e) {}
 
 console.log(JSON.stringify({
   'microservice-router:admin': {

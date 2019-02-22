@@ -65,11 +65,14 @@ if (mControlCluster.isMaster) {
  */
 function adminPOST(jsonData, requestDetails, callback) {
   // Version 1.x compatibility.
-  if(!jsonData.type) {
+  if (!jsonData.type) {
     jsonData.type = "handler"
   }
-  if(!jsonData.path == 'ws') {
+  if (jsonData.path === 'ws') {
     jsonData.type = "websocket"
+  }
+  if (!jsonData.online) {
+    jsonData.online = true
   }
   mservice.post(jsonData, requestDetails, callback)
 }

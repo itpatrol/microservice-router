@@ -37,10 +37,10 @@ function ExplorerClass(requestDetails, callback) {
     self.debug.explorer('services %O', services);
     if (!self.requestDetails.isSecure) {
       let accessToken = ''
-      if(self.requestDetails.headers.access_token) {
+      if (self.requestDetails.headers.access_token) {
         accessToken = self.requestDetails.headers.access_token;
       };
-      if(self.requestDetails.headers['access-token']) {
+      if (self.requestDetails.headers['access-token']) {
         accessToken = self.requestDetails.headers['access-token'];
       };
       if (services['auth']) {
@@ -54,7 +54,7 @@ function ExplorerClass(requestDetails, callback) {
             if (err) {
               return self.emit('done');
             }
-            if(!answer[0]) {
+            if (!answer[0]) {
               return self.emit('done');
             }
             self.accessTokenDetails = answer[0];
@@ -91,10 +91,10 @@ function ExplorerClass(requestDetails, callback) {
       });
     }
     let accessToken = ''
-    if(self.requestDetails.headers.access_token) {
+    if (self.requestDetails.headers.access_token) {
       accessToken = self.requestDetails.headers.access_token;
     };
-    if(self.requestDetails.headers['access-token']) {
+    if (self.requestDetails.headers['access-token']) {
       accessToken = self.requestDetails.headers['access-token'];
     };
 
@@ -155,7 +155,7 @@ ExplorerClass.prototype.processMapToHTML = function(map, isSecure, accessToken) 
     var serviceHTML = '';
     try {
       serviceHTML = dots.service(map[i])
-    } catch(e) {
+    } catch (e) {
       self.debug.explorer('Error on dot template error: %O service: %O', e, map[i]);
     }
     servicesHTML = servicesHTML + serviceHTML;
@@ -225,7 +225,7 @@ ExplorerClass.prototype.processMapToHTML = function(map, isSecure, accessToken) 
         'content-type': 'text/html'
       }
     });
-  } catch(e) {
+  } catch (e) {
     return self.callback(e);
   }
 }
