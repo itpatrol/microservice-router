@@ -486,6 +486,8 @@ function hookCall(targetRequest, phase, callback) {
  * Find all hook routes by stage.
  */
 function findHookTarget(targetRequest, phase, type, group){
+  debug.debug('Find all hooks route: %s phase: %s type: %s group: %s',
+    targetRequest.route, phase, type, group);
   let allHookTargets = findAllTargets(targetRequest, 'hook')
   if (allHookTargets instanceof Error) {
     return allHookTargets
@@ -549,10 +551,10 @@ function findAllTargets(targetRequest, type) {
       availableRoutes.push(routeItem);
     }
   }
-  debug.debug('Available routes type: %s route: %s availableRoutes: %s', type, route,
+  debug.debug('Available routes type: %s route: %s availableRoutes: %s', type, targetRequest.route,
     JSON.stringify(availableRoutes , null, 2));
   if (availableRoutes.length == 0) {
-    debug.debug('Not found for %s', route);
+    debug.debug('Not found for %s', targetRequest.route);
     return new Error('Endpoint not found');
   }
   return availableRoutes;
@@ -602,7 +604,6 @@ function _request(getRequest, callback) {
     if (error) {
       debug.debug('_request Error received: %O', error);
       debug.debug('_request Restart request: %O', requestOptions);
-      debug.debug('_request %s Data %O', route, jsonData);
       return _request(getRequest, callback);
     }
     
@@ -630,6 +631,8 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
   }
 
   hookCall(targetRequest, 'before', function(){
+    //used later in sendBroadcastMessage
+    let router = false
     // process request to endpoint
     let getEndpointRequest = function(){
       let endpointTargets = findAllTargets(targetRequest, 'handler');
@@ -639,7 +642,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       if (!endpointTargets.length) {
         return false
       }
-      let router = false
+      
       if (endpointTargets.length == 1) {
         router = endpointTargets.pop();
       } else {
