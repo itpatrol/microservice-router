@@ -277,17 +277,183 @@ function matchRoute(targetRequest, routeItem) {
   }
   return true;
 }
+/**
+ * Process before Hooks.
+ */
+function HookCall(targetRequest, phase, callback) {
+  
+  
+  // send Broadcast
+  let beforeBroadcastTargets = findHookTarget(targetRequest, phase, 'broadcast')
+  _request(function(){
+    if(beforeBroadcastTargets instanceof Error) {
+      return beforeBroadcastTargets
+    }
+    if(!beforeBroadcastTargets.length) {
+      return false
+    }
+    let router = beforeBroadcastTargets.pop()
+    debug.log('Notify route %s result %O', targetRequest.route, router);
+
+    let headers = {};
+    for (var i in targetRequest.requestDetails.headers) {
+      if (i != 'host') {
+        headers[i] = targetRequest.requestDetails.headers[i];
+      }
+    }
+    for (var i in router.matchVariables) {
+      headers['mfw-' + i] = router.matchVariables[i];
+    }
+
+    headers['x-origin-method'] = targetRequest.method
+    debug.debug('%s headers %O', targetRequest.route, headers);
+    return {
+      uri: router.url + targetRequest.path,
+      method: 'NOTIFY',
+      headers: headers,
+      body: targetRequest.requestDetails._buffer
+    }
+  }, function(err, response, body){
+    // No action on broadcast hook.
+    if(err) {
+      debug.log('broadcast failed %O', err);
+    }
+    debug.log('broadcast sent');
+  })
+  // send Notify
+  _request(function(){
+    let beforeNotifyTargets = findHookTarget(targetRequest, phase, 'notify')
+    if(beforeNotifyTargets instanceof Error) {
+      return beforeNotifyTargets
+    }
+    let router = false
+    if (beforeNotifyTargets.length == 1) {
+      router = beforeNotifyTargets.pop();
+    }
+    // TODO: add diferent strategy to choose one of the routes
+    router =  getMinLoadedRouter(beforeNotifyTargets);
+    debug.log('Notify route %s result %O', targetRequest.route, router);
+
+    let headers = {};
+    for (var i in targetRequest.requestDetails.headers) {
+      if (i != 'host') {
+        headers[i] = targetRequest.requestDetails.headers[i];
+      }
+    }
+    for (var i in router.matchVariables) {
+      headers['mfw-' + i] = router.matchVariables[i];
+    }
+
+    headers['x-origin-method'] = targetRequest.method
+    debug.debug('%s headers %O', targetRequest.route, headers);
+    return {
+      uri: router.url + targetRequest.path,
+      method: 'NOTIFY',
+      headers: headers,
+      body: targetRequest.requestDetails._buffer
+    }
+  }, function(err, response, body){
+    // No action on notify hook.
+    if(err) {
+      debug.log('notify failed %O', err);
+    }
+    debug.log('notify sent');
+  })
+
+  // send proxy
+  _request(function(){
+    let beforeProxyTargets = findHookTarget(targetRequest, phase, 'proxy')
+    if(beforeProxyTargets instanceof Error) {
+      return beforeProxyTargets
+    }
+    let router = false
+    if (beforeNotifyTargets.length == 1) {
+      router = beforeNotifyTargets.pop();
+    }
+    // TODO: add diferent strategy to choose one of the routes
+    router =  getMinLoadedRouter(beforeNotifyTargets);
+    debug.log('Notify route %s result %O', targetRequest.route, router);
+    let headers = {};
+    for (var i in targetRequest.requestDetails.headers) {
+      if (i != 'host') {
+        headers[i] = targetRequest.requestDetails.headers[i];
+      }
+    }
+    for (var i in router.matchVariables) {
+      headers['mfw-' + i] = router.matchVariables[i];
+    }
+    headers['x-origin-method'] = targetRequest.method
+    debug.debug('%s headers %O', targetRequest.route, headers);
+    return {
+      uri: router.url + targetRequest.path,
+      method: 'NOTIFY',
+      headers: headers,
+      body: targetRequest.requestDetails._buffer
+    }
+  }, function(err, response, body){
+    if(err) {
+      debug.log('proxy failed %O', err);
+      return callback(err)
+    }
+    callback(null, response, body)
+  });
+}
 
 /**
- * Find target URL.
+ * Find all hook routes by stage.
  */
-function FindTarget(targetRequest, type, callback) {
-  debug.debug('Find route %s', targetRequest.route);
+function findHookTarget(targetRequest, phase, type){
+  let allHookTargets = findAllTargets(targetRequest, 'hook')
+  if(allHookTargets instanceof Error) {
+    return allHookTargets
+  }
+  let finalHookTable = []
+  for(let target of allHookTargets){
+    // skip hooks with no hook properties
+    if(!target.hook || !target.hook.length) {
+      continue
+    }
+    for(let phase of target.phase) {
+      if(hook.phase !== phase) {
+        continue
+      }
+      if(hook.type !== type) {
+        continue
+      }
+      let targetCopy = JSON.parse(JSON.stringify(target))
+      delete targetCopy.hook
+      targetCopy.weight = hook.weight
+      finalHookTable.push(targetCopy)
+    }
+  }
+  if(finalHookTable.length) {
+    finalHookTable.sort(function(a, b){
+      if(a.weight < b.weight) {
+        return -1
+      }
+      if(a.weight > b.weight) {
+        return 1
+      }
+      return 0
+    })
+  }
+  return finalHookTable
+}
+
+/**
+ * Find all routes.
+ */
+function findAllTargets(targetRequest, type) {
+  debug.debug('Find all routes %s', targetRequest.route);
 
   var availableRoutes = [];
   for (let i in globalServices) {
     if(globalServices[i].type && globalServices[i].type.toLowerCase() !== type) {
-      continue;
+      continue
+    }
+    // For easy deployment when service need to stop receiving new requests.
+    if(!globalServices[i].online) {
+      continue
     }
     // Making copy of the router.
     let routeItem = JSON.parse(JSON.stringify(globalServices[i]));
@@ -300,12 +466,25 @@ function FindTarget(targetRequest, type, callback) {
     JSON.stringify(availableRoutes , null, 2));
   if (availableRoutes.length == 0) {
     debug.debug('Not found for %s', route);
-    return callback(new Error('Endpoint not found'), null);
+    return new Error('Endpoint not found');
+  }
+  return availableRoutes;
+}
+/**
+ * Find target URL.
+ */
+function findTarget(targetRequest) {
+  debug.debug('Find route %s', targetRequest.route);
+
+  let availableRoutes = FindAllTargets(targetRequest, 'handler');
+  if(availableRoutes instanceof Error) {
+    return availableRoutes
   }
   if (availableRoutes.length == 1) {
-    return callback(null, availableRoutes.pop());
+    return availableRoutes.pop();
   }
-  return callback(null, getMinLoadedRouter(availableRoutes));
+  // TODO: add diferent strategy to choose one of the routes
+  return getMinLoadedRouter(availableRoutes);
 }
 
 /**
@@ -339,6 +518,29 @@ function getMinLoadedRouter(availableRoutes) {
   return minRouter;
 }
 
+function _request(getRequest, callback) {
+  let request = getRequest()
+  
+  if(request instanceof Error) {
+    return callback(request)
+  }
+  if(request === false) {
+    return callback(false)
+  }
+  request(request, function(error, response, body) {
+    let body = false
+    if (error) {
+      debug.debug('_request Error received: %O', error);
+      debug.debug('_request Restart request: %O', request);
+      debug.debug('_request %s Data %O', route, jsonData);
+      return _request(getRequest, callback);
+    }
+    
+    debug.debug('%s body: %s', request.uri, body);
+    return callback(null, response, body)
+  })
+}
+
 /**
  * Proxy request to backend server.
  */
@@ -351,6 +553,35 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
     jsonData: jsonData,
     requestDetails: requestDetails
   }
+  let endPointTarget = findTarget(targetRequest)
+  if(endPointTarget instanceof Error) {
+    debug.debug('Route %s err %O', route, endPointTarget)
+    return callback(endPointTarget, null)
+  }
+
+  HookCall(targetRequest, 'before', function(err, response, body){
+    if(!err) {
+      debug.debug('%s body: %O', route, body);
+      let bodyJSON = false
+      try {
+        bodyJSON = JSON.parse(body);
+      } catch(e) {
+        debug.debug('JSON.parse(body) Error received: %O', e);
+        debug.log('Notify before reseived not json')
+      }
+      if(bodyJSON) {
+        // need to replace body data
+        
+      }
+      // need to set headers x-set-XXXXX
+    }
+
+    // process request to endpoint
+
+    // process after hooks
+  })
+
+
   FindTarget(targetRequest, 'handler', function(err, router) {
     if (err) {
       debug.debug('Route %s err %s', route, err.message);
@@ -528,6 +759,10 @@ function updateRouteVariable() {
             if (route.path == 'ws') {
               route.type = 'websocket'
             }
+          }
+          if(typeof route.online === "undefined") {
+            // Version 1.x compatibility.
+            route.online = true
           }
           newServices.push(route);
         }
