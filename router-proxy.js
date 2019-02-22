@@ -287,7 +287,7 @@ function matchRoute(targetRequest, routeItem) {
 /**
  * Process before Hooks.
  */
-function HookCall(targetRequest, phase, callback) {
+function hookCall(targetRequest, phase, callback) {
   
   let getHeaders = function(){
     let headers = {};
@@ -623,16 +623,16 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
     jsonData: jsonData,
     requestDetails: requestDetails
   }
-  let endpointTargets = FindAllTargets(targetRequest, 'handler');
+  let endpointTargets = findAllTargets(targetRequest, 'handler');
   if (endpointTargets instanceof Error) {
     debug.debug('Route %s err %O', route, endpointTargets);
     return callback(endpointTargets, null);
   }
 
-  HookCall(targetRequest, 'before', function(){
+  hookCall(targetRequest, 'before', function(){
     // process request to endpoint
     let getEndpointRequest = function(){
-      let endpointTargets = FindAllTargets(targetRequest, 'handler');
+      let endpointTargets = findAllTargets(targetRequest, 'handler');
       if (endpointTargets instanceof Error) {
         return endpointTargets
       }
@@ -683,7 +683,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       debug.debug('%s body: %O', route, bodyJSON);
 
       // process after hooks
-      // HookCall requestDetails.headers and _buffer should contain response data.
+      // hookCall requestDetails.headers and _buffer should contain response data.
       let answerDetails = {
         headers: response.headers,
         _buffer: body
@@ -695,7 +695,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         jsonData: bodyJSON,
         requestDetails: answerDetails
       }
-      HookCall(targetAnswer, 'after', function(){
+      hookCall(targetAnswer, 'after', function(){
         let body = false
         // Double check updated _buffer after proxy.
         try {
