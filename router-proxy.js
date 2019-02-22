@@ -445,14 +445,35 @@ function HookCall(targetRequest, phase, callback) {
   let callbackAdapterRequest = function(err, response, body) {
     if (err) {
       debug.log('adapter failed %O', err);
+    } else {
+      debug.log('adapter processed');
+      let bodyJSON = false
+      try {
+        bodyJSON = JSON.parse(body);
+      } catch (e) {
+        debug.debug('JSON.parse(body) Error received: %O', e);
+        debug.log('Notify before reseived not json')
+      }
+      if (bodyJSON) {
+        // need to replace body data
+        targetRequest.requestDetails._buffer = body
+      }
+      // need to set headers x-set-XXXXX
+      for (var i in response.headers) {
+        if (i.substring(0,5) == 'x-set-') {
+          let headerName = i.substr(6)
+          targetRequest.requestDetails.headers[headerName] = response.headers[i];
+        }
+      }
     }
-    debug.log('adapter processed');
+    
     // If more groups left - send more
     if (adapterGroups.length) {
       currentAdapterGroup = adapterGroups.shift()
-      _request(getAdapterRequest, callbackAdapterRequest)
+      return _request(getAdapterRequest, callbackAdapterRequest)
     }
     // return back via callback
+    callback()
   }
   _request(getAdapterRequest, callbackAdapterRequest)
 
@@ -533,22 +554,6 @@ function findAllTargets(targetRequest, type) {
   }
   return availableRoutes;
 }
-/**
- * Find target URL.
- */
-function findTarget(targetRequest) {
-  debug.debug('Find route %s', targetRequest.route);
-
-  let availableRoutes = FindAllTargets(targetRequest, 'handler');
-  if (availableRoutes instanceof Error) {
-    return availableRoutes
-  }
-  if (availableRoutes.length == 1) {
-    return availableRoutes.pop();
-  }
-  // TODO: add diferent strategy to choose one of the routes
-  return getMinLoadedRouter(availableRoutes);
-}
 
 /**
  * Get Router with minimum CPU used.
@@ -615,38 +620,70 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
     jsonData: jsonData,
     requestDetails: requestDetails
   }
-  let endPointTarget = findTarget(targetRequest)
-  if (endPointTarget instanceof Error) {
-    debug.debug('Route %s err %O', route, endPointTarget)
-    return callback(endPointTarget, null)
+  let endpointTargets = FindAllTargets(targetRequest, 'handler');
+  if (endpointTargets instanceof Error) {
+    debug.debug('Route %s err %O', route, endpointTargets);
+    return callback(endpointTargets, null);
   }
 
   HookCall(targetRequest, 'before', function(err, response, body){
-    if (!err) {
-      debug.debug('%s body: %s', route, body);
+    // process request to endpoint
+    let getEndpointRequest = function(){
+      let endpointTargets = FindAllTargets(targetRequest, 'handler');
+      if (endpointTargets instanceof Error) {
+        return endpointTargets
+      }
+      if (!endpointTargets.length) {
+        return false
+      }
+      let router = false
+      if (endpointTargets.length == 1) {
+        router = endpointTargets.pop();
+      } else {
+        // TODO: add diferent strategy to choose one of the routes
+        router =  getMinLoadedRouter(endpointTargets);
+      }
+      debug.log('Endpoint route %s result %O', route, router);
+      let headers = {};
+      let i;
+      for (i in requestDetails.headers) {
+        if (i != 'host') {
+          headers[i] = requestDetails.headers[i];
+        }
+      }
+
+      for (i in router.matchVariables) {
+        headers['mfw-' + i] = router.matchVariables[i];
+      }
+      return {
+        uri: router.url + path,
+        method: method,
+        headers: headers,
+        body: requestDetails._buffer
+      }
+    }
+    let callbackEndpointRequest = function(err, response, body){
+      if (err) {
+        debug.log('endpoint failed %O', err);
+        if (err !== false) {
+          return callback(err, null)
+        }
+        return callback(new Error('Endpoint not found'), null)
+      }
       let bodyJSON = false
       try {
         bodyJSON = JSON.parse(body);
       } catch (e) {
         debug.debug('JSON.parse(body) Error received: %O', e);
-        debug.log('Notify before reseived not json')
+        return callback(new Error('Service respond is not JSON.'));
       }
-      if (bodyJSON) {
-        // need to replace body data
-        requestDetails._buffer = body
-      }
-      // need to set headers x-set-XXXXX
-      for (var i in response.headers) {
-        if (i.substring(0,5) == 'x-set-') {
-          let headerName = i.substr(6)
-          requestDetails.headers[headerName] = response.headers[i];
-        }
-      }
+      debug.debug('%s body: %O', route, bodyJSON);
+
+      // process after hooks
+      // HookCall requestDetails.headers and _buffer should contain response data.
     }
-
-    // process request to endpoint
-
-    // process after hooks
+    _request(getEndpointRequest, callbackEndpointRequest)
+    
   })
 
 
