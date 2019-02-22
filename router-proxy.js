@@ -223,21 +223,31 @@ function checkConditions(conditions, requestDetails, jsonData) {
 function matchRoute(targetRequest, routeItem) {
   let routeItems = targetRequest.route.split('/');
 
+  
+  if(routeItem.path && routeItem.path.length == 1 && routeItem.path[0] == '*') {
+    if(routeItem.conditions) {
+      if(!checkConditions(routeItem.conditions, targetRequest.requestDetails, targetRequest.jsonData)) {
+        return false
+      }
+    }
+    return true
+  }
+  // Check path and if match, set routeItem.matchVariables with values.
   let checkPath = function(paths){
-    for (var i in paths) {
+    for (let path of paths) {
       // If route qual saved path
-      if (paths[i] == targetRequest.route) {
+      if (path == targetRequest.route) {
         return true;
       }
   
       // If routeItems.length == 1, and did not match
       if (routeItems.length == 1) {
-        if (paths[i] != targetRequest.route) {
+        if (path != targetRequest.route) {
           continue;
         }
       }
   
-      var pathItems = paths[i].split('/');
+      var pathItems = path.split('/');
       if (pathItems.length != routeItems.length) {
         continue;
       }
@@ -276,10 +286,7 @@ function FindTarget(targetRequest, type, callback) {
 
   var availableRoutes = [];
   for (let i in globalServices) {
-    // Version 1.x compatibility. 
-    // If no type provided we assume it's "handler"
-    if(globalServices[i].type && globalServices[i].type.toLowerCase() != 'handler') {
-      // skip if not "handler" router.
+    if(globalServices[i].type && globalServices[i].type.toLowerCase() !== type) {
       continue;
     }
     // Making copy of the router.
@@ -289,7 +296,8 @@ function FindTarget(targetRequest, type, callback) {
       availableRoutes.push(routeItem);
     }
   }
-  debug.debug('Available routes for %s %s', route, JSON.stringify(availableRoutes , null, 2));
+  debug.debug('Available routes type: %s route: %s availableRoutes: %s', type, route,
+    JSON.stringify(availableRoutes , null, 2));
   if (availableRoutes.length == 0) {
     debug.debug('Not found for %s', route);
     return callback(new Error('Endpoint not found'), null);
@@ -343,7 +351,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
     jsonData: jsonData,
     requestDetails: requestDetails
   }
-  FindTarget(targetRequest, function(err, router) {
+  FindTarget(targetRequest, 'handler', function(err, router) {
     if (err) {
       debug.debug('Route %s err %s', route, err.message);
       return callback(err, null);
