@@ -154,6 +154,57 @@ function ProxyRequestOPTIONS(jsonData, requestDetails, callbacks, callback) {
   proxyRequest(route, path, 'OPTIONS', jsonData, requestDetails, callback);
 }
 /**
+ * Check Conditions for request.
+ */
+function checkConditions(conditions, requestDetails, jsonData) {
+  if(conditions.headers && conditions.headers.length) {
+    for(let header of conditions.headers ) {
+      if(!requestDetails.headers[header.name]) {
+        return false
+      }
+      let receivedHeaderValue = requestDetails.headers[header.name]
+      if(header.isRegex) {
+        let pattern = new RegExp(header.value, "i")
+        if(!pattern.test(receivedHeaderValue)) {
+          return false
+        }
+      } else {
+        if(receivedHeaderValue !== header.value) {
+          return false
+        }
+      }
+    }
+  }
+  // check methods
+  if(conditions.methods && conditions.methods.length) {
+    if(conditions.methods.indexOf(targetRequest.method) == -1) {
+      return false;
+    }
+  }
+  // check payload
+  if(conditions.payload && conditions.payload.length
+    && jsonData) {
+    for(let payload of conditions.payload ) {
+      if(!jsonData[payload.name]) {
+        return false
+      }
+      let receivedPayloadValue = jsonData[payload.name]
+      if(header.isRegex) {
+        let pattern = new RegExp(payload.value, "i")
+        if(!pattern.test(receivedPayloadValue)) {
+          return false
+        }
+      } else {
+        if(receivedPayloadValue !== payload.value) {
+          return false
+        }
+      }
+    }
+  }
+  return true
+}
+
+/**
  * Compare route to router.path items.
  */
 function matchRoute(targetRequest, routeItem) {
@@ -193,60 +244,15 @@ function matchRoute(targetRequest, routeItem) {
       }
     }
   }
-
-  if(checkPath(routeItem.path)) {
-    if(routeItem.conditions) {
-      // check headers
-      if(routeItem.conditions.headers && routeItem.conditions.headers.length) {
-        for(let header of routeItem.conditions.headers ) {
-          if(!targetRequest.requestDetails.headers[header.name]) {
-            return false
-          }
-          let receivedHeaderValue = targetRequest.requestDetails.headers[header.name]
-          if(header.isRegex) {
-            let pattern = new RegExp(header.value, "i")
-            if(!pattern.test(receivedHeaderValue)) {
-              return false
-            }
-          } else {
-            if(receivedHeaderValue !== header.value) {
-              return false
-            }
-          }
-        }
-      }
-      // check methods
-      if(routeItem.conditions.methods && routeItem.conditions.methods.length) {
-        if(routeItem.conditions.methods.indexOf(targetRequest.method) == -1) {
-          return false;
-        }
-      }
-      // check payload
-      if(routeItem.conditions.payload && routeItem.conditions.payload.length
-        && targetRequest.jsonData) {
-        for(let payload of routeItem.conditions.payload ) {
-          if(!targetRequest.jsonData[payload.name]) {
-            return false
-          }
-          let receivedPayloadValue = targetRequest.jsonData[payload.name]
-          if(header.isRegex) {
-            let pattern = new RegExp(payload.value, "i")
-            if(!pattern.test(receivedPayloadValue)) {
-              return false
-            }
-          } else {
-            if(receivedPayloadValue !== payload.value) {
-              return false
-            }
-          }
-        }
-      }
-    }
-    return true;
+  if(!checkPath(routeItem.path)) {
+    return false
   }
-  
-
-  return false;
+  if(routeItem.conditions) {
+    if(!checkConditions(routeItem.conditions, targetRequest.requestDetails, targetRequest.jsonData)) {
+      return false
+    }
+  }
+  return true;
 }
 
 /**
