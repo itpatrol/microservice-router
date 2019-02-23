@@ -226,7 +226,7 @@ function checkConditions(conditions, requestDetails, jsonData) {
   }
   // check methods
   if (conditions.methods && conditions.methods.length) {
-    if (conditions.methods.indexOf(targetRequest.method) == -1) {
+    if (conditions.methods.indexOf(requestDetails.method) == -1) {
       return false;
     }
   }
@@ -370,7 +370,7 @@ function hookCall(targetRequest, phase, callback) {
       return {
         uri: router.url + targetRequest.path,
         method: 'NOTIFY',
-        headers: getHeaders(router, 'broadcast'),
+        headers: headers,
         body: targetRequest.requestDetails._buffer
       }
     }
@@ -434,7 +434,7 @@ function hookCall(targetRequest, phase, callback) {
         return {
           uri: router.url + targetRequest.path,
           method: 'NOTIFY',
-          headers: getHeaders(router, 'notify'),
+          headers: headers,
           body: targetRequest.requestDetails._buffer
         }
       }
@@ -513,42 +513,52 @@ function hookCall(targetRequest, phase, callback) {
     }
   }
   let callbackAdapterRequest = function(err, response, body) {
-    if (err) {
-      debug.log('adapter failed %O', err);
-    } else {
-      if (response.statusCode == 200) {
-        debug.log('adapter processed');
-        let bodyJSON = false
-        try {
-          bodyJSON = JSON.parse(body);
-        } catch (e) {
-          debug.debug('JSON.parse(body) Error received: %O', e);
-          debug.log('Notify before reseived not json')
-        }
-        if (bodyJSON) {
-          // need to replace body data
-          targetRequest.requestDetails._buffer = body
-        }
-        // need to set headers x-set-XXXXX
-        debug.debug('Adapter Headers received: %O code: %s', response.headers, response.statusCode);
+    let headerStatusName = 'x-hook-adapter-status-' + currentAdapterGroup + '-' + phase
+    if (err || response.statusCode != 200) {
+      if (err) {
+        debug.log('adapter failed %O', err);
+        // TODO status header for adapter
+        targetRequest.requestDetails.headers[headerStatusName] = 'error: ' + err.message
+      } else {
+        debug.log('Adapter failed with code: %s body: %s', response.statusCode, body)
         for (var i in response.headers) {
           if (i.substring(0,6) == 'x-set-') {
             let headerName = i.substr(6)
             targetRequest.requestDetails.headers[headerName] = response.headers[i];
           }
         }
-        if (phase == 'before') {
-          delete targetRequest.requestDetails.headers['content-length']
-          // resign it
-          if (targetRequest.requestDetails.headers.signature) {
-            targetRequest.requestDetails.headers.signature = 'sha256=' 
-            + signature('sha256',
-              targetRequest.requestDetails._buffer,
-              targetRequest.endpoint.secureKey);
-          }
+      }
+      
+    } else {
+      debug.log('adapter processed');
+      let bodyJSON = false
+      try {
+        bodyJSON = JSON.parse(body);
+      } catch (e) {
+        debug.debug('JSON.parse(body) Error received: %O', e);
+        debug.log('Notify before reseived not json')
+      }
+      if (bodyJSON) {
+        // need to replace body data
+        targetRequest.requestDetails._buffer = body
+      }
+      // need to set headers x-set-XXXXX
+      debug.debug('Adapter Headers received: %O code: %s', response.headers, response.statusCode);
+      for (var i in response.headers) {
+        if (i.substring(0,6) == 'x-set-') {
+          let headerName = i.substr(6)
+          targetRequest.requestDetails.headers[headerName] = response.headers[i];
         }
-      } else {
-        debug.log('Adapter failed with code: %s body: %s', response.statusCode, body)
+      }
+      if (phase == 'before') {
+        delete targetRequest.requestDetails.headers['content-length']
+        // resign it
+        if (targetRequest.requestDetails.headers.signature) {
+          targetRequest.requestDetails.headers.signature = 'sha256=' 
+          + signature('sha256',
+            targetRequest.requestDetails._buffer,
+            targetRequest.endpoint.secureKey);
+        }
       }
     }
     
@@ -682,8 +692,15 @@ function _request(getRequest, callback) {
   if (requestOptions === false) {
     return callback(false)
   }
+  
+  // Validate URI 
+  let uri = url.parse(requestOptions.uri);
+  if (!(uri.host || (uri.hostname && uri.port)) && !uri.isUnix) {
+    return callback(new Error('Invalid URI' + requestOptions.uri))
+  }
   request(requestOptions, function(error, response, body) {
     if (error) {
+      // TODO add limit to re send
       debug.debug('_request Error received: %O', error);
       debug.debug('_request Restart request: %O', requestOptions);
       return _request(getRequest, callback);
@@ -759,8 +776,10 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       if (err) {
         debug.log('endpoint failed %O', err);
         if (err !== false) {
+          // TODO call after hooks
           return callback(err, null)
         }
+        // TODO call after hooks
         return callback(new Error('Endpoint not found'), null)
       }
       let bodyJSON = false
@@ -776,7 +795,8 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       // hookCall requestDetails.headers and _buffer should contain response data.
       let answerDetails = {
         headers: response.headers,
-        _buffer: body
+        _buffer: body,
+        method: method
       }
       let targetAnswer = {
         route: route,
