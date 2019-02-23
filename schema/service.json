@@ -79,7 +79,7 @@
                 "required": true
               },
               "value": {
-                "type": "string",
+                "type": ["string", "boolean", "number"],
                 "description": "Field value",
                 "required": true
               },

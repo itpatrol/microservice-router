@@ -171,10 +171,41 @@ function ProxyRequestOPTIONS(jsonData, requestDetails, callbacks, callback) {
   }
   proxyRequest(route, path, 'OPTIONS', jsonData, requestDetails, callback);
 }
+
+/**
+ * Source: https://gist.github.com/jasonrhodes/2321581
+ * A function to take a string written in dot notation style, and use it to
+ * find a nested object property inside of an object.
+ *
+ * Useful in a plugin or module that accepts a JSON array of objects, but
+ * you want to let the user specify where to find various bits of data
+ * inside of each custom object instead of forcing a standardized
+ * property list.
+ *
+ * @param String nested A dot notation style parameter reference (ie "urls.small")
+ * @param Object object (optional) The object to search
+ *
+ * @return the value of the property in question
+ */
+function getProperty( propertyName, object ) {
+  let parts = propertyName.split( "." ),
+      length = parts.length,
+      i,
+      property = object || this;
+  for ( i = 0; i < length; i++ ) {
+    if (!property[parts[i]]) {
+      return new Error('Property Does not exists')
+    }
+    property = property[parts[i]];
+  }
+  return property;
+}
 /**
  * Check Conditions for request.
  */
 function checkConditions(conditions, requestDetails, jsonData) {
+  debug.debug('checkConditions %O requestDetails: %O json: %O', conditions,
+  requestDetails, jsonData)
   if (conditions.headers && conditions.headers.length) {
     for (let header of conditions.headers ) {
       if (!requestDetails.headers[header.name]) {
@@ -203,11 +234,12 @@ function checkConditions(conditions, requestDetails, jsonData) {
   if (conditions.payload && conditions.payload.length
     && jsonData) {
     for (let payload of conditions.payload ) {
-      if (!jsonData[payload.name]) {
+      
+      let receivedPayloadValue = getProperty(payload.name, jsonData)
+      if (receivedPayloadValue instanceof Error) {
         return false
       }
-      let receivedPayloadValue = jsonData[payload.name]
-      if (header.isRegex) {
+      if (payload.isRegex) {
         let pattern = new RegExp(payload.value, "i")
         if (!pattern.test(receivedPayloadValue)) {
           return false
@@ -284,17 +316,26 @@ function matchRoute(targetRequest, routeItem) {
   }
   return true;
 }
+
 /**
  * Process before Hooks.
  */
 function hookCall(targetRequest, phase, callback) {
   
-  let getHeaders = function(){
+  let getHeaders = function(router, hookType){
     let headers = {};
+    let skipHeaders = [
+      'host',
+      'content-type',
+      'date',
+      'connection',
+      'transfer-encoding'
+    ]
     for (var i in targetRequest.requestDetails.headers) {
-      if (i != 'host') {
-        headers[i] = targetRequest.requestDetails.headers[i];
+      if (skipHeaders.indexOf(i) != -1) {
+        continue
       }
+      headers[i] = targetRequest.requestDetails.headers[i];
     }
     for (var i in router.matchVariables) {
       headers['mfw-' + i] = router.matchVariables[i];
@@ -302,11 +343,14 @@ function hookCall(targetRequest, phase, callback) {
     headers['x-origin-url'] = targetRequest.route
     headers['x-origin-method'] = targetRequest.method
     headers['x-hook-phase'] = phase
+    headers['x-hook-type'] = hookType
+    headers['x-endpoint-scope'] = targetRequest.endpoint.scope
     debug.debug('%s headers %O', targetRequest.route, headers);
     return headers;
   }
   // send Broadcast
   let broadcastTargets = findHookTarget(targetRequest, phase, 'broadcast')
+  debug.debug('Bradcast: Phase %s for %s result: %O', phase, targetRequest.route, broadcastTargets);
   if (broadcastTargets instanceof Array) {
     let getBroadcastRequest = function(){
       if (broadcastTargets instanceof Error) {
@@ -317,11 +361,16 @@ function hookCall(targetRequest, phase, callback) {
       }
       let router = broadcastTargets.pop()
       debug.log('Notify route %s result %O', targetRequest.route, router);
-
+      let headers = getHeaders(router, 'broadcast')
+      // Sign request for hook
+      headers['x-hook-signature'] = 'sha256=' 
+      + signature('sha256',
+        targetRequest.requestDetails._buffer,
+        router.secureKey);
       return {
         uri: router.url + targetRequest.path,
         method: 'NOTIFY',
-        headers: getHeaders(),
+        headers: getHeaders(router, 'broadcast'),
         body: targetRequest.requestDetails._buffer
       }
     }
@@ -341,16 +390,18 @@ function hookCall(targetRequest, phase, callback) {
 
   // send Notify
   let notifyTargets = findHookTarget(targetRequest, phase, 'notify')
+  debug.debug('Notify: Phase %s for %s result: %O', phase, targetRequest.route, notifyTargets);
   if (notifyTargets instanceof Array) {
     let notifyGroups = []
     for (let target of notifyTargets) {
       if (target.group) {
-        if (notifyGroups.indexOf(target.group) != -1) {
+        if (notifyGroups.indexOf(target.group) == -1) {
           notifyGroups.push(target.group)
         }
       }
     }
     notifyGroups.sort()
+    debug.debug('notify Groups %O', notifyGroups);
     if (notifyGroups.length){
       let currentNotifyGroup = notifyGroups.shift()
       let getNotifyRequest = function(){
@@ -358,6 +409,7 @@ function hookCall(targetRequest, phase, callback) {
           return false
         }
         let notifyGroupTargets = findHookTarget(targetRequest, phase, 'notify', currentNotifyGroup)
+        debug.debug('Notify: Phase %s result: %O', phase, notifyGroupTargets);
         if (notifyGroupTargets instanceof Error) {
           return notifyGroupTargets
         }
@@ -372,11 +424,17 @@ function hookCall(targetRequest, phase, callback) {
           router =  getMinLoadedRouter(notifyGroupTargets);
         }
         debug.log('Notify route %s result %O', targetRequest.route, router);
-
+        let headers = getHeaders(router, 'notify')
+        headers['x-hook-group'] = currentNotifyGroup
+        // Sign request for hook
+        headers['x-hook-signature'] = 'sha256=' 
+        + signature('sha256',
+          targetRequest.requestDetails._buffer,
+          router.secureKey);
         return {
           uri: router.url + targetRequest.path,
           method: 'NOTIFY',
-          headers: getHeaders(),
+          headers: getHeaders(router, 'notify'),
           body: targetRequest.requestDetails._buffer
         }
       }
@@ -398,22 +456,26 @@ function hookCall(targetRequest, phase, callback) {
 
   // send adapter
   let adapterTargets = findHookTarget(targetRequest, phase, 'adapter')
+  debug.debug('Adapter: Phase %s for %s result: %O', phase, targetRequest.route, adapterTargets);
   if (adapterTargets instanceof Error) {
     // No adapters found. return true, no error but nothing to process.
+    debug.debug('No adapter groups found');
     return callback(true)
   }
 
   let adapterGroups = []
   for (let target of adapterTargets) {
     if (target.group) {
-      if (adapterGroups.indexOf(target.group) != -1) {
+      if (adapterGroups.indexOf(target.group) == -1) {
         adapterGroups.push(target.group)
       }
     }
   }
   adapterGroups.sort()
+  debug.debug('adapter Groups %O', adapterGroups);
   if (!adapterGroups.length) {
     // No adapters found. return true, no error but nothing to process.
+    debug.debug('No adapter groups found');
     return callback(true)
   }
   let currentAdapterGroup = adapterGroups.shift()
@@ -436,8 +498,13 @@ function hookCall(targetRequest, phase, callback) {
       router =  getMinLoadedRouter(adapterGroupTargets);
     }
     debug.log('Notify route %s result %O', targetRequest.route, router);
-    let headers = getHeaders()
+    let headers = getHeaders(router, 'adapter')
     headers['x-hook-group'] = currentAdapterGroup
+    // Sign request for hook
+    headers['x-hook-signature'] = 'sha256=' 
+    + signature('sha256',
+      targetRequest.requestDetails._buffer,
+      router.secureKey);
     return {
       uri: router.url + targetRequest.path,
       method: 'NOTIFY',
@@ -449,24 +516,39 @@ function hookCall(targetRequest, phase, callback) {
     if (err) {
       debug.log('adapter failed %O', err);
     } else {
-      debug.log('adapter processed');
-      let bodyJSON = false
-      try {
-        bodyJSON = JSON.parse(body);
-      } catch (e) {
-        debug.debug('JSON.parse(body) Error received: %O', e);
-        debug.log('Notify before reseived not json')
-      }
-      if (bodyJSON) {
-        // need to replace body data
-        targetRequest.requestDetails._buffer = body
-      }
-      // need to set headers x-set-XXXXX
-      for (var i in response.headers) {
-        if (i.substring(0,5) == 'x-set-') {
-          let headerName = i.substr(6)
-          targetRequest.requestDetails.headers[headerName] = response.headers[i];
+      if (response.statusCode == 200) {
+        debug.log('adapter processed');
+        let bodyJSON = false
+        try {
+          bodyJSON = JSON.parse(body);
+        } catch (e) {
+          debug.debug('JSON.parse(body) Error received: %O', e);
+          debug.log('Notify before reseived not json')
         }
+        if (bodyJSON) {
+          // need to replace body data
+          targetRequest.requestDetails._buffer = body
+        }
+        // need to set headers x-set-XXXXX
+        debug.debug('Adapter Headers received: %O code: %s', response.headers, response.statusCode);
+        for (var i in response.headers) {
+          if (i.substring(0,6) == 'x-set-') {
+            let headerName = i.substr(6)
+            targetRequest.requestDetails.headers[headerName] = response.headers[i];
+          }
+        }
+        if (phase == 'before') {
+          delete targetRequest.requestDetails.headers['content-length']
+          // resign it
+          if (targetRequest.requestDetails.headers.signature) {
+            targetRequest.requestDetails.headers.signature = 'sha256=' 
+            + signature('sha256',
+              targetRequest.requestDetails._buffer,
+              targetRequest.endpoint.secureKey);
+          }
+        }
+      } else {
+        debug.log('Adapter failed with code: %s body: %s', response.statusCode, body)
       }
     }
     
@@ -522,7 +604,7 @@ function findHookTarget(targetRequest, phase, type, group){
     })
   }
   if (!finalHookTable.length) {
-    debug.debug('Not found for %s', route);
+    debug.debug('Not found for %s', targetRequest.route);
     debug.log('Hook instance %s not found', group);
     return new Error('Hook instance not found');
   }
@@ -630,6 +712,11 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
     return callback(endpointTargets, null);
   }
 
+  targetRequest.endpoint = {
+    scope: endpointTargets[0].scope,
+    secureKey: endpointTargets[0].secureKey
+  }
+
   hookCall(targetRequest, 'before', function(){
     //used later in sendBroadcastMessage
     let router = false
@@ -696,7 +783,8 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         path: path,
         method: method,
         jsonData: bodyJSON,
-        requestDetails: answerDetails
+        requestDetails: answerDetails,
+        endpoint: targetRequest.endpoint
       }
       hookCall(targetAnswer, 'after', function(){
         let body = false
@@ -859,6 +947,7 @@ function updateRouteVariable() {
           newServices.push(route);
         }
       }
+      debug.debug('Updated router table %O', newServices);
       globalServices = newServices;
     });
   });
