@@ -3,8 +3,10 @@
  */
 'use strict';
 
-const Cluster = require('@microservice-framework/microservice-cluster');
-const Microservice = require('@microservice-framework/microservice');
+const framework = '@microservice-framework';
+const Cluster = require(framework + '/microservice-cluster');
+const Microservice = require(framework + '/microservice');
+const MicroserviceRouterRegister = require(framework + '/microservice-router-register').register;
 const MongoClient = require('mongodb').MongoClient;
 const debugF = require('debug');
 
@@ -43,12 +45,14 @@ var mControlCluster = new Cluster({
   count: process.env.WORKERS,
   hostname: process.env.HOSTNAME,
   callbacks: {
+    init: hookInit,
     validate: mservice.validate,
     POST: adminPOST,
     GET: mservice.get,
     PUT: mservice.put,
     DELETE: mservice.delete,
-    SEARCH: adminSearch
+    SEARCH: adminSearch,
+    OPTIONS: mservice.options
   }
 });
 
@@ -58,6 +62,72 @@ if (mControlCluster.isMaster) {
     interval = process.env.INTERVAL;
   }
   setInterval(cleanRouteTable , interval);
+}
+
+/**
+ * Init Handler.
+ */
+function hookInit(cluster, worker, address) {
+  if (worker.id == 1) {
+    let interval = 6000;
+    if (process.env.INTERVAL) {
+      interval = process.env.INTERVAL;
+    }
+    var mserviceRegister = new MicroserviceRouterRegister({
+      server: {
+        url: 'http://' + process.env.HOSTNAME + ':' + process.env.PORT,
+        secureKey: process.env.SECURE_KEY,
+        period: interval,
+      },
+      route: {
+        path: ['register'],
+        url: 'http://' + process.env.HOSTNAME + ':' + process.env.PORT + '/',
+        secureKey: process.env.SECURE_KEY,
+        online: true,
+        scope: 'admin'
+      },
+      cluster: cluster
+    });
+/*
+    let record = {
+      type: 'handler',
+      path: ['register'],
+      url: 'http://' + process.env.HOSTNAME + ':' + process.env.PORT,
+      secureKey: process.env.SECURE_KEY,
+      online: true,
+      scope: 'admin',
+      metrics: [
+        {
+          "cpu": "0.00",
+          "memory": 5.40625,
+          "loadavg": [
+            1.19091796875,
+            1.37646484375,
+            1.38134765625
+          ]
+        },
+        {
+          "cpu": "0.00",
+          "memory": 2.1796875,
+          "loadavg": [
+            1.19091796875,
+            1.37646484375,
+            1.38134765625
+          ]
+        }
+      ]
+    };
+    
+    mservice.post(record, {}, function(err, handlerResponse){
+      if(err) {
+        debug.log('self register err: %s', err.message)
+        debug.debug('self register err: %O %O', err, handlerResponse)
+        return
+      }
+      debug.log('self registered')
+      debug.debug('self registered %O', handlerResponse)
+    })*/
+  }
 }
 
 /**
@@ -83,15 +153,15 @@ function adminPOST(jsonData, requestDetails, callback) {
 function adminSearch(jsonData, requestDetails, callback) {
   // Version 1.x compatibility.
   if(jsonData.query) {
-    if(!jsonData.query.handler) {
-      jsonData.query.handler = { $eq: 'handler'}
+    if(!jsonData.query.type) {
+      jsonData.query.type = { $eq: 'handler'}
     }
     if(!jsonData.query.online) {
       jsonData.query.online = true
     }
   } else {
-    if(!jsonData.handler) {
-      jsonData.handler = { $eq: 'handler'}
+    if(!jsonData.type) {
+      jsonData.type = { $eq: 'handler'}
     }
     if(!jsonData.online) {
       jsonData.online = true
