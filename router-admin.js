@@ -48,7 +48,7 @@ var mControlCluster = new Cluster({
     GET: mservice.get,
     PUT: mservice.put,
     DELETE: mservice.delete,
-    SEARCH: mservice.search
+    SEARCH: adminSearch
   }
 });
 
@@ -75,6 +75,29 @@ function adminPOST(jsonData, requestDetails, callback) {
     jsonData.online = true
   }
   mservice.post(jsonData, requestDetails, callback)
+}
+
+/**
+ * SEARCH handler.
+ */
+function adminSearch(jsonData, requestDetails, callback) {
+  // Version 1.x compatibility.
+  if(jsonData.query) {
+    if(!jsonData.query.handler) {
+      jsonData.query.handler = { $eq: 'handler'}
+    }
+    if(!jsonData.query.online) {
+      jsonData.query.online = true
+    }
+  } else {
+    if(!jsonData.handler) {
+      jsonData.handler = { $eq: 'handler'}
+    }
+    if(!jsonData.online) {
+      jsonData.online = true
+    }
+  }
+  mservice.search(jsonData, requestDetails, callback)
 }
 
 /**
