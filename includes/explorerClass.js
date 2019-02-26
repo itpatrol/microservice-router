@@ -277,7 +277,7 @@ ExplorerClass.prototype.process = function() {
 
     var collection = db.collection(process.env.MONGO_TABLE);
 
-    collection.find({}).toArray(function(err, results) {
+    collection.find({type: "handler"}).toArray(function(err, results) {
       db.close();
       if (err) {
         // If error, do nothing.

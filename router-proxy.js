@@ -234,13 +234,16 @@ function checkConditions(conditions, requestDetails, jsonData) {
   if (conditions.payload && conditions.payload.length
     && jsonData) {
     for (let payload of conditions.payload ) {
-      
+      debug.debug('Checking for condition %O', payload)
       let receivedPayloadValue = getProperty(payload.name, jsonData)
+      debug.debug('receivedPayloadValue %O', receivedPayloadValue)
       if (receivedPayloadValue instanceof Error) {
+
         return false
       }
       if (payload.isRegex) {
         let pattern = new RegExp(payload.value, "i")
+        debug.debug('pattern.test %O', pattern.test(receivedPayloadValue))
         if (!pattern.test(receivedPayloadValue)) {
           return false
         }
@@ -405,6 +408,7 @@ function hookCall(targetRequest, phase, callback) {
     if (notifyGroups.length){
       let currentNotifyGroup = notifyGroups.shift()
       let getNotifyRequest = function(){
+        debug.debug('notify Groups %s %O',currentNotifyGroup, notifyGroups);
         if (!currentNotifyGroup) {
           return false
         }
@@ -609,7 +613,7 @@ function findHookTarget(targetRequest, phase, type, group){
     }
   }
   if (typeof group !== "undefined") {
-    finalHookTable.filter(function(elem){
+    finalHookTable = finalHookTable.filter(function(elem){
       return elem.group == group
     })
   }
