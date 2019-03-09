@@ -272,8 +272,10 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
     debug.debug('%s requestDetails %O', route, requestDetails);
 
     var headers = {};
+    let skipHeaders  = ['host', 'content-length']
+
     for (var i in requestDetails.headers) {
-      if (i != 'host') {
+      if (skipHeaders.indexOf(i) == -1) {
         headers[i] = requestDetails.headers[i];
       }
     }

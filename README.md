@@ -7,6 +7,8 @@
 Proxy-Router for [microservice-framework](https://www.npmjs.com/~microservice-framework)
 
 # Change Log
+- 1.3.2
+  - fix rear issue with content-length on POST request
 - 1.3.1
   - Add to access control header - x-total-count
 - 1.3.0
