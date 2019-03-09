@@ -667,7 +667,7 @@ function getMinLoadedRouter(availableRoutes) {
     cpu:0,
     loadavg: 0
   }
-  if(minRouter.metrics) {
+  if (minRouter.metrics) {
     totalCPU = minRouter.metrics.reduce(function(a, b) {
 
       return {
@@ -683,7 +683,7 @@ function getMinLoadedRouter(availableRoutes) {
       cpu:0,
       loadavg: 0
     }
-    if(availableRoutes[i].metrics) {
+    if (availableRoutes[i].metrics) {
       totalCPU = availableRoutes[i].metrics.reduce(function(a, b) {
         return {
           cpu : parseFloat(a.cpu) + parseFloat(b.cpu) + a.loadavg[0] + b.loadavg[0],
@@ -747,7 +747,7 @@ function _request(getRequest, callback, targetRequest, noMetric) {
   let startTime = Date.now();
   request(requestOptions, function(error, response, body) {
     let endTime = Date.now();
-    if(!noMetric) {
+    if (!noMetric) {
       let metricTargets = findHookTarget(targetRequest, null, 'metric')
       debug.debug('NOTIFY: for %s result: %O', targetRequest.route, metricTargets);
     
@@ -763,7 +763,7 @@ function _request(getRequest, callback, targetRequest, noMetric) {
           debug.log('Metric route %s result %O', targetRequest.route, router);
           let headers = getHeaders(router, 'metric')
           let metricBody = "";
-          if(!router.meta) {
+          if (!router.meta) {
             metricBody = JSON.stringify({
               request: targetRequest.requestDetails._buffer,
               response: body,
