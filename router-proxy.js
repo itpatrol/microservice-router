@@ -769,7 +769,9 @@ function _request(getRequest, callback, targetRequest, noMetric) {
               response: body,
               startTime: startTime,
               endTime: endTime,
-              headers: requestOptions.headers
+              headers: requestOptions.headers,
+              uri: requestOptions.uri,
+              route: targetRequest.route,
             })
           }
           // Sign request for hook
