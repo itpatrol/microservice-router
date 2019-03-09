@@ -327,11 +327,13 @@ function hookCall(targetRequest, phase, callback) {
   
   let getHeaders = function(router, hookType){
     let headers = {};
+    // TODO verify date,content-type, transfer-encoding headers
     let skipHeaders = [
       'host',
       'content-type',
       'date',
       'connection',
+      'content-length',
       'transfer-encoding'
     ]
     for (var i in targetRequest.requestDetails.headers) {
@@ -772,10 +774,15 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       debug.log('Endpoint route %s result %O', route, router);
       let headers = {};
       let i;
+      let skipHeaders = [
+        'host',
+        'content-length'
+      ]
       for (i in requestDetails.headers) {
-        if (i != 'host') {
-          headers[i] = requestDetails.headers[i];
+        if (skipHeaders.indexOf(i) != -1) {
+          continue;
         }
+        headers[i] = requestDetails.headers[i];
       }
 
       for (i in router.matchVariables) {
