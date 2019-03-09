@@ -749,7 +749,8 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
 
   targetRequest.endpoint = {
     scope: endpointTargets[0].scope,
-    secureKey: endpointTargets[0].secureKey
+    secureKey: endpointTargets[0].secureKey,
+    binary: endpointTargets[0].binary
   }
 
   hookCall(targetRequest, 'before', function(){
@@ -806,13 +807,17 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         return callback(new Error('Endpoint not found'), null)
       }
       let bodyJSON = false
-      try {
-        bodyJSON = JSON.parse(body);
-      } catch (e) {
-        debug.debug('JSON.parse(body) Error received: %O', e);
-        return callback(new Error('Service respond is not JSON.'));
+      if(!targetRequest.endpoint.binary) {
+        try {
+          bodyJSON = JSON.parse(body);
+        } catch (e) {
+          debug.debug('JSON.parse(body) Error received: %O', e);
+          return callback(new Error('Service respond is not JSON.'));
+        }
+        
       }
-      debug.debug('%s body: %O', route, bodyJSON);
+      debug.debug('%s body: %O', route, body);
+      
 
       // process after hooks
       // hookCall requestDetails.headers and _buffer should contain response data.
