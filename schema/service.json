@@ -20,7 +20,7 @@
           },
           "type": {
             "type": "string",
-            "enum": ["adapter", "notify", "broadcast"],
+            "enum": ["adapter", "notify", "broadcast", "metric"],
             "required": true
           },
           "group": {
@@ -107,8 +107,7 @@
       "items": {
           "type": "string"
       },
-      "minItems": 1,
-      "required": true
+      "minItems": 1
     },
     "url": {
       "type": "string",
