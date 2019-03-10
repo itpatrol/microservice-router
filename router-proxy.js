@@ -14,7 +14,9 @@ const ExplorerClass = require('./includes/explorerClass.js');
 
 var debug = {
   log: debugF('proxy:log'),
-  debug: debugF('proxy:debug')
+  debug: debugF('proxy:debug'),
+  debugMetric: debugF('proxy:metric'),
+  debugHook: debugF('proxy:hook')
 };
 
 
@@ -263,7 +265,15 @@ function checkConditions(conditions, requestDetails, jsonData) {
 function matchRoute(targetRequest, routeItem) {
   let routeItems = targetRequest.route.split('/');
 
-  
+  if(routeItem.type == "metric") {
+    if (routeItem.conditions) {
+      if (!checkConditions(routeItem.conditions,
+                          targetRequest.requestDetails, targetRequest.jsonData)) {
+        return false
+      }
+    }
+    return true
+  }
   if (routeItem.path && routeItem.path.length == 1 && routeItem.path[0] == '*') {
     if (routeItem.conditions) {
       if (!checkConditions(routeItem.conditions,
@@ -584,7 +594,7 @@ function hookCall(targetRequest, phase, callback) {
  * Find all hook routes by stage.
  */
 function findHookTarget(targetRequest, phase, type, group){
-  debug.debug('Find all hooks route: %s phase: %s type: %s group: %s',
+  debug.debugHook('Find all hooks route: %s phase: %s type: %s group: %s',
     targetRequest.route, phase, type, group);
   let allHookTargets = findAllTargets(targetRequest, 'hook')
   if (allHookTargets instanceof Error) {
@@ -622,6 +632,7 @@ function findHookTarget(targetRequest, phase, type, group){
   if (!finalHookTable.length) {
     debug.debug('Not found for %s', targetRequest.route);
     debug.log('Hook instance %s not found', group);
+    debug.debugHook('Hook instance %s not found', group);
     return new Error('Hook instance not found');
   }
   return finalHookTable
@@ -739,7 +750,6 @@ function _request(getRequest, callback, targetRequest, noMetric) {
     }
     headers['x-origin-url'] = targetRequest.route
     headers['x-origin-method'] = targetRequest.method
-    headers['x-hook-type'] = hookType
     headers['x-endpoint-scope'] = targetRequest.endpoint.scope
     debug.debug('%s headers %O', targetRequest.route, headers);
     return headers;
@@ -747,9 +757,10 @@ function _request(getRequest, callback, targetRequest, noMetric) {
   let startTime = Date.now();
   request(requestOptions, function(error, response, body) {
     let endTime = Date.now();
+    debug.debugMetric('requestOptions: %O time: %s', requestOptions, endTime - startTime);
     if (!noMetric) {
-      let metricTargets = findHookTarget(targetRequest, null, 'metric')
-      debug.debug('NOTIFY: for %s result: %O', targetRequest.route, metricTargets);
+      let metricTargets = findAllTargets(targetRequest, 'metric')
+      debug.debugMetric('findHookTarget: for %s result: %O', targetRequest.route, metricTargets);
     
       if (metricTargets instanceof Array) {
         let getMetricRequest = function(){
@@ -761,19 +772,31 @@ function _request(getRequest, callback, targetRequest, noMetric) {
           }
           let router = metricTargets.pop()
           debug.log('Metric route %s result %O', targetRequest.route, router);
-          let headers = getHeaders(router, 'metric')
-          let metricBody = "";
-          if (!router.meta) {
-            metricBody = JSON.stringify({
-              request: targetRequest.requestDetails._buffer,
-              response: body,
-              startTime: startTime,
-              endTime: endTime,
-              headers: requestOptions.headers,
-              uri: requestOptions.uri,
-              route: targetRequest.route,
-            })
+          
+          let statusCode = 0
+          if(error) {
+            statusCode = error.code
+          } else {
+            if(response.statusCode) {
+              statusCode = response.statusCode
+            }
           }
+
+          let metricJSON = {
+            startTime: startTime,
+            endTime: endTime,
+            code: statusCode,
+            method: requestOptions.method,
+            headers: requestOptions.headers,
+            uri: requestOptions.uri,
+            route: targetRequest.route,
+          }
+          if (!router.meta) {
+            metricJSON.request = targetRequest.requestDetails._buffer;
+            metricJSON.response = body;
+          }
+          let metricBody = JSON.stringify(metricJSON)
+          let headers = getHeaders(router, 'metric')
           // Sign request for hook
           headers['x-hook-signature'] = 'sha256='
             + signature('sha256', metricBody, router.secureKey);
@@ -781,7 +804,7 @@ function _request(getRequest, callback, targetRequest, noMetric) {
             uri: router.url + targetRequest.path,
             method: 'NOTIFY',
             headers: headers,
-            body: targetRequest.requestDetails._buffer
+            body: metricBody
           }
         }
         let callbackMetricRequest = function(err, response, body){
@@ -790,13 +813,18 @@ function _request(getRequest, callback, targetRequest, noMetric) {
             debug.log('metric failed %O', err);
           }
           debug.log('metric sent');
+          debug.debugMetric('Metric targetRequest %O ', targetRequest);
           // If more in queue left - send more
           if (metricTargets.length) {
             _request(getMetricRequest, callbackMetricRequest, targetRequest, true)
           }
         }
         _request(getMetricRequest, callbackMetricRequest, targetRequest, true)
+      } else {
+        debug.debugMetric('no metric enpoints');
       }
+    } else {
+      debug.debugMetric('metric disabled');
     }
     
     if (error) {

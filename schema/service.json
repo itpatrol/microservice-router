@@ -107,8 +107,7 @@
       "items": {
           "type": "string"
       },
-      "minItems": 1,
-      "required": true
+      "minItems": 1
     },
     "url": {
       "type": "string",
