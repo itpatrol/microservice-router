@@ -152,18 +152,18 @@ function adminPOST(jsonData, requestDetails, callback) {
  */
 function adminSearch(jsonData, requestDetails, callback) {
   // Version 1.x compatibility.
-  if(jsonData.query) {
-    if(!jsonData.query.type) {
+  if (jsonData.query) {
+    if (!jsonData.query.type) {
       jsonData.query.type = { $eq: 'handler'}
     }
-    if(!jsonData.query.online) {
+    if (!jsonData.query.online) {
       jsonData.query.online = true
     }
   } else {
-    if(!jsonData.type) {
+    if (!jsonData.type) {
       jsonData.type = { $eq: 'handler'}
     }
-    if(!jsonData.online) {
+    if (!jsonData.online) {
       jsonData.online = true
     }
   }
