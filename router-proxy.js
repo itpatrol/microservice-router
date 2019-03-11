@@ -344,6 +344,7 @@ function hookCall(targetRequest, phase, callback) {
     let skipHeaders = [
       'host', // issue to properly connect
       'connection', // if it is closed, behavior is unexpected
+      'transfer-encoding', //we need to ignore that one.
       'content-length', //issue with recounting length of the package
     ]
     for (var i in targetRequest.requestDetails.headers) {
