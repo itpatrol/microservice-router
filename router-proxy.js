@@ -927,7 +927,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       }
       let bodyJSON = ""
       try {
-        bodyJSON = decodeData(body, response.headers['content-type'])
+        bodyJSON = decodeData(response.headers['content-type'], body)
       } catch (e) {
         debug.debug('decodeData Error received: %O', e);
         return callback(e);
@@ -954,7 +954,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         // Double check updated _buffer after proxy.
         let body = false
         try {
-          body = decodeData(answerDetails._buffer, answerDetails.headers['content-type'])
+          body = decodeData(answerDetails.headers['content-type'], answerDetails._buffer)
         } catch (e) {
           debug.debug('decodeData Error received: %O', e);
           return callback(e);
