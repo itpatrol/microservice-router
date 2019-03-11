@@ -193,7 +193,7 @@ function getProperty( propertyName, object ) {
   let parts = propertyName.split( "." ),
       length = parts.length,
       i,
-      property = object || this;
+      property = object;
   for ( i = 0; i < length; i++ ) {
     if (!property[parts[i]]) {
       return new Error('Property Does not exists')
@@ -235,6 +235,9 @@ function checkConditions(conditions, requestDetails, jsonData) {
   // check payload
   if (conditions.payload && conditions.payload.length
     && jsonData) {
+    if(typeof jsonData != "object") {
+      return false
+    }
     for (let payload of conditions.payload ) {
       debug.debug('Checking for condition %O', payload)
       let receivedPayloadValue = getProperty(payload.name, jsonData)
@@ -339,12 +342,9 @@ function hookCall(targetRequest, phase, callback) {
     let headers = {};
     // TODO verify date,content-type, transfer-encoding headers
     let skipHeaders = [
-      'host',
-      'content-type',
-      'date',
-      'connection',
-      'content-length',
-      'transfer-encoding'
+      'host', // issue to properly connect
+      'connection', // if it is closed, behavior is unexpected
+      'content-length', //issue with recounting length of the package
     ]
     for (var i in targetRequest.requestDetails.headers) {
       if (skipHeaders.indexOf(i) != -1) {
@@ -547,17 +547,7 @@ function hookCall(targetRequest, phase, callback) {
       
     } else {
       debug.log('adapter processed');
-      let bodyJSON = false
-      try {
-        bodyJSON = JSON.parse(body);
-      } catch (e) {
-        debug.debug('JSON.parse(body) Error received: %O', e);
-        debug.log('Notify before reseived not json')
-      }
-      if (bodyJSON) {
-        // need to replace body data
-        targetRequest.requestDetails._buffer = body
-      }
+      targetRequest.requestDetails._buffer = body
       // need to set headers x-set-XXXXX
       debug.debug('Adapter Headers received: %O code: %s', response.headers, response.statusCode);
       for (var i in response.headers) {
@@ -566,8 +556,8 @@ function hookCall(targetRequest, phase, callback) {
           targetRequest.requestDetails.headers[headerName] = response.headers[i];
         }
       }
+      delete targetRequest.requestDetails.headers['content-length']
       if (phase == 'before') {
-        delete targetRequest.requestDetails.headers['content-length']
         // resign it
         if (targetRequest.requestDetails.headers.signature) {
           targetRequest.requestDetails.headers.signature = 'sha256=' 
