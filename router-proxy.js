@@ -800,6 +800,12 @@ function _request(getRequest, callback, targetRequest, noMetric) {
             uri: requestOptions.uri,
             route: targetRequest.route,
           }
+          if(body && body.length) {
+            metricJSON.responseLength = body.length;
+          }
+          if(requestOptions.body && requestOptions.body.length) {
+            metricJSON.requestLength = requestOptions.body.length;
+          }
           if (!router.meta) {
             metricJSON.request = targetRequest.requestDetails._buffer;
             metricJSON.response = body;
