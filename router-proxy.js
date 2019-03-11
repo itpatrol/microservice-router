@@ -85,7 +85,7 @@ function applyAccessToken(requestDetails) {
 /**
  * Proxy GET requests.
  */
-function ProxyRequestGet(jsonData, requestDetails, callback) {
+function ProxyRequestGet(url, requestDetails, callback) {
   applyAccessToken(requestDetails);
   if (requestDetails.url == '') {
     var Explorer = new ExplorerClass(requestDetails, callback);
@@ -94,7 +94,7 @@ function ProxyRequestGet(jsonData, requestDetails, callback) {
   let cutPosition = requestDetails.url.lastIndexOf('/');
   let route = requestDetails.url.substring(0, cutPosition);
   let path = requestDetails.url.substring(cutPosition + 1);
-  proxyRequest(route, path, 'GET', jsonData, requestDetails, callback);
+  proxyRequest(route, path, 'GET', url, requestDetails, callback);
 }
 
 /**
@@ -124,12 +124,12 @@ function ProxyRequestPUT(jsonData, requestDetails, callback) {
 /**
  * Proxy DELETE requests.
  */
-function ProxyRequestDELETE(jsonData, requestDetails, callback) {
+function ProxyRequestDELETE(url, requestDetails, callback) {
   applyAccessToken(requestDetails);
   let cutPosition = requestDetails.url.lastIndexOf('/');
   let route = requestDetails.url.substring(0, cutPosition);
   let path = requestDetails.url.substring(cutPosition + 1);
-  proxyRequest(route, path, 'DELETE', jsonData, requestDetails, callback);
+  proxyRequest(route, path, 'DELETE', url, requestDetails, callback);
 }
 
 
@@ -193,7 +193,7 @@ function getProperty( propertyName, object ) {
   let parts = propertyName.split( "." ),
       length = parts.length,
       i,
-      property = object || this;
+      property = object;
   for ( i = 0; i < length; i++ ) {
     if (!property[parts[i]]) {
       return new Error('Property Does not exists')
@@ -235,6 +235,9 @@ function checkConditions(conditions, requestDetails, jsonData) {
   // check payload
   if (conditions.payload && conditions.payload.length
     && jsonData) {
+    if (typeof jsonData != "object") {
+      return false
+    }
     for (let payload of conditions.payload ) {
       debug.debug('Checking for condition %O', payload)
       let receivedPayloadValue = getProperty(payload.name, jsonData)
@@ -265,7 +268,7 @@ function checkConditions(conditions, requestDetails, jsonData) {
 function matchRoute(targetRequest, routeItem) {
   let routeItems = targetRequest.route.split('/');
 
-  if(routeItem.type == "metric") {
+  if (routeItem.type == "metric") {
     if (routeItem.conditions) {
       if (!checkConditions(routeItem.conditions,
                           targetRequest.requestDetails, targetRequest.jsonData)) {
@@ -339,12 +342,9 @@ function hookCall(targetRequest, phase, callback) {
     let headers = {};
     // TODO verify date,content-type, transfer-encoding headers
     let skipHeaders = [
-      'host',
-      'content-type',
-      'date',
-      'connection',
-      'content-length',
-      'transfer-encoding'
+      'host', // issue to properly connect
+      'connection', // if it is closed, behavior is unexpected
+      'content-length', //issue with recounting length of the package
     ]
     for (var i in targetRequest.requestDetails.headers) {
       if (skipHeaders.indexOf(i) != -1) {
@@ -547,17 +547,7 @@ function hookCall(targetRequest, phase, callback) {
       
     } else {
       debug.log('adapter processed');
-      let bodyJSON = false
-      try {
-        bodyJSON = JSON.parse(body);
-      } catch (e) {
-        debug.debug('JSON.parse(body) Error received: %O', e);
-        debug.log('Notify before reseived not json')
-      }
-      if (bodyJSON) {
-        // need to replace body data
-        targetRequest.requestDetails._buffer = body
-      }
+      targetRequest.requestDetails._buffer = body
       // need to set headers x-set-XXXXX
       debug.debug('Adapter Headers received: %O code: %s', response.headers, response.statusCode);
       for (var i in response.headers) {
@@ -566,8 +556,8 @@ function hookCall(targetRequest, phase, callback) {
           targetRequest.requestDetails.headers[headerName] = response.headers[i];
         }
       }
+      delete targetRequest.requestDetails.headers['content-length']
       if (phase == 'before') {
-        delete targetRequest.requestDetails.headers['content-length']
         // resign it
         if (targetRequest.requestDetails.headers.signature) {
           targetRequest.requestDetails.headers.signature = 'sha256=' 
@@ -588,6 +578,25 @@ function hookCall(targetRequest, phase, callback) {
   }
   _request(getAdapterRequest, callbackAdapterRequest, targetRequest)
 
+}
+
+/**
+ * decode buffer to specidied by content-type format.
+ */
+function decodeData(contentType, buffer){
+  let data = false
+  switch (contentType) {
+    case undefined: // version 1.x compatibility. If no content-type provided, assume json.
+    case 'application/json': {
+      data = JSON.parse(buffer);
+      break;
+    }
+    // Todo support more decoders here?
+    default: {
+      data = buffer
+    }
+  }
+  return data
 }
 
 /**
@@ -774,10 +783,10 @@ function _request(getRequest, callback, targetRequest, noMetric) {
           debug.log('Metric route %s result %O', targetRequest.route, router);
           
           let statusCode = 0
-          if(error) {
+          if (error) {
             statusCode = error.code
           } else {
-            if(response.statusCode) {
+            if (response.statusCode) {
               statusCode = response.statusCode
             }
           }
@@ -886,6 +895,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
       let i;
       let skipHeaders = [
         'host',
+        'connection',
         'content-length'
       ]
       for (i in requestDetails.headers) {
@@ -915,15 +925,15 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         // TODO call after hooks
         return callback(new Error('Endpoint not found'), null)
       }
-      let bodyJSON = false
+      let bodyJSON = ""
       try {
-        bodyJSON = JSON.parse(body);
+        bodyJSON = decodeData(body, response.headers['content-type'])
       } catch (e) {
-        debug.debug('JSON.parse(body) Error received: %O', e);
-        return callback(new Error('Service respond is not JSON.'));
+        debug.debug('decodeData Error received: %O', e);
+        return callback(e);
       }
-      debug.debug('%s body: %O', route, bodyJSON);
-
+      debug.debug('%s body: %O', route, body);
+      
       // process after hooks
       // hookCall requestDetails.headers and _buffer should contain response data.
       let answerDetails = {
@@ -940,20 +950,23 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         endpoint: targetRequest.endpoint
       }
       hookCall(targetAnswer, 'after', function(){
-        let body = false
+
         // Double check updated _buffer after proxy.
+        let body = false
         try {
-          body = JSON.parse(answerDetails._buffer);
+          body = decodeData(answerDetails._buffer, answerDetails.headers['content-type'])
         } catch (e) {
-          debug.debug('JSON.parse(body) Error received: %O', e);
-          return callback(new Error('Service respond is not JSON.'));
+          debug.debug('decodeData Error received: %O', e);
+          return callback(e);
         }
-        // prefix with base_URL all urls
-        if (method != 'OPTIONS') {
-          if (body.url) {
-            body.url = process.env.BASE_URL + body.url;
-          } else if (body.id) {
-            body.url = process.env.BASE_URL + route + '/' + body.id;
+        if(typeof body == "object") {
+          // prefix with base_URL all urls
+          if (method != 'OPTIONS') {
+            if (body.url) {
+              body.url = process.env.BASE_URL + body.url;
+            } else if (body.id) {
+              body.url = process.env.BASE_URL + route + '/' + body.id;
+            }
           }
         }
         if (body instanceof Array) {
@@ -978,7 +991,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
             responseHeaders[i] = answerDetails.headers[i];
           }
         }
-
+        // deprecated. websoket need to be rewriten as a hook broadcast
         if (response.statusCode == 200) {
           sendBroadcastMessage(router, method, requestDetails.url, body);
         }
