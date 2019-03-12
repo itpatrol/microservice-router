@@ -138,7 +138,8 @@ function adminPOST(jsonData, requestDetails, callback) {
   if (!jsonData.type) {
     jsonData.type = "handler"
   }
-  if (jsonData.path === 'ws') {
+  // Version 1.x  websocket compatibility.
+  if (jsonData.path && jsonData.path.indexOf('ws') != -1) {
     jsonData.type = "websocket"
   }
   if (!jsonData.online) {

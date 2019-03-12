@@ -970,7 +970,11 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
           // prefix with base_URL all urls
           if (method != 'OPTIONS') {
             if (body.url) {
-              body.url = process.env.BASE_URL + body.url;
+              // Make sure that url is not absolute
+              if(body.url.indexOf('http://') == -1
+                && body.url.indexOf('https://') == -1) {
+                body.url = process.env.BASE_URL + body.url;
+              }
             } else if (body.id) {
               body.url = process.env.BASE_URL + route + '/' + body.id;
             }
@@ -979,7 +983,11 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         if (body instanceof Array) {
           for (var i in body) {
             if (body[i].url) {
-              body[i].url =  process.env.BASE_URL + body[i].url;
+              // Make sure that url is not absolute
+              if(body[i].url.indexOf('http://') == -1
+                && body[i].url.indexOf('https://') == -1 ) {
+                body[i].url =  process.env.BASE_URL + body[i].url;
+              }
             } else if (body[i].id) {
               body[i].url = process.env.BASE_URL + route  + '/' + body[i].id;
             }
