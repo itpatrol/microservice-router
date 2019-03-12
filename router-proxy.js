@@ -743,7 +743,6 @@ function _request(getRequest, callback, targetRequest, noMetric) {
     // TODO verify date,content-type, transfer-encoding headers
     let skipHeaders = [
       'host',
-      'content-type',
       'date',
       'connection',
       'content-length',
