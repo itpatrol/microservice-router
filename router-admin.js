@@ -78,7 +78,7 @@ var cleanRouteTableInerval = false;
 /**
  * Init Handler.
  */
-function hookInit(cluster) {
+function adminInit(cluster) {
   let interval = 6000;
   if (process.env.INTERVAL) {
     interval = process.env.INTERVAL;
