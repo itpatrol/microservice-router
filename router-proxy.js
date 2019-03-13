@@ -48,17 +48,30 @@ var mControlCluster = new Cluster({
     DELETE: ProxyRequestDELETE,
     SEARCH: ProxyRequestSEARCH,
     OPTIONS: ProxyRequestOPTIONS,
+    shutdown: ProxyRequestShutdown,
+    init: ProxyRequestInit,
   }
 });
 
-if (!mControlCluster.isMaster) {
-  var globalServices = [];
+var updateInerval = false;
+var globalServices = [];
+
+function ProxyRequestInit(){
   updateRouteVariable();
   var interval = 6000;
   if (process.env.INTERVAL) {
     interval = process.env.INTERVAL;
   }
-  setInterval(function() { updateRouteVariable()}, interval);
+  updateInerval = setInterval(function() { updateRouteVariable()}, interval);
+}
+
+/**
+ * clear interval on shutdown.
+ */
+function ProxyRequestShutdown(){
+  if(updateInerval) {
+    clearInterval(updateInerval)
+  }
 }
 
 /**
