@@ -88,7 +88,7 @@ function adminInit(callback) {
     interval = process.env.INTERVAL;
   }
   let cleanRouteTableInerval = setInterval(cleanRouteTable , interval);
-  debug.log('init executed %O %s', cleanRouteTableInerval, process.pid)
+  debug.log('init executed %s', process.pid)
   callback(cleanRouteTableInerval)
   
 }
@@ -97,7 +97,7 @@ function adminInit(callback) {
  * clear interval on shutdown.
  */
 function adminShutdown(cleanRouteTableInerval){
-  debug.log('shutdown executed %O %s', cleanRouteTableInerval, process.pid)
+  debug.log('shutdown executed %s', process.pid)
   if (cleanRouteTableInerval) {
     clearInterval(cleanRouteTableInerval)
   }
