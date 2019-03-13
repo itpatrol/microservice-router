@@ -53,22 +53,23 @@ var mControlCluster = new Cluster({
   }
 });
 
-var updateInerval = false;
+
 var globalServices = [];
 
-function ProxyRequestInit(){
+function ProxyRequestInit(callback){
   updateRouteVariable();
   var interval = 6000;
   if (process.env.INTERVAL) {
     interval = process.env.INTERVAL;
   }
-  updateInerval = setInterval(function() { updateRouteVariable()}, interval);
+  let updateInerval = setInterval(function() { updateRouteVariable()}, interval);
+  callback(updateInerval)
 }
 
 /**
  * clear interval on shutdown.
  */
-function ProxyRequestShutdown(){
+function ProxyRequestShutdown(updateInerval){
   if (updateInerval) {
     clearInterval(updateInerval)
   }

@@ -78,24 +78,26 @@ var mserviceRegister = new MicroserviceRouterRegister({
   cluster: mControlCluster
 });
 
-var cleanRouteTableInerval = false;
 
 /**
  * Init Handler.
  */
-function adminInit(cluster) {
+function adminInit(callback) {
   let interval = 6000;
   if (process.env.INTERVAL) {
     interval = process.env.INTERVAL;
   }
-  cleanRouteTableInerval = setInterval(cleanRouteTable , interval);
+  let cleanRouteTableInerval = setInterval(cleanRouteTable , interval);
+  debug.log('init executed %O %s', cleanRouteTableInerval, process.pid)
+  callback(cleanRouteTableInerval)
   
 }
 
 /**
  * clear interval on shutdown.
  */
-function adminShutdown(){
+function adminShutdown(cleanRouteTableInerval){
+  debug.log('shutdown executed %O %s', cleanRouteTableInerval, process.pid)
   if (cleanRouteTableInerval) {
     clearInterval(cleanRouteTableInerval)
   }
