@@ -836,7 +836,8 @@ function _request(getRequest, callback, targetRequest, noMetric) {
             uri: router.url + targetRequest.path,
             method: 'NOTIFY',
             headers: headers,
-            body: metricBody
+            body: metricBody,
+            timeout: 300 // For metrics we limit to 300 ms.
           }
         }
         let callbackMetricRequest = function(err, response, body){
@@ -863,7 +864,10 @@ function _request(getRequest, callback, targetRequest, noMetric) {
       // TODO add limit to re send
       debug.debug('_request Error received: %O', error);
       debug.debug('_request Restart request: %O', requestOptions);
-      return _request(getRequest, callback, targetRequest);
+      // Do not try to redeliver metrics. can lock a event loop
+      if(!noMetric) {
+        return _request(getRequest, callback, targetRequest);
+      }
     }
     
     debug.debug('%s body: %s', requestOptions.uri, body);
