@@ -57,6 +57,11 @@ var mControlCluster = new Cluster({
   }
 });
 
+let interval = 6000;
+if (process.env.INTERVAL) {
+  interval = process.env.INTERVAL;
+}
+
 var mserviceRegister = new MicroserviceRouterRegister({
   server: {
     url: 'http://' + process.env.HOSTNAME + ':' + process.env.PORT,
