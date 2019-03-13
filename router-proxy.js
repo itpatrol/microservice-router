@@ -69,7 +69,7 @@ function ProxyRequestInit(){
  * clear interval on shutdown.
  */
 function ProxyRequestShutdown(){
-  if(updateInerval) {
+  if (updateInerval) {
     clearInterval(updateInerval)
   }
 }
@@ -816,10 +816,10 @@ function _request(getRequest, callback, targetRequest, noMetric) {
             uri: requestOptions.uri,
             route: targetRequest.route,
           }
-          if(body && body.length) {
+          if (body && body.length) {
             metricJSON.responseLength = body.length;
           }
-          if(requestOptions.body && requestOptions.body.length) {
+          if (requestOptions.body && requestOptions.body.length) {
             metricJSON.requestLength = requestOptions.body.length;
           }
           if (!router.meta) {
@@ -981,12 +981,12 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
           debug.debug('decodeData Error received: %O', e);
           return callback(e);
         }
-        if(typeof body == "object") {
+        if (typeof body == "object") {
           // prefix with base_URL all urls
           if (method != 'OPTIONS') {
             if (body.url) {
               // Make sure that url is not absolute
-              if(body.url.indexOf('http://') == -1
+              if (body.url.indexOf('http://') == -1
                 && body.url.indexOf('https://') == -1) {
                 body.url = process.env.BASE_URL + body.url;
               }
@@ -999,7 +999,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
           for (var i in body) {
             if (body[i].url) {
               // Make sure that url is not absolute
-              if(body[i].url.indexOf('http://') == -1
+              if (body[i].url.indexOf('http://') == -1
                 && body[i].url.indexOf('https://') == -1 ) {
                 body[i].url =  process.env.BASE_URL + body[i].url;
               }

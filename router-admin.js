@@ -91,7 +91,7 @@ function hookInit(cluster) {
  * clear interval on shutdown.
  */
 function adminShutdown(){
-  if(cleanRouteTableInerval) {
+  if (cleanRouteTableInerval) {
     clearInterval(cleanRouteTableInerval)
   }
 }
