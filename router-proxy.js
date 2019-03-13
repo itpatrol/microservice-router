@@ -16,6 +16,7 @@ var debug = {
   log: debugF('proxy:log'),
   debug: debugF('proxy:debug'),
   debugMetric: debugF('proxy:metric'),
+  request: debugF('proxy:request'),
   debugHook: debugF('proxy:hook')
 };
 
@@ -764,7 +765,9 @@ function _request(getRequest, callback, targetRequest, noMetric) {
     return headers;
   }
   let startTime = Date.now();
+  debug.request('requestOptions: %O', requestOptions);
   request(requestOptions, function(error, response, body) {
+    debug.request('requestOptions: %O answer err %O body %s' , requestOptions, error, body);
     let endTime = Date.now();
     debug.debugMetric('requestOptions: %O time: %s', requestOptions, endTime - startTime);
     if (!noMetric) {
