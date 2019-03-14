@@ -5,8 +5,8 @@
   "main": "router-admin.js",
   "scripts": {
     "test": "node_modules/.bin/mocha --timeout 15000",
-    "start-admin": "DEBUG=http:log,cluster:*,router:* node  --max-old-space-size=520 router-admin.js",
-    "start-proxy": "DEBUG=http:log,cluster:*,proxy:* node  --max-old-space-size=520 router-proxy.js",
+    "start-admin": "DEBUG=http:log,cluster:*,router:log node  --max-old-space-size=520 router-admin.js",
+    "start-proxy": "DEBUG=http:log,cluster:*,proxy:log node  --max-old-space-size=520 router-proxy.js",
     "stop-admin": "ADMIN=true node kill.js",
     "stop-proxy": "PROXY=true node kill.js",
     "status": "node status.js",
