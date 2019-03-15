@@ -210,7 +210,7 @@ function getProperty( propertyName, object ) {
       i,
       property = object;
   for ( i = 0; i < length; i++ ) {
-    if (!property[parts[i]]) {
+    if (property[parts[i]] === undefined) {
       return new Error('Property Does not exists')
     }
     property = property[parts[i]];
