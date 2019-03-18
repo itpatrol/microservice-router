@@ -12,6 +12,7 @@
 'use strict';
 
 const debug = require('debug')('proxy:find-hook-target');
+const findAllTargets = require('./findAllTargets.js')
 
 module.exports = function(targetRequest, phase, type, group, allRegisteredRoutes){
   debug('Find all hooks route: %s phase: %s type: %s group: %s',

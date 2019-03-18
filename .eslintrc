@@ -1,4 +1,10 @@
 {
+  "extends": [
+    "eslint:recommended"
+  ],
+  "env": {
+        "node": true
+  },
   "parserOptions": {
     "ecmaVersion": 6
   },
@@ -16,6 +22,14 @@
     "max-len": [
       2,
       100
+    ],
+    "comma-spacing": [
+      2,
+      { "before": false, "after": true }
+    ],
+    "space-infix-ops": [
+      2,
+     {"int32Hint": true}
     ]
   }
 }

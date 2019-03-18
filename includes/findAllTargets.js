@@ -33,7 +33,7 @@ module.exports = function(targetRequest, routeType, allRegisteredRoutes) {
     }
   }
   debug('Available routes type: %s route: %s availableRoutes: %s', routeType,
-  targetRequest.route,  JSON.stringify(availableRoutes , null, 2));
+  targetRequest.route,  JSON.stringify(availableRoutes, null, 2));
   if (availableRoutes.length == 0) {
     debug('Not found for %s', targetRequest.route);
     return new Error('Endpoint not found');

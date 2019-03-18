@@ -1,6 +1,8 @@
 const request = require('request');
 
 const findAllTargets = require('./findAllTargets.js')
+const findHookTarget = require('./findHookTarget.js')
+const decodeData = require('./decodeData.js')
 
 
 /**
@@ -91,7 +93,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
     if (notifyGroups.length){
       let currentNotifyGroup = notifyGroups.shift()
       let getNotifyRequest = function(){
-        debug.debug('notify Groups %s %O',currentNotifyGroup, notifyGroups);
+        debug.debug('notify Groups %s %O', currentNotifyGroup, notifyGroups);
         if (!currentNotifyGroup) {
           return false
         }
@@ -209,7 +211,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
       } else {
         debug.log('Adapter failed with code: %s body: %s', response.statusCode, body)
         for (var i in response.headers) {
-          if (i.substring(0,6) == 'x-set-') {
+          if (i.substring(0, 6) == 'x-set-') {
             let headerName = i.substr(6)
             targetRequest.requestDetails.headers[headerName] = response.headers[i];
           }
@@ -222,7 +224,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
       // need to set headers x-set-XXXXX
       debug.debug('Adapter Headers received: %O code: %s', response.headers, response.statusCode);
       for (var i in response.headers) {
-        if (i.substring(0,6) == 'x-set-') {
+        if (i.substring(0, 6) == 'x-set-') {
           let headerName = i.substr(6)
           targetRequest.requestDetails.headers[headerName] = response.headers[i];
         }
@@ -242,7 +244,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
     // If more groups left - send more
     if (adapterGroups.length) {
       currentAdapterGroup = adapterGroups.shift()
-      return _request(getAdapterRequest, callbackAdapterRequest, targetRequest,false, globalServices)
+      return _request(getAdapterRequest, callbackAdapterRequest, targetRequest, false, globalServices)
     }
     // return back via callback
     callback()
@@ -255,21 +257,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
 /**
  * decode buffer to specidied by content-type format.
  */
-function decodeData(contentType, buffer){
-  let data = false
-  switch (contentType) {
-    case undefined: // version 1.x compatibility. If no content-type provided, assume json.
-    case 'application/json': {
-      data = JSON.parse(buffer);
-      break;
-    }
-    // Todo support more decoders here?
-    default: {
-      data = buffer
-    }
-  }
-  return data
-}
+
 
 
 /**
@@ -310,7 +298,7 @@ function getMinLoadedRouter(availableRoutes) {
       minRouter = availableRoutes[i];
     }
     debug.debug('MinRouter %O', minRouter);
-    debug.debug('availableRoutes %s %O',i, availableRoutes[i]);
+    debug.debug('availableRoutes %s %O', i, availableRoutes[i]);
   }
   return minRouter;
 }
@@ -359,7 +347,7 @@ function _request(getRequest, callback, targetRequest, noMetric, globalServices)
   let startTime = Date.now();
   debug.request('requestOptions: %O', requestOptions);
   request(requestOptions, function(error, response, body) {
-    debug.request('requestOptions: %O answer err %O body %s' , requestOptions, error, body);
+    debug.request('requestOptions: %O answer err %O body %s', requestOptions, error, body);
     let endTime = Date.now();
     let executeTime = endTime - startTime
     
@@ -649,7 +637,7 @@ module.exports = function(targetRequest, globalServices, callback){
           'Access-Control-Expose-Headers': 'x-total-count',
         };
         for (var i in answerDetails.headers) {
-          if (i.substring(0,1) == 'x') {
+          if (i.substring(0, 1) == 'x') {
             responseHeaders[i] = answerDetails.headers[i];
           }
         }

@@ -8,7 +8,6 @@
  */
 'use strict';
 
-const debug = require('debug')('proxy:match-route');
 const checkPath = require('./checkPath.js')
 const checkConditions = require('./checkConditions.js')
 
