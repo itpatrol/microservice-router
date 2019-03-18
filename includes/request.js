@@ -1,10 +1,6 @@
 const request = require('request');
 
-
-
-
-
-
+const findAllTargets = require('./findAllTargets.js')
 
 
 /**
@@ -262,7 +258,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
 function findHookTarget(targetRequest, globalServices, phase, type, group){
   debug.debugHook('Find all hooks route: %s phase: %s type: %s group: %s',
     targetRequest.route, phase, type, group);
-  let allHookTargets = findAllTargets(targetRequest, globalServices, 'hook')
+  let allHookTargets = findAllTargets(targetRequest, 'hook', globalServices)
   if (allHookTargets instanceof Error) {
     return allHookTargets
   }
