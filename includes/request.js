@@ -6,6 +6,7 @@ const sendBroadcastMessage = require('./sendBroadcastMessage.js')
 const decodeData = require('./decodeData.js')
 const getHookHeaders = require('./getHookHeaders.js')
 const sendRequest = require('./sendRequest.js')
+const sendHookBroadcast = require('./sendHookBroadcast.js')
 
 
 /**
@@ -13,35 +14,8 @@ const sendRequest = require('./sendRequest.js')
  */
 function hookCall(targetRequest, globalServices, phase, callback) {
   
-  // send Broadcast
-  let broadcastTargets = findHookTarget(targetRequest, phase, 'broadcast', false, globalServices)
-  debug.debug('Bradcast: Phase %s for %s result: %O', phase, targetRequest.route, broadcastTargets);
+  sendHookBroadcast(targetRequest, phase, globalServices)
   
-  if (broadcastTargets instanceof Array) {
-    let processBroadcast = function() {
-      if (!broadcastTargets.length) {
-        return false
-      }
-      let routerItem = broadcastTargets.pop()
-      let requestOptions = {
-        uri: routerItem.url + targetRequest.path,
-        method: 'NOTIFY',
-        headers: getHookHeaders(targetRequest, routerItem, phase, 'broadcast', false, true),
-        body: targetRequest.requestDetails._buffer
-      }
-      sendRequest(requestOptions, targetRequest, globalServices, function(err){
-        if (err) {
-          debug.log('broadcast failed %O', err);
-        } else {
-          debug.log('broadcast sent');
-        }
-        if (broadcastTargets.length) {
-          processBroadcast()
-        }
-      })
-    }
-    processBroadcast()
-  }
 
   // send Notify
   let notifyTargets = findHookTarget(targetRequest, phase, 'notify', false, globalServices)
