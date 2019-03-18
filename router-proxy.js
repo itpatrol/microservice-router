@@ -117,7 +117,7 @@ function ProxyRequestGet(url, requestDetails, callback) {
     jsonData: url,
     requestDetails: requestDetails
   }
-  proxyRequest(targetRequest, callback);
+  proxyRequest(targetRequest, globalServices, callback);
 }
 
 /**
@@ -137,7 +137,7 @@ function ProxyRequestPOST(jsonData, requestDetails, callback) {
     jsonData: jsonData,
     requestDetails: requestDetails
   }
-  proxyRequest(targetRequest, callback);
+  proxyRequest(targetRequest, globalServices, callback);
 }
 
 /**
@@ -155,7 +155,7 @@ function ProxyRequestPUT(jsonData, requestDetails, callback) {
     jsonData: jsonData,
     requestDetails: requestDetails
   }
-  proxyRequest(targetRequest, callback);
+  proxyRequest(targetRequest, globalServices, callback);
 }
 
 /**
@@ -173,7 +173,7 @@ function ProxyRequestDELETE(url, requestDetails, callback) {
     jsonData: url,
     requestDetails: requestDetails
   }
-  proxyRequest(targetRequest, callback);
+  proxyRequest(targetRequest, globalServices, callback);
 }
 
 
@@ -194,7 +194,7 @@ function ProxyRequestSEARCH(jsonData, requestDetails, callback) {
     jsonData: jsonData,
     requestDetails: requestDetails
   }
-  proxyRequest(targetRequest, callback);
+  proxyRequest(targetRequest, globalServices, callback);
 }
 
 
@@ -228,7 +228,7 @@ function ProxyRequestOPTIONS(jsonData, requestDetails, callbacks, callback) {
     jsonData: jsonData,
     requestDetails: requestDetails
   }
-  proxyRequest(targetRequest, callback);
+  proxyRequest(targetRequest, globalServices, callback);
 }
 
 /**

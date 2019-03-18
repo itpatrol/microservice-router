@@ -1,172 +1,16 @@
 const request = require('request');
 
-/**
- * Source: https://gist.github.com/jasonrhodes/2321581
- * A function to take a string written in dot notation style, and use it to
- * find a nested object property inside of an object.
- *
- * Useful in a plugin or module that accepts a JSON array of objects, but
- * you want to let the user specify where to find various bits of data
- * inside of each custom object instead of forcing a standardized
- * property list.
- *
- * @param String nested A dot notation style parameter reference (ie "urls.small")
- * @param Object object (optional) The object to search
- *
- * @return the value of the property in question
- */
-function getProperty( propertyName, object ) {
-  let parts = propertyName.split( "." ),
-      length = parts.length,
-      i,
-      property = object;
-  for ( i = 0; i < length; i++ ) {
-    if (property[parts[i]] === undefined) {
-      return new Error('Property Does not exists')
-    }
-    property = property[parts[i]];
-  }
-  return property;
-}
 
 
-/**
- * Check Conditions for request.
- */
-function checkConditions(conditions, requestDetails, jsonData) {
-  debug.debug('checkConditions %O requestDetails: %O json: %O', conditions,
-  requestDetails, jsonData)
-  if (conditions.headers && conditions.headers.length) {
-    for (let header of conditions.headers ) {
-      if (!requestDetails.headers[header.name]) {
-        return false
-      }
-      let receivedHeaderValue = requestDetails.headers[header.name]
-      if (header.isRegex) {
-        let pattern = new RegExp(header.value, "i")
-        if (!pattern.test(receivedHeaderValue)) {
-          return false
-        }
-      } else {
-        if (receivedHeaderValue !== header.value) {
-          return false
-        }
-      }
-    }
-  }
-  // check methods
-  if (conditions.methods && conditions.methods.length) {
-    if (conditions.methods.indexOf(requestDetails.method) == -1) {
-      return false;
-    }
-  }
-  // check payload
-  if (conditions.payload && conditions.payload.length
-    && jsonData) {
-    if (typeof jsonData != "object") {
-      return false
-    }
-    for (let payload of conditions.payload ) {
-      debug.debug('Checking for condition %O', payload)
-      let receivedPayloadValue = getProperty(payload.name, jsonData)
-      debug.debug('receivedPayloadValue %O', receivedPayloadValue)
-      if (receivedPayloadValue instanceof Error) {
-
-        return false
-      }
-      if (payload.isRegex) {
-        let pattern = new RegExp(payload.value, "i")
-        debug.debug('pattern.test %O', pattern.test(receivedPayloadValue))
-        if (!pattern.test(receivedPayloadValue)) {
-          return false
-        }
-      } else {
-        if (receivedPayloadValue !== payload.value) {
-          return false
-        }
-      }
-    }
-  }
-  return true
-}
 
 
-/**
- * Check if route match request.
- */
-function matchRoute(targetRequest, routeItem) {
-  let routeItems = targetRequest.route.split('/');
 
-  if (routeItem.type == "metric") {
-    if (routeItem.conditions) {
-      if (!checkConditions(routeItem.conditions,
-                          targetRequest.requestDetails, targetRequest.jsonData)) {
-        return false
-      }
-    }
-    return true
-  }
-  if (routeItem.path && routeItem.path.length == 1 && routeItem.path[0] == '*') {
-    if (routeItem.conditions) {
-      if (!checkConditions(routeItem.conditions,
-                          targetRequest.requestDetails, targetRequest.jsonData)) {
-        return false
-      }
-    }
-    return true
-  }
-  // Check path and if match, set routeItem.matchVariables with values.
-  let checkPath = function(paths){
-    for (let path of paths) {
-      // If route qual saved path
-      if (path == targetRequest.route) {
-        return true;
-      }
-  
-      // If routeItems.length == 1, and did not match
-      if (routeItems.length == 1) {
-        if (path != targetRequest.route) {
-          continue;
-        }
-      }
-  
-      var pathItems = path.split('/');
-      if (pathItems.length != routeItems.length) {
-        continue;
-      }
-      var fullPathMatched = true;
-      for (var i = 0; i < routeItems.length; i++) {
-        if (pathItems[i].charAt(0) == ':') {
-          routeItem.matchVariables[pathItems[i].substring(1)] = routeItems[i];
-        } else {
-          if (routeItems[i] != pathItems[i]) {
-            fullPathMatched = false;
-            break;
-          }
-        }
-      }
-      if (fullPathMatched) {
-        return true;
-      }
-    }
-  }
-  if (!checkPath(routeItem.path)) {
-    return false
-  }
-  if (routeItem.conditions) {
-    if (!checkConditions(routeItem.conditions,
-                        targetRequest.requestDetails, targetRequest.jsonData)) {
-      return false
-    }
-  }
-  return true;
-}
 
 
 /**
  * Process before Hooks.
  */
-function hookCall(targetRequest, phase, callback) {
+function hookCall(targetRequest, globalServices, phase, callback) {
   
   let getHeaders = function(router, hookType){
     let headers = {};
@@ -195,7 +39,7 @@ function hookCall(targetRequest, phase, callback) {
     return headers;
   }
   // send Broadcast
-  let broadcastTargets = findHookTarget(targetRequest, phase, 'broadcast')
+  let broadcastTargets = findHookTarget(targetRequest, globalServices, phase, 'broadcast')
   debug.debug('Bradcast: Phase %s for %s result: %O', phase, targetRequest.route, broadcastTargets);
   if (broadcastTargets instanceof Array) {
     let getBroadcastRequest = function(){
@@ -228,14 +72,14 @@ function hookCall(targetRequest, phase, callback) {
       debug.log('broadcast sent');
       // If more in queue left - send more
       if (broadcastTargets.length) {
-        _request(getBroadcastRequest, callbackBroadcastRequest, targetRequest)
+        _request(getBroadcastRequest, callbackBroadcastRequest, targetRequest, false, globalServices)
       }
     }
-    _request(getBroadcastRequest, callbackBroadcastRequest, targetRequest)
+    _request(getBroadcastRequest, callbackBroadcastRequest, targetRequest, false, globalServices)
   }
 
   // send Notify
-  let notifyTargets = findHookTarget(targetRequest, phase, 'notify')
+  let notifyTargets = findHookTarget(targetRequest, globalServices, phase, 'notify')
   debug.debug('Notify: Phase %s for %s result: %O', phase, targetRequest.route, notifyTargets);
   if (notifyTargets instanceof Array) {
     let notifyGroups = []
@@ -255,7 +99,7 @@ function hookCall(targetRequest, phase, callback) {
         if (!currentNotifyGroup) {
           return false
         }
-        let notifyGroupTargets = findHookTarget(targetRequest, phase, 'notify', currentNotifyGroup)
+        let notifyGroupTargets = findHookTarget(targetRequest, globalServices, phase, 'notify', currentNotifyGroup)
         debug.debug('Notify: Phase %s result: %O', phase, notifyGroupTargets);
         if (notifyGroupTargets instanceof Error) {
           return notifyGroupTargets
@@ -293,16 +137,16 @@ function hookCall(targetRequest, phase, callback) {
         // If more groups left - send more
         if (notifyGroups.length) {
           currentNotifyGroup = notifyGroups.shift()
-          _request(getNotifyRequest, callbackNotifyRequest, targetRequest)
+          _request(getNotifyRequest, callbackNotifyRequest, targetRequest, false, globalServices)
         }
       }
-      _request(getNotifyRequest, callbackNotifyRequest, targetRequest)
+      _request(getNotifyRequest, callbackNotifyRequest, targetRequest, false, globalServices)
     }
   }
 
 
   // send adapter
-  let adapterTargets = findHookTarget(targetRequest, phase, 'adapter')
+  let adapterTargets = findHookTarget(targetRequest, globalServices, phase, 'adapter')
   debug.debug('Adapter: Phase %s for %s result: %O', phase, targetRequest.route, adapterTargets);
   if (adapterTargets instanceof Error) {
     // No adapters found. return true, no error but nothing to process.
@@ -330,7 +174,7 @@ function hookCall(targetRequest, phase, callback) {
     if (!currentAdapterGroup) {
       return false
     }
-    let adapterGroupTargets = findHookTarget(targetRequest, phase, 'adapter', currentAdapterGroup)
+    let adapterGroupTargets = findHookTarget(targetRequest, globalServices, phase, 'adapter', currentAdapterGroup)
     if (adapterGroupTargets instanceof Error) {
       return adapterGroupTargets
     }
@@ -402,12 +246,12 @@ function hookCall(targetRequest, phase, callback) {
     // If more groups left - send more
     if (adapterGroups.length) {
       currentAdapterGroup = adapterGroups.shift()
-      return _request(getAdapterRequest, callbackAdapterRequest, targetRequest)
+      return _request(getAdapterRequest, callbackAdapterRequest, targetRequest,false, globalServices)
     }
     // return back via callback
     callback()
   }
-  _request(getAdapterRequest, callbackAdapterRequest, targetRequest)
+  _request(getAdapterRequest, callbackAdapterRequest, targetRequest, false, globalServices)
 
 }
 
@@ -415,10 +259,10 @@ function hookCall(targetRequest, phase, callback) {
 /**
  * Find all hook routes by stage.
  */
-function findHookTarget(targetRequest, phase, type, group){
+function findHookTarget(targetRequest, globalServices, phase, type, group){
   debug.debugHook('Find all hooks route: %s phase: %s type: %s group: %s',
     targetRequest.route, phase, type, group);
-  let allHookTargets = findAllTargets(targetRequest, 'hook')
+  let allHookTargets = findAllTargets(targetRequest, globalServices, 'hook')
   if (allHookTargets instanceof Error) {
     return allHookTargets
   }
@@ -463,33 +307,7 @@ function findHookTarget(targetRequest, phase, type, group){
 /**
  * Find all routes.
  */
-function findAllTargets(targetRequest, type) {
-  debug.debug('Find all routes %s', targetRequest.route);
 
-  var availableRoutes = [];
-  for (let i in globalServices) {
-    if (globalServices[i].type && globalServices[i].type.toLowerCase() !== type) {
-      continue
-    }
-    // For easy deployment when service need to stop receiving new requests.
-    if (!globalServices[i].online) {
-      continue
-    }
-    // Making copy of the router.
-    let routeItem = JSON.parse(JSON.stringify(globalServices[i]));
-    routeItem.matchVariables = {};
-    if (matchRoute(targetRequest, routeItem)) {
-      availableRoutes.push(routeItem);
-    }
-  }
-  debug.debug('Available routes type: %s route: %s availableRoutes: %s', type, targetRequest.route,
-    JSON.stringify(availableRoutes , null, 2));
-  if (availableRoutes.length == 0) {
-    debug.debug('Not found for %s', targetRequest.route);
-    return new Error('Endpoint not found');
-  }
-  return availableRoutes;
-}
 
 
 /**
@@ -555,7 +373,7 @@ function getMinLoadedRouter(availableRoutes) {
   return minRouter;
 }
 
-function _request(getRequest, callback, targetRequest, noMetric) {
+function _request(getRequest, callback, targetRequest, noMetric, globalServices) {
   let requestOptions = getRequest()
   
   if (requestOptions instanceof Error) {
@@ -605,7 +423,7 @@ function _request(getRequest, callback, targetRequest, noMetric) {
     
     debug.debugMetric('requestOptions: %O executeTime: %s', requestOptions, executeTime);
     if (!noMetric) {
-      let metricTargets = findAllTargets(targetRequest, 'metric')
+      let metricTargets = findAllTargets(targetRequest, 'metric', globalServices)
       debug.debugMetric('findHookTarget: for %s result: %O', targetRequest.route, metricTargets);
     
       if (metricTargets instanceof Array) {
@@ -671,10 +489,10 @@ function _request(getRequest, callback, targetRequest, noMetric) {
           debug.debugMetric('Metric targetRequest %O ', targetRequest);
           // If more in queue left - send more
           if (metricTargets.length) {
-            _request(getMetricRequest, callbackMetricRequest, targetRequest, true)
+            _request(getMetricRequest, callbackMetricRequest, targetRequest, true, globalServices)
           }
         }
-        _request(getMetricRequest, callbackMetricRequest, targetRequest, true)
+        _request(getMetricRequest, callbackMetricRequest, targetRequest, true, globalServices)
       } else {
         debug.debugMetric('no metric enpoints');
       }
@@ -688,7 +506,7 @@ function _request(getRequest, callback, targetRequest, noMetric) {
       debug.debug('_request Restart request: %O', requestOptions);
       // Do not try to redeliver metrics. can lock a event loop
       if (!noMetric) {
-        return _request(getRequest, callback, targetRequest);
+        return _request(getRequest, callback, targetRequest, false, globalServices);
       }
     }
     
@@ -759,10 +577,10 @@ function sendBroadcastMessageToClient(bufferedMessage, URL) {
 }
 
 
-module.exports = function(targetRequest, callback){
+module.exports = function(targetRequest, globalServices, callback){
   debug.debug('Route base: %s', targetRequest.route);
 
-  let endpointTargets = findAllTargets(targetRequest, 'handler');
+  let endpointTargets = findAllTargets(targetRequest, 'handler', globalServices);
   if (endpointTargets instanceof Error) {
     debug.debug('Route %s err %O', targetRequest.route, endpointTargets);
     return callback(endpointTargets, null);
@@ -773,19 +591,11 @@ module.exports = function(targetRequest, callback){
     secureKey: endpointTargets[0].secureKey
   }
 
-  hookCall(targetRequest, 'before', function(){
+  hookCall(targetRequest, globalServices, 'before', function(){
     //used later in sendBroadcastMessage
     let router = false
     // process request to endpoint
     let getEndpointRequest = function(){
-      let endpointTargets = findAllTargets(targetRequest, 'handler');
-      if (endpointTargets instanceof Error) {
-        return endpointTargets
-      }
-      if (!endpointTargets.length) {
-        return false
-      }
-      
       if (endpointTargets.length == 1) {
         router = endpointTargets.pop();
       } else {
@@ -851,7 +661,7 @@ module.exports = function(targetRequest, callback){
         requestDetails: answerDetails,
         endpoint: targetRequest.endpoint
       }
-      hookCall(targetAnswer, 'after', function(){
+      hookCall(targetAnswer, globalServices, 'after', function(){
 
         // Double check updated _buffer after proxy.
         let body = false
@@ -914,7 +724,7 @@ module.exports = function(targetRequest, callback){
 
       })
     }
-    _request(getEndpointRequest, callbackEndpointRequest, targetRequest)
+    _request(getEndpointRequest, callbackEndpointRequest, targetRequest, false, globalServices)
     
   })
 }
