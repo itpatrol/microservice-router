@@ -5,7 +5,7 @@
  * @param String phase(optional) hook phase: before, after, metric
  * @param Object object all available routes
  *
- * @return array of objects with available routes
+ * @return 
  */
 'use strict';
 
@@ -30,7 +30,7 @@ function processNotify(notifyTargets, targetRequest, phase, globalServices, call
   sendRequest(requestOptions, targetRequest, globalServices, function(err){
     if (err) {
       debug('notify failed %O', err);
-      return processNotify(currentNotifyTargets, targetRequest, phase, globalServices, callback)
+      return processNotify(notifyTargets, targetRequest, phase, globalServices, callback)
     }
     debug('notify sent');
     callback()
@@ -38,12 +38,13 @@ function processNotify(notifyTargets, targetRequest, phase, globalServices, call
 }
 
 function processNotifyGroup(notifyGroups, notifyTargets, targetRequest, phase, globalServices){
-  debug.debug('notify Groups %s %O', currentNotifyGroup, notifyGroups);
   if (notifyGroups.length){
     let currentNotifyGroup = notifyGroups.shift()
     let currentNotifyTargets = notifyTargets.filter(function(a) {
       return a.group == currentNotifyGroup
     })
+    debug('notify Groups %s %O', currentNotifyGroup, notifyGroups);
+  
     processNotify(currentNotifyTargets, targetRequest, phase, globalServices, function(){
       processNotifyGroup(notifyGroups, notifyTargets, targetRequest, phase, globalServices)
     })

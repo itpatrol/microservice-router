@@ -8,6 +8,7 @@ const getHookHeaders = require('./getHookHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const sendHookBroadcast = require('./sendHookBroadcast.js')
 const sendHookNotify = require('./sendHookNotify.js')
+const sendHookAdapter = require('./sendHookAdapter.js')
 
 
 /**
@@ -17,125 +18,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
   
   sendHookBroadcast(targetRequest, phase, globalServices)
   sendHookNotify(targetRequest, phase, globalServices)
-
-
-  // send adapter
-  let adapterTargets = findHookTarget(targetRequest, phase, 'adapter', false, globalServices)
-  debug.debug('Adapter: Phase %s for %s result: %O', phase, targetRequest.route, adapterTargets);
-  if (adapterTargets instanceof Error) {
-    // No adapters found. return true, no error but nothing to process.
-    debug.debug('No adapter groups found');
-    return callback(true)
-  }
-
-  let adapterGroups = []
-  for (let target of adapterTargets) {
-    if (target.group) {
-      if (adapterGroups.indexOf(target.group) == -1) {
-        adapterGroups.push(target.group)
-      }
-    }
-  }
-  adapterGroups.sort()
-  debug.debug('adapter Groups %O', adapterGroups);
-  if (!adapterGroups.length) {
-    // No adapters found. return true, no error but nothing to process.
-    debug.debug('No adapter groups found');
-    return callback(true)
-  }
-  let currentAdapterGroup = adapterGroups.shift()
-  let currentAdapterGroupTargets = adapterTargets.filter(function(a) {
-    return a.group == currentAdapterGroup
-  })
-
-  let processAdapter = function() {
-    debug.debug('Adapter Groups %s %O', currentAdapterGroup, adapterGroups);
-    if (!currentAdapterGroupTargets.length) {
-      if(!adapterGroups.length) {
-        return callback(true)
-      }
-      // Try next group if available 
-      currentAdapterGroup = adapterGroups.shift()
-      currentAdapterGroupTargets = adapterTargets.filter(function(a) {
-        return a.group == currentAdapterGroup
-      })
-      return processAdapter()
-    }
-    // TODO apply tags based vouting here
-    let routerItem = currentAdapterGroupTargets.pop()
-    let requestOptions = {
-      uri: routerItem.url + targetRequest.path,
-      method: 'NOTIFY',
-      headers: getHookHeaders(targetRequest, routerItem, phase, 'adapter', currentAdapterGroup, true),
-      body: targetRequest.requestDetails._buffer
-    }
-    sendRequest(requestOptions, targetRequest, globalServices, function(err, response, body){
-      let headerStatusName = 'x-hook-adapter-status-' + currentAdapterGroup + '-' + phase
-      if (err) {
-        // It's communication error and we need to try next adapter
-        if (!currentAdapterGroupTargets.length) {
-          // no more adapters in current group. Set Status.
-          targetRequest.requestDetails.headers[headerStatusName] = 'error: ' + err.message
-          
-        }
-        // Go to next Adapter to next Group
-        return processAdapter()
-      }
-      if(response.statusCode != 200) {
-        debug.log('Adapter failed with code: %s body: %s', response.statusCode, body)
-        for (var i in response.headers) {
-          if (i.substring(0, 6) == 'x-set-') {
-            let headerName = i.substr(6)
-            targetRequest.requestDetails.headers[headerName] = response.headers[i];
-          }
-        }
-        // TODO Maybe if addapter return !200 code, we need to return it to client
-        // Go to next group
-        if (adapterGroups.length) {
-          currentAdapterGroup = adapterGroups.shift()
-          currentAdapterGroupTargets = adapterTargets.filter(function(a) {
-            return a.group == currentAdapterGroup
-          })
-          return processAdapter()
-        }
-        // No more groups, return via callback
-        return callback()
-      }
-      
-      debug.log('adapter processed');
-      //Apply body converted by adapter 
-      targetRequest.requestDetails._buffer = body
-      debug.debug('Adapter Headers received: %O code: %s', response.headers, response.statusCode);
-      for (var i in response.headers) {
-        if (i.substring(0, 6) == 'x-set-') {
-          let headerName = i.substr(6)
-          targetRequest.requestDetails.headers[headerName] = response.headers[i];
-        }
-      }
-      delete targetRequest.requestDetails.headers['content-length']
-      if (phase == 'before') {
-        // resign it
-        if (targetRequest.requestDetails.headers.signature) {
-          targetRequest.requestDetails.headers.signature = 'sha256=' 
-          + signature('sha256',
-            targetRequest.requestDetails._buffer,
-            targetRequest.endpoint.secureKey);
-        }
-      }
-      //try next group
-      if (adapterGroups.length) {
-        currentAdapterGroup = adapterGroups.shift()
-        currentAdapterGroupTargets = adapterTargets.filter(function(a) {
-          return a.group == currentAdapterGroup
-        })
-        return processAdapter()
-      }
-      // return back via callback
-      callback()
-    })
-  }
-  processAdapter();
-}
+  sendHookAdapter(targetRequest, phase, globalServices, callback)
 
 
 /**
