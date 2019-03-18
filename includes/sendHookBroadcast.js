@@ -1,5 +1,5 @@
 /**
- * get Headers for Hook
+ * Send Hook Broadcast
  *
  * @param Object targetRequest request details
  * @param String phase(optional) hook phase: before, after, metric
@@ -13,8 +13,9 @@ const debug = require('debug')('proxy:send-hook-broadcast');
 
 const getHookHeaders = require('./getHookHeaders.js')
 const sendRequest = require('./sendRequest.js')
+const findHookTarget = require('./findHookTarget.js')
 
-function processBroadcast (broadcastTargets, targetRequest, phase, globalServices) {
+function processBroadcast(broadcastTargets, targetRequest, phase, globalServices) {
   if (!broadcastTargets.length) {
     return false
   }
@@ -27,9 +28,9 @@ function processBroadcast (broadcastTargets, targetRequest, phase, globalService
   }
   sendRequest(requestOptions, targetRequest, globalServices, function(err){
     if (err) {
-      debug.log('broadcast failed %O', err);
+      debug('broadcast failed %O', err);
     } else {
-      debug.log('broadcast sent');
+      debug('broadcast sent');
     }
     if (broadcastTargets.length) {
       processBroadcast(broadcastTargets, targetRequest, phase, globalServices)

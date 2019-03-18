@@ -7,6 +7,7 @@ const decodeData = require('./decodeData.js')
 const getHookHeaders = require('./getHookHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const sendHookBroadcast = require('./sendHookBroadcast.js')
+const sendHookNotify = require('./sendHookNotify.js')
 
 
 /**
@@ -15,74 +16,7 @@ const sendHookBroadcast = require('./sendHookBroadcast.js')
 function hookCall(targetRequest, globalServices, phase, callback) {
   
   sendHookBroadcast(targetRequest, phase, globalServices)
-  
-
-  // send Notify
-  let notifyTargets = findHookTarget(targetRequest, phase, 'notify', false, globalServices)
-  debug.debug('Notify: Phase %s for %s result: %O', phase, targetRequest.route, notifyTargets);
-  if (notifyTargets instanceof Array) {
-    let notifyGroups = []
-    for (let target of notifyTargets) {
-      if (target.group) {
-        if (notifyGroups.indexOf(target.group) == -1) {
-          notifyGroups.push(target.group)
-        }
-      }
-    }
-    notifyGroups.sort()
-    debug.debug('notify Groups %O', notifyGroups);
-    if (notifyGroups.length){
-      let currentNotifyGroup = notifyGroups.shift()
-      let currentNotifyTargets = notifyTargets.filter(function(a) {
-        return a.group == currentNotifyGroup
-      })
-
-      let processNotify = function() {
-        debug.debug('notify Groups %s %O', currentNotifyGroup, notifyGroups);
-        if (!currentNotifyTargets.length) {
-          if(!notifyGroups.length) {
-            return
-          }
-          // Try next group if available 
-          if(notifyGroups.length) {
-            currentNotifyGroup = notifyGroups.shift()
-            currentNotifyTargets = notifyTargets.filter(function(a) {
-              return a.group == currentNotifyGroup
-            })
-            return processNotify()
-          }
-          return
-        }
-        // TODO apply tags based vouting here
-        let routerItem = currentNotifyTargets.pop()
-        let requestOptions = {
-          uri: routerItem.url + targetRequest.path,
-          method: 'NOTIFY',
-          headers: getHookHeaders(targetRequest, routerItem, phase, 'notify', currentNotifyGroup, true),
-          body: targetRequest.requestDetails._buffer
-        }
-        sendRequest(requestOptions, targetRequest, globalServices, function(err){
-          if (err) {
-            debug.log('notify failed %O', err);
-            // Try next in line
-            return processNotify()
-          }
-          
-          debug.log('notify sent');
-          if(!notifyGroups.length) {
-            return
-          }
-          //try next group
-          currentNotifyGroup = notifyGroups.shift()
-          currentNotifyTargets = notifyTargets.filter(function(a) {
-            return a.group == currentNotifyGroup
-          })
-          return processNotify()
-        })
-      }
-      processNotify();
-    }
-  }
+  sendHookNotify(targetRequest, phase, globalServices)
 
 
   // send adapter
