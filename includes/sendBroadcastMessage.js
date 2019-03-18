@@ -10,7 +10,7 @@
 'use strict';
 
 const debug = require('debug')('proxy:send-udp-broadcast');
-const signature = require('./includes/signature.js');
+const signature = require('./signature.js');
 const dgram = require('dgram');
 const url = require('url');
 

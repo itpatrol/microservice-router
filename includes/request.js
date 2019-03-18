@@ -4,6 +4,7 @@ const findAllTargets = require('./findAllTargets.js')
 const findHookTarget = require('./findHookTarget.js')
 const sendBroadcastMessage = require('./sendBroadcastMessage.js')
 const decodeData = require('./decodeData.js')
+const getHookHeaders = require('./getHookHeaders.js')
 
 
 /**
@@ -11,32 +12,6 @@ const decodeData = require('./decodeData.js')
  */
 function hookCall(targetRequest, globalServices, phase, callback) {
   
-  let getHeaders = function(router, hookType){
-    let headers = {};
-    // TODO verify date,content-type, transfer-encoding headers
-    let skipHeaders = [
-      'host', // issue to properly connect
-      'connection', // if it is closed, behavior is unexpected
-      'transfer-encoding', //we need to ignore that one.
-      'content-length', //issue with recounting length of the package
-    ]
-    for (var i in targetRequest.requestDetails.headers) {
-      if (skipHeaders.indexOf(i) != -1) {
-        continue
-      }
-      headers[i] = targetRequest.requestDetails.headers[i];
-    }
-    for (var i in router.matchVariables) {
-      headers['mfw-' + i] = router.matchVariables[i];
-    }
-    headers['x-origin-url'] = targetRequest.route
-    headers['x-origin-method'] = targetRequest.method
-    headers['x-hook-phase'] = phase
-    headers['x-hook-type'] = hookType
-    headers['x-endpoint-scope'] = targetRequest.endpoint.scope
-    debug.debug('%s headers %O', targetRequest.route, headers);
-    return headers;
-  }
   // send Broadcast
   let broadcastTargets = findHookTarget(targetRequest, phase, 'broadcast', false, globalServices)
   debug.debug('Bradcast: Phase %s for %s result: %O', phase, targetRequest.route, broadcastTargets);
@@ -50,16 +25,11 @@ function hookCall(targetRequest, globalServices, phase, callback) {
       }
       let router = broadcastTargets.pop()
       debug.log('Notify route %s result %O', targetRequest.route, router);
-      let headers = getHeaders(router, 'broadcast')
-      // Sign request for hook
-      headers['x-hook-signature'] = 'sha256=' 
-      + signature('sha256',
-        targetRequest.requestDetails._buffer,
-        router.secureKey);
+
       return {
         uri: router.url + targetRequest.path,
         method: 'NOTIFY',
-        headers: headers,
+        headers: getHookHeaders(targetRequest, router, phase, 'broadcast', false, true),
         body: targetRequest.requestDetails._buffer
       }
     }
@@ -114,17 +84,11 @@ function hookCall(targetRequest, globalServices, phase, callback) {
           router =  getMinLoadedRouter(notifyGroupTargets);
         }
         debug.log('Notify route %s result %O', targetRequest.route, router);
-        let headers = getHeaders(router, 'notify')
-        headers['x-hook-group'] = currentNotifyGroup
-        // Sign request for hook
-        headers['x-hook-signature'] = 'sha256=' 
-        + signature('sha256',
-          targetRequest.requestDetails._buffer,
-          router.secureKey);
+
         return {
           uri: router.url + targetRequest.path,
           method: 'NOTIFY',
-          headers: headers,
+          headers: getHookHeaders(targetRequest, router, phase, 'notify', currentNotifyGroup, true),
           body: targetRequest.requestDetails._buffer
         }
       }
@@ -188,17 +152,10 @@ function hookCall(targetRequest, globalServices, phase, callback) {
       router =  getMinLoadedRouter(adapterGroupTargets);
     }
     debug.log('Notify route %s result %O', targetRequest.route, router);
-    let headers = getHeaders(router, 'adapter')
-    headers['x-hook-group'] = currentAdapterGroup
-    // Sign request for hook
-    headers['x-hook-signature'] = 'sha256=' 
-    + signature('sha256',
-      targetRequest.requestDetails._buffer,
-      router.secureKey);
     return {
       uri: router.url + targetRequest.path,
       method: 'NOTIFY',
-      headers: headers,
+      headers: getHookHeaders(targetRequest, router, phase, 'adapter', currentAdapterGroup, true),
       body: targetRequest.requestDetails._buffer
     }
   }
@@ -278,31 +235,7 @@ function _request(getRequest, callback, targetRequest, noMetric, globalServices)
     return callback(new Error('Invalid URI' + requestOptions.uri))
   }
 
-  let getHeaders = function(router, hookType){
-    let headers = {};
-    // TODO verify date,content-type, transfer-encoding headers
-    let skipHeaders = [
-      'host',
-      'date',
-      'connection',
-      'content-length',
-      'transfer-encoding'
-    ]
-    for (var i in targetRequest.requestDetails.headers) {
-      if (skipHeaders.indexOf(i) != -1) {
-        continue
-      }
-      headers[i] = targetRequest.requestDetails.headers[i];
-    }
-    for (var i in router.matchVariables) {
-      headers['mfw-' + i] = router.matchVariables[i];
-    }
-    headers['x-origin-url'] = targetRequest.route
-    headers['x-origin-method'] = targetRequest.method
-    headers['x-endpoint-scope'] = targetRequest.endpoint.scope
-    debug.debug('%s headers %O', targetRequest.route, headers);
-    return headers;
-  }
+  
   let startTime = Date.now();
   debug.request('requestOptions: %O', requestOptions);
   request(requestOptions, function(error, response, body) {
@@ -356,7 +289,7 @@ function _request(getRequest, callback, targetRequest, noMetric, globalServices)
             metricJSON.response = body;
           }
           let metricBody = JSON.stringify(metricJSON)
-          let headers = getHeaders(router, 'metric')
+          let headers = getHookHeaders(targetRequest, router, false, 'metric', false, false)
           // Sign request for hook
           headers['x-hook-signature'] = 'sha256='
             + signature('sha256', metricBody, router.secureKey);
