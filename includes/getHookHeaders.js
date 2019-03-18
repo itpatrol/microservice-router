@@ -1,5 +1,5 @@
 /**
- * Find all targets for hook
+ * get Headers for Hook
  *
  * @param Object targetRequest request details
  * @param Object routeItem ob route table

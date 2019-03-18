@@ -5,6 +5,7 @@ const findHookTarget = require('./findHookTarget.js')
 const sendBroadcastMessage = require('./sendBroadcastMessage.js')
 const decodeData = require('./decodeData.js')
 const getHookHeaders = require('./getHookHeaders.js')
+const sendRequest = require('./sendRequest.js')
 
 
 /**
@@ -15,36 +16,31 @@ function hookCall(targetRequest, globalServices, phase, callback) {
   // send Broadcast
   let broadcastTargets = findHookTarget(targetRequest, phase, 'broadcast', false, globalServices)
   debug.debug('Bradcast: Phase %s for %s result: %O', phase, targetRequest.route, broadcastTargets);
+  
   if (broadcastTargets instanceof Array) {
-    let getBroadcastRequest = function(){
-      if (broadcastTargets instanceof Error) {
-        return broadcastTargets
-      }
+    let processBroadcast = function() {
       if (!broadcastTargets.length) {
         return false
       }
-      let router = broadcastTargets.pop()
-      debug.log('Notify route %s result %O', targetRequest.route, router);
-
-      return {
-        uri: router.url + targetRequest.path,
+      let routerItem = broadcastTargets.pop()
+      let requestOptions = {
+        uri: routerItem.url + targetRequest.path,
         method: 'NOTIFY',
-        headers: getHookHeaders(targetRequest, router, phase, 'broadcast', false, true),
+        headers: getHookHeaders(targetRequest, routerItem, phase, 'broadcast', false, true),
         body: targetRequest.requestDetails._buffer
       }
+      sendRequest(requestOptions, targetRequest, globalServices, function(err){
+        if (err) {
+          debug.log('broadcast failed %O', err);
+        } else {
+          debug.log('broadcast sent');
+        }
+        if (broadcastTargets.length) {
+          processBroadcast()
+        }
+      })
     }
-    let callbackBroadcastRequest = function(err, response, body){
-      // No action on broadcast hook.
-      if (err) {
-        debug.log('broadcast failed %O', err);
-      }
-      debug.log('broadcast sent');
-      // If more in queue left - send more
-      if (broadcastTargets.length) {
-        _request(getBroadcastRequest, callbackBroadcastRequest, targetRequest, false, globalServices)
-      }
-    }
-    _request(getBroadcastRequest, callbackBroadcastRequest, targetRequest, false, globalServices)
+    processBroadcast()
   }
 
   // send Notify
@@ -63,47 +59,54 @@ function hookCall(targetRequest, globalServices, phase, callback) {
     debug.debug('notify Groups %O', notifyGroups);
     if (notifyGroups.length){
       let currentNotifyGroup = notifyGroups.shift()
-      let getNotifyRequest = function(){
-        debug.debug('notify Groups %s %O', currentNotifyGroup, notifyGroups);
-        if (!currentNotifyGroup) {
-          return false
-        }
-        let notifyGroupTargets = findHookTarget(targetRequest, phase, 'notify', currentNotifyGroup, globalServices)
-        debug.debug('Notify: Phase %s result: %O', phase, notifyGroupTargets);
-        if (notifyGroupTargets instanceof Error) {
-          return notifyGroupTargets
-        }
-        if (!notifyGroupTargets.length) {
-          return false
-        }
-        let router = false
-        if (notifyGroupTargets.length == 1) {
-          router = notifyGroupTargets.pop()
-        } else {
-          // TODO: add diferent strategy to choose one of the routes
-          router =  getMinLoadedRouter(notifyGroupTargets);
-        }
-        debug.log('Notify route %s result %O', targetRequest.route, router);
+      let currentNotifyTargets = notifyTargets.filter(function(a) {
+        return a.group == currentNotifyGroup
+      })
 
-        return {
-          uri: router.url + targetRequest.path,
+      let processNotify = function() {
+        debug.debug('notify Groups %s %O', currentNotifyGroup, notifyGroups);
+        if (!currentNotifyTargets.length) {
+          if(!notifyGroups.length) {
+            return
+          }
+          // Try next group if available 
+          if(notifyGroups.length) {
+            currentNotifyGroup = notifyGroups.shift()
+            currentNotifyTargets = notifyTargets.filter(function(a) {
+              return a.group == currentNotifyGroup
+            })
+            return processNotify()
+          }
+          return
+        }
+        // TODO apply tags based vouting here
+        let routerItem = currentNotifyTargets.pop()
+        let requestOptions = {
+          uri: routerItem.url + targetRequest.path,
           method: 'NOTIFY',
-          headers: getHookHeaders(targetRequest, router, phase, 'notify', currentNotifyGroup, true),
+          headers: getHookHeaders(targetRequest, routerItem, phase, 'notify', currentNotifyGroup, true),
           body: targetRequest.requestDetails._buffer
         }
-      }
-      let callbackNotifyRequest = function(err, response, body) {
-        if (err) {
-          debug.log('notify failed %O', err);
-        }
-        debug.log('notify sent');
-        // If more groups left - send more
-        if (notifyGroups.length) {
+        sendRequest(requestOptions, targetRequest, globalServices, function(err){
+          if (err) {
+            debug.log('notify failed %O', err);
+            // Try next in line
+            return processNotify()
+          }
+          
+          debug.log('notify sent');
+          if(!notifyGroups.length) {
+            return
+          }
+          //try next group
           currentNotifyGroup = notifyGroups.shift()
-          _request(getNotifyRequest, callbackNotifyRequest, targetRequest, false, globalServices)
-        }
+          currentNotifyTargets = notifyTargets.filter(function(a) {
+            return a.group == currentNotifyGroup
+          })
+          return processNotify()
+        })
       }
-      _request(getNotifyRequest, callbackNotifyRequest, targetRequest, false, globalServices)
+      processNotify();
     }
   }
 
@@ -133,40 +136,44 @@ function hookCall(targetRequest, globalServices, phase, callback) {
     return callback(true)
   }
   let currentAdapterGroup = adapterGroups.shift()
-  let getAdapterRequest = function(){
-    if (!currentAdapterGroup) {
-      return false
+  let currentAdapterGroupTargets = adapterTargets.filter(function(a) {
+    return a.group == currentAdapterGroup
+  })
+
+  let processAdapter = function() {
+    debug.debug('Adapter Groups %s %O', currentAdapterGroup, adapterGroups);
+    if (!currentAdapterGroupTargets.length) {
+      if(!adapterGroups.length) {
+        return callback(true)
+      }
+      // Try next group if available 
+      currentAdapterGroup = adapterGroups.shift()
+      currentAdapterGroupTargets = adapterTargets.filter(function(a) {
+        return a.group == currentAdapterGroup
+      })
+      return processAdapter()
     }
-    let adapterGroupTargets = findHookTarget(targetRequest, phase, 'adapter', currentAdapterGroup, globalServices)
-    if (adapterGroupTargets instanceof Error) {
-      return adapterGroupTargets
-    }
-    if (!adapterGroupTargets.length) {
-      return false
-    }
-    let router = false
-    if (adapterGroupTargets.length == 1) {
-      router = adapterGroupTargets.pop()
-    } else {
-      // TODO: add diferent strategy to choose one of the routes
-      router =  getMinLoadedRouter(adapterGroupTargets);
-    }
-    debug.log('Notify route %s result %O', targetRequest.route, router);
-    return {
-      uri: router.url + targetRequest.path,
+    // TODO apply tags based vouting here
+    let routerItem = currentAdapterGroupTargets.pop()
+    let requestOptions = {
+      uri: routerItem.url + targetRequest.path,
       method: 'NOTIFY',
-      headers: getHookHeaders(targetRequest, router, phase, 'adapter', currentAdapterGroup, true),
+      headers: getHookHeaders(targetRequest, routerItem, phase, 'adapter', currentAdapterGroup, true),
       body: targetRequest.requestDetails._buffer
     }
-  }
-  let callbackAdapterRequest = function(err, response, body) {
-    let headerStatusName = 'x-hook-adapter-status-' + currentAdapterGroup + '-' + phase
-    if (err || response.statusCode != 200) {
+    sendRequest(requestOptions, targetRequest, globalServices, function(err, response, body){
+      let headerStatusName = 'x-hook-adapter-status-' + currentAdapterGroup + '-' + phase
       if (err) {
-        debug.log('adapter failed %O', err);
-        // TODO status header for adapter
-        targetRequest.requestDetails.headers[headerStatusName] = 'error: ' + err.message
-      } else {
+        // It's communication error and we need to try next adapter
+        if (!currentAdapterGroupTargets.length) {
+          // no more adapters in current group. Set Status.
+          targetRequest.requestDetails.headers[headerStatusName] = 'error: ' + err.message
+          
+        }
+        // Go to next Adapter to next Group
+        return processAdapter()
+      }
+      if(response.statusCode != 200) {
         debug.log('Adapter failed with code: %s body: %s', response.statusCode, body)
         for (var i in response.headers) {
           if (i.substring(0, 6) == 'x-set-') {
@@ -174,12 +181,22 @@ function hookCall(targetRequest, globalServices, phase, callback) {
             targetRequest.requestDetails.headers[headerName] = response.headers[i];
           }
         }
+        // TODO Maybe if addapter return !200 code, we need to return it to client
+        // Go to next group
+        if (adapterGroups.length) {
+          currentAdapterGroup = adapterGroups.shift()
+          currentAdapterGroupTargets = adapterTargets.filter(function(a) {
+            return a.group == currentAdapterGroup
+          })
+          return processAdapter()
+        }
+        // No more groups, return via callback
+        return callback()
       }
       
-    } else {
       debug.log('adapter processed');
+      //Apply body converted by adapter 
       targetRequest.requestDetails._buffer = body
-      // need to set headers x-set-XXXXX
       debug.debug('Adapter Headers received: %O code: %s', response.headers, response.statusCode);
       for (var i in response.headers) {
         if (i.substring(0, 6) == 'x-set-') {
@@ -197,18 +214,19 @@ function hookCall(targetRequest, globalServices, phase, callback) {
             targetRequest.endpoint.secureKey);
         }
       }
-    }
-    
-    // If more groups left - send more
-    if (adapterGroups.length) {
-      currentAdapterGroup = adapterGroups.shift()
-      return _request(getAdapterRequest, callbackAdapterRequest, targetRequest, false, globalServices)
-    }
-    // return back via callback
-    callback()
+      //try next group
+      if (adapterGroups.length) {
+        currentAdapterGroup = adapterGroups.shift()
+        currentAdapterGroupTargets = adapterTargets.filter(function(a) {
+          return a.group == currentAdapterGroup
+        })
+        return processAdapter()
+      }
+      // return back via callback
+      callback()
+    })
   }
-  _request(getAdapterRequest, callbackAdapterRequest, targetRequest, false, globalServices)
-
+  processAdapter();
 }
 
 
@@ -326,8 +344,10 @@ function _request(getRequest, callback, targetRequest, noMetric, globalServices)
       // TODO add limit to re send
       debug.debug('_request Error received: %O', error);
       debug.debug('_request Restart request: %O', requestOptions);
+      return callback(error, response, body)
       // Do not try to redeliver metrics. can lock a event loop
       if (!noMetric) {
+
         return _request(getRequest, callback, targetRequest, false, globalServices);
       }
     }
