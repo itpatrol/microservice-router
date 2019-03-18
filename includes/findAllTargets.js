@@ -5,7 +5,7 @@
  * @param String routeType(optional) of router: hook, handler, metric
  * @param Object object all available routes
  *
- * @return the value of the property in question
+ * @return array of objects with available routes
  */
 'use strict';
 

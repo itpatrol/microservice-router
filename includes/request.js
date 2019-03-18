@@ -35,7 +35,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
     return headers;
   }
   // send Broadcast
-  let broadcastTargets = findHookTarget(targetRequest, globalServices, phase, 'broadcast')
+  let broadcastTargets = findHookTarget(targetRequest, phase, 'broadcast', false, globalServices)
   debug.debug('Bradcast: Phase %s for %s result: %O', phase, targetRequest.route, broadcastTargets);
   if (broadcastTargets instanceof Array) {
     let getBroadcastRequest = function(){
@@ -75,7 +75,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
   }
 
   // send Notify
-  let notifyTargets = findHookTarget(targetRequest, globalServices, phase, 'notify')
+  let notifyTargets = findHookTarget(targetRequest, phase, 'notify', false, globalServices)
   debug.debug('Notify: Phase %s for %s result: %O', phase, targetRequest.route, notifyTargets);
   if (notifyTargets instanceof Array) {
     let notifyGroups = []
@@ -95,7 +95,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
         if (!currentNotifyGroup) {
           return false
         }
-        let notifyGroupTargets = findHookTarget(targetRequest, globalServices, phase, 'notify', currentNotifyGroup)
+        let notifyGroupTargets = findHookTarget(targetRequest, phase, 'notify', currentNotifyGroup, globalServices)
         debug.debug('Notify: Phase %s result: %O', phase, notifyGroupTargets);
         if (notifyGroupTargets instanceof Error) {
           return notifyGroupTargets
@@ -142,7 +142,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
 
 
   // send adapter
-  let adapterTargets = findHookTarget(targetRequest, globalServices, phase, 'adapter')
+  let adapterTargets = findHookTarget(targetRequest, phase, 'adapter', false, globalServices)
   debug.debug('Adapter: Phase %s for %s result: %O', phase, targetRequest.route, adapterTargets);
   if (adapterTargets instanceof Error) {
     // No adapters found. return true, no error but nothing to process.
@@ -170,7 +170,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
     if (!currentAdapterGroup) {
       return false
     }
-    let adapterGroupTargets = findHookTarget(targetRequest, globalServices, phase, 'adapter', currentAdapterGroup)
+    let adapterGroupTargets = findHookTarget(targetRequest, phase, 'adapter', currentAdapterGroup, globalServices)
     if (adapterGroupTargets instanceof Error) {
       return adapterGroupTargets
     }
@@ -250,60 +250,6 @@ function hookCall(targetRequest, globalServices, phase, callback) {
   _request(getAdapterRequest, callbackAdapterRequest, targetRequest, false, globalServices)
 
 }
-
-
-/**
- * Find all hook routes by stage.
- */
-function findHookTarget(targetRequest, globalServices, phase, type, group){
-  debug.debugHook('Find all hooks route: %s phase: %s type: %s group: %s',
-    targetRequest.route, phase, type, group);
-  let allHookTargets = findAllTargets(targetRequest, 'hook', globalServices)
-  if (allHookTargets instanceof Error) {
-    return allHookTargets
-  }
-  let finalHookTable = []
-  for (let target of allHookTargets){
-    // skip hooks with no hook properties
-    if (!target.hook || !target.hook.length) {
-      continue
-    }
-    for (let hook of target.hook) {
-      if (phase !== null && hook.phase !== phase) {
-        continue
-      }
-      if (hook.type !== type) {
-        continue
-      }
-      let targetCopy = JSON.parse(JSON.stringify(target))
-      delete targetCopy.hook
-      if (hook.group) {
-        targetCopy.group = hook.group
-      } else {
-        targetCopy.group = '_default'
-      }
-
-      finalHookTable.push(targetCopy)
-    }
-  }
-  if (typeof group !== "undefined") {
-    finalHookTable = finalHookTable.filter(function(elem){
-      return elem.group == group
-    })
-  }
-  if (!finalHookTable.length) {
-    debug.debug('Not found for %s', targetRequest.route);
-    debug.log('Hook instance %s not found', group);
-    debug.debugHook('Hook instance %s not found', group);
-    return new Error('Hook instance not found');
-  }
-  return finalHookTable
-}
-
-/**
- * Find all routes.
- */
-
 
 
 /**
