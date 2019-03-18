@@ -2,6 +2,7 @@ const request = require('request');
 
 const findAllTargets = require('./findAllTargets.js')
 const findHookTarget = require('./findHookTarget.js')
+const sendBroadcastMessage = require('./sendBroadcastMessage.js')
 const decodeData = require('./decodeData.js')
 
 
@@ -260,48 +261,6 @@ function hookCall(targetRequest, globalServices, phase, callback) {
 
 
 
-/**
- * Get Router with minimum CPU used.
- */
-function getMinLoadedRouter(availableRoutes) {
-  let minRouter = availableRoutes.pop();
-  let totalCPU = {
-    cpu:0,
-    loadavg: 0
-  }
-  if (minRouter.metrics) {
-    totalCPU = minRouter.metrics.reduce(function(a, b) {
-
-      return {
-        cpu : parseFloat(a.cpu) + parseFloat(b.cpu) + a.loadavg[0] + b.loadavg[0],
-        loadavg: [0]
-      };
-    });
-  }
-  minRouter.cpu = totalCPU.cpu;
-  debug.debug('MinRouter %O', minRouter);
-  for (let i in availableRoutes) {
-    let totalCPU = {
-      cpu:0,
-      loadavg: 0
-    }
-    if (availableRoutes[i].metrics) {
-      totalCPU = availableRoutes[i].metrics.reduce(function(a, b) {
-        return {
-          cpu : parseFloat(a.cpu) + parseFloat(b.cpu) + a.loadavg[0] + b.loadavg[0],
-          loadavg: [0]
-        };
-      });
-    }
-    availableRoutes[i].cpu = totalCPU.cpu;
-    if (availableRoutes[i].cpu < minRouter.cpu) {
-      minRouter = availableRoutes[i];
-    }
-    debug.debug('MinRouter %O', minRouter);
-    debug.debug('availableRoutes %s %O', i, availableRoutes[i]);
-  }
-  return minRouter;
-}
 
 function _request(getRequest, callback, targetRequest, noMetric, globalServices) {
   let requestOptions = getRequest()
@@ -446,65 +405,9 @@ function _request(getRequest, callback, targetRequest, noMetric, globalServices)
 }
 
 
-/**
- * Proxy request to backend server.
- * deprecated. WS need to be replaced by boracast hook
- */
-function sendBroadcastMessage(router, method, path, message) {
-  debug.debug('UDP broadcast %O %s %s %O', router, method, path, message);
 
-  for (let routeItem of globalServices) {
-    if (routeItem.type !== 'websocket') {
-      continue
-    }
-    var broadcastMessage = {
-      method: method,
-      route: router.path,
-      scope: router.scope,
-      loaders: router.matchVariables,
-      path: path
-    };
-    switch (routeItem.methods[method.toLowerCase()]) {
-      case 'data': {
-        broadcastMessage.message = message;
-        break;
-      }
-      case 'meta': {
-        broadcastMessage.meta = true;
-        break;
-      }
-      default: {
-        continue;
-      }
-    }
-    var URL = url.parse(routeItem.url);
 
-    broadcastMessage.signature = ['sha256',
-      signature('sha256', JSON.stringify(broadcastMessage), routeItem.secureKey)];
 
-    debug.debug('UDP broadcast to %O %O', routeItem, URL);
-    var bufferedMessage = Buffer.from(JSON.stringify(broadcastMessage));
-    sendBroadcastMessageToClient(bufferedMessage, URL);
-  }
-}
-
-/**
- * Send broadcast message to UDP client.
- * deprecated. WS need to be replaced by boracast hook
- */
-function sendBroadcastMessageToClient(bufferedMessage, URL) {
-  let client = dgram.createSocket('udp4');
-  client.send(bufferedMessage, URL.port, URL.hostname, function(err) {
-    if (err) {
-      debug.debug('UDP broadcast Error: %O', err);
-      client.close();
-    }
-  });
-  client.on('message', function(message, remote) {
-    debug.debug('Received from server: ' + message);
-    client.close();
-  });
-}
 
 
 module.exports = function(targetRequest, globalServices, callback){
