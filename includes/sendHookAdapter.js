@@ -17,7 +17,8 @@ const sendRequest = require('./sendRequest.js')
 const findHookTarget = require('./findHookTarget.js')
 const signature = require('./signature.js');
 
-function processAdapter(adapterTargets, targetRequest, phase, globalServices, callbackAdapterGroup) {
+function processAdapter(adapterTargets, targetRequest,
+                        phase, globalServices, callbackAdapterGroup) {
   if (!adapterTargets.length) {
     return callbackAdapterGroup()
   }
@@ -29,8 +30,8 @@ function processAdapter(adapterTargets, targetRequest, phase, globalServices, ca
     headers: getHookHeaders(targetRequest, routerItem, phase, 'adapter', routerItem.group, true),
     body: targetRequest.requestDetails._buffer
   }
-  sendRequest(requestOptions, targetRequest, globalServices, function(err){
-    let headerStatusName = 'x-hook-adapter-status-' + currentAdapterGroup + '-' + phase
+  sendRequest(requestOptions, targetRequest, globalServices, function(err, response, body){
+    let headerStatusName = 'x-hook-adapter-status-' + routerItem.group + '-' + phase
     if (err) {
       debug('Adapter failed %O', err);
       // It's communication error and we need to try next adapter
@@ -39,11 +40,12 @@ function processAdapter(adapterTargets, targetRequest, phase, globalServices, ca
         targetRequest.requestDetails.headers[headerStatusName] = 'error: ' + err.message
         return callbackAdapterGroup()
       }
-      return processAdapter(adapterTargets, targetRequest, phase, globalServices, callbackAdapterGroup)
+      return processAdapter(adapterTargets, targetRequest,
+                            phase, globalServices, callbackAdapterGroup)
     }
-    if(response.statusCode != 200) {
+    if (response.statusCode != 200) {
       debug('Adapter failed with code: %s body: %s', response.statusCode, body)
-      for (var i in response.headers) {
+      for (let i in response.headers) {
         if (i.substring(0, 6) == 'x-set-') {
           let headerName = i.substr(6)
           targetRequest.requestDetails.headers[headerName] = response.headers[i];
@@ -55,7 +57,7 @@ function processAdapter(adapterTargets, targetRequest, phase, globalServices, ca
     debug('adapter processed');
     targetRequest.requestDetails._buffer = body
     debug('Adapter Headers received: %O code: %s', response.headers, response.statusCode);
-    for (var i in response.headers) {
+    for (let i in response.headers) {
       if (i.substring(0, 6) == 'x-set-') {
         let headerName = i.substr(6)
         targetRequest.requestDetails.headers[headerName] = response.headers[i];
@@ -75,7 +77,8 @@ function processAdapter(adapterTargets, targetRequest, phase, globalServices, ca
   })
 }
 
-function processAdapterGroup(adapterGroups, adapterTargets, targetRequest, phase, globalServices, callback){
+function processAdapterGroup(adapterGroups, adapterTargets, targetRequest,
+                              phase, globalServices, callback){
   if (!adapterGroups.length){
     debug('No more adapter groups left');
     return callback(false)
@@ -85,8 +88,10 @@ function processAdapterGroup(adapterGroups, adapterTargets, targetRequest, phase
   let currentAdapterTargets = adapterTargets.filter(function(a) {
     return a.group == currentAdapterGroup
   })
-  processAdapter(currentAdapterTargets, targetRequest, phase, globalServices, function(){
-    processAdapterGroup(adapterGroups, adapterTargets, targetRequest, phase, globalServices, callback)
+  processAdapter(currentAdapterTargets, targetRequest,
+                  phase, globalServices, function(){
+    processAdapterGroup(adapterGroups, adapterTargets, targetRequest,
+                        phase, globalServices, callback)
   })
 
 }

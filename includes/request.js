@@ -19,14 +19,7 @@ function hookCall(targetRequest, globalServices, phase, callback) {
   sendHookBroadcast(targetRequest, phase, globalServices)
   sendHookNotify(targetRequest, phase, globalServices)
   sendHookAdapter(targetRequest, phase, globalServices, callback)
-
-
-/**
- * decode buffer to specidied by content-type format.
- */
-
-
-
+}
 
 function _request(getRequest, callback, targetRequest, noMetric, globalServices) {
   let requestOptions = getRequest()
