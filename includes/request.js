@@ -18,7 +18,7 @@ const sendHookBroadcast = require('./sendHookBroadcast.js')
 const sendHookNotify = require('./sendHookNotify.js')
 const sendHookAdapter = require('./sendHookAdapter.js')
 const getHeaders = require('./getHeaders.js')
-const BuildURI = require('./BuildURI.js')
+const BuildURI = require('./buildURI.js')
 const debug = require('debug')('proxy:request-wrapper');
 
 /**

@@ -14,7 +14,7 @@ const debug = require('debug')('proxy:send-hook-notify');
 const getHookHeaders = require('./getHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const findHookTarget = require('./findHookTarget.js')
-const BuildURI = require('./BuildURI.js')
+const BuildURI = require('./buildURI.js')
 
 function processNotify(notifyTargets, targetRequest, phase, globalServices, callback) {
   if (!notifyTargets.length) {

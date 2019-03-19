@@ -15,7 +15,7 @@ const debug = require('debug')('proxy:send-hook-adapter');
 const getHookHeaders = require('./getHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const findHookTarget = require('./findHookTarget.js')
-const BuildURI = require('./BuildURI.js')
+const BuildURI = require('./buildURI.js')
 const signature = require('./signature.js');
 
 function processAdapter(adapterTargets, targetRequest,

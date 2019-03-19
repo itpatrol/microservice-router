@@ -27,7 +27,7 @@ module.exports = function(requestOptions, targetRequest, globalServices, callbac
   request(requestOptions, function(error, response, body) {
     debug('requestOptions: %O answer err %O body %s', requestOptions, error, body);
     if (!targetRequest.isMetric) {
-      sendMetrics(error, response, body, targetRequest, startTime, requestOptions, globalServices)
+      sendMetrics(error, response, body, startTime, targetRequest, requestOptions, globalServices)
     }
     if (error) {
       // TODO add limit to re send

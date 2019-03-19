@@ -14,7 +14,7 @@ const debug = require('debug')('proxy:send-hook-broadcast');
 const getHookHeaders = require('./getHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const findHookTarget = require('./findHookTarget.js')
-const BuildURI = require('./BuildURI.js')
+const BuildURI = require('./buildURI.js')
 
 function processBroadcast(broadcastTargets, targetRequest, phase, globalServices) {
   if (!broadcastTargets.length) {
