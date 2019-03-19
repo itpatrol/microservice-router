@@ -24,28 +24,27 @@ module.exports = function(targetRequest, phase, type, group, allRegisteredRoutes
   let finalHookTable = []
   for (let target of allHookTargets){
     // skip hooks with no hook properties
-    if (!target.hook || !target.hook.length) {
+    if (!target.hook) {
       continue
     }
-    for (let hook of target.hook) {
-      if (phase){
-        if (hook.phase !== phase) {
-          continue
-        }
-      }
-      if (hook.type !== type) {
+
+    if (phase){
+      if (target.hook.phase !== phase) {
         continue
       }
-      let targetCopy = JSON.parse(JSON.stringify(target))
-      delete targetCopy.hook
-      if (hook.group) {
-        targetCopy.group = hook.group
-      } else {
-        targetCopy.group = '_default'
-      }
-
-      finalHookTable.push(targetCopy)
     }
+    if (target.hook.type !== type) {
+      continue
+    }
+    let targetCopy = JSON.parse(JSON.stringify(target))
+    delete targetCopy.hook
+    if (target.hook.group) {
+      targetCopy.group = target.hook.group
+    } else {
+      targetCopy.group = '_default'
+    }
+
+    finalHookTable.push(targetCopy)
   }
   if (group) {
     finalHookTable = finalHookTable.filter(function(elem){

@@ -217,5 +217,183 @@ module.exports = [{
   "changed": 1553011394363,
   "token": "xxx",
   "id": "5c89d4f7cf087c449c9ddc39"
+},
+{
+  "_id": "5c72edae9196913851b214f3",
+  "type": "hook",
+  "hook":{
+      "phase": "after",
+      "type": "notify",
+      "group": "repo-perm"
+    },
+  "group": "repo-perm",
+  "conditions": {
+    "methods": [
+      "POST"
+    ]
+  },
+  "path": [
+    "repos/:owner"
+  ],
+  "endpointURL": "http://142.44.212.5:10083/",
+  "secureKey": "xxxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 31.2734375,
+      "loadavg": [
+        13.87158203125,
+        12.900390625,
+        8.81787109375
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 31.51171875,
+      "loadavg": [
+        13.87158203125,
+        12.900390625,
+        8.81787109375
+      ]
+    }
+  ],
+  "created": 1551035822972,
+  "changed": 1551036325110,
+  "token": "xxxx"
+},
+{
+  "_id": "5c72edb07ca0193860fdef7b",
+  "type": "hook",
+  "hook":
+    {
+      "phase": "after",
+      "type": "notify",
+      "group": "repo-perm"
+    },
+  "conditions": {
+    "methods": [
+      "POST"
+    ]
+  },
+  "group": "repo-perm",
+  "path": [
+    "repos/:owner"
+  ],
+  "endpointURL": "http://142.44.212.6:10095/",
+  "secureKey": "xxxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 30.00390625,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 27.59375,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    }
+  ],
+  "created": 1551035824669,
+  "changed": 1551036353626,
+  "token": "xxx",
+},
+{
+  "_id": "5c72edb19196913851b214f9",
+  "type": "hook",
+  "hook":
+    {
+      "phase": "after",
+      "type": "notify",
+      "group": "repo-email"
+    },
+  "group": "repo-email",
+  "conditions": {
+    "methods": [
+      "POST"
+    ]
+  },
+  "path": [
+    "repos/:owner"
+  ],
+  "endpointURL": "http://142.44.212.6:10096/",
+  "secureKey": "xxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 22.90234375,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 23.22265625,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    }
+  ],
+  "created": 1551035825950,
+  "changed": 1551036353688,
+  "token": "xxx",
+},
+{
+  "_id": "5c72edb49196913851b214fa",
+  "type": "hook",
+  "hook":{
+      "phase": "after",
+      "type": "notify",
+      "group": "repo-email"
+    },
+  "conditions": {
+    "methods": [
+      "POST"
+    ]
+  },
+  "group": "repo-email",
+  "path": [
+    "repos/:owner"
+  ],
+  "endpointURL": "http://142.44.212.5:10084/",
+  "secureKey": "xxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 30.41796875,
+      "loadavg": [
+        13.4814453125,
+        12.83544921875,
+        8.81884765625
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 29.5859375,
+      "loadavg": [
+        13.4814453125,
+        12.83544921875,
+        8.81884765625
+      ]
+    }
+  ],
+  "created": 1551035828020,
+  "changed": 1551036353638,
+  "token": "xxx",
 }
 ]

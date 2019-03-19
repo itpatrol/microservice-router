@@ -5,6 +5,7 @@ module.exports = [
     method: 'POST',
     jsonData: {},
     requestDetails: {
+      method: 'POST',
       headers: {
         test: "test"
       }
@@ -20,6 +21,7 @@ module.exports = [
     method: 'GET',
     jsonData: {},
     requestDetails: {
+      method: 'GET',
       headers: {
         test: "test"
       }
@@ -35,6 +37,7 @@ module.exports = [
     method: 'POST',
     jsonData: {},
     requestDetails: {
+      method: 'POST',
       headers: {
         test: "test"
       }
@@ -50,6 +53,7 @@ module.exports = [
     method: 'GET',
     jsonData: {},
     requestDetails: {
+      method: 'GET',
       headers: {
         test: "test"
       }
@@ -65,6 +69,7 @@ module.exports = [
     method: 'SEARCH',
     jsonData: {},
     requestDetails: {
+      method: 'SEARCH',
       headers: {
         test: "test"
       }
@@ -80,6 +85,7 @@ module.exports = [
     method: 'GET',
     jsonData: {},
     requestDetails: {
+      method: 'GET',
       headers: {
         test: "test"
       }
@@ -95,6 +101,7 @@ module.exports = [
     method: 'POST',
     jsonData: {},
     requestDetails: {
+      method: 'POST',
       headers: {
         test: "test"
       }
@@ -110,6 +117,7 @@ module.exports = [
     method: 'GET',
     jsonData: {},
     requestDetails: {
+      method: 'GET',
       headers: {
         test: "test"
       }
@@ -125,6 +133,7 @@ module.exports = [
     method: 'SEARCH',
     jsonData: {},
     requestDetails: {
+      method: 'SEARCH',
       headers: {
         test: "test"
       }
@@ -140,6 +149,7 @@ module.exports = [
     method: 'GET',
     jsonData: {},
     requestDetails: {
+      method: 'GET',
       headers: {
         test: "test"
       }
