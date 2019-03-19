@@ -11,7 +11,7 @@
 
 const debug = require('debug')('proxy:send-hook-notify');
 
-const getHookHeaders = require('./getHookHeaders.js')
+const getHookHeaders = require('./getHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const findHookTarget = require('./findHookTarget.js')
 

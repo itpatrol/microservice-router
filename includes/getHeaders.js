@@ -13,7 +13,7 @@
  */
 'use strict';
 
-const debug = require('debug')('proxy:get-hook-headers');
+const debug = require('debug')('proxy:get-headers');
 const signature = require('./signature.js');
 const skipHeaders = [
   'host', // issue to properly connect
@@ -33,10 +33,10 @@ module.exports = function(targetRequest, routeItem, phase, hookType, hookGroup, 
   for (let i in routeItem.matchVariables) {
     headers['mfw-' + i] = routeItem.matchVariables[i];
   }
-  headers['x-origin-url'] = targetRequest.route
-  headers['x-origin-method'] = targetRequest.method
-  headers['x-endpoint-scope'] = targetRequest.endpoint.scope
   if (phase) {
+    headers['x-origin-url'] = targetRequest.route
+    headers['x-origin-method'] = targetRequest.method
+    headers['x-endpoint-scope'] = targetRequest.endpoint.scope
     headers['x-hook-phase'] = phase
   }
   if (hookType) {

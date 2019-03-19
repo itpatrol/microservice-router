@@ -12,7 +12,7 @@
 
 const debug = require('debug')('proxy:send-hook-adapter');
 
-const getHookHeaders = require('./getHookHeaders.js')
+const getHookHeaders = require('./getHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const findHookTarget = require('./findHookTarget.js')
 const signature = require('./signature.js');

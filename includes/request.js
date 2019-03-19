@@ -4,18 +4,18 @@ const findAllTargets = require('./findAllTargets.js')
 const findHookTarget = require('./findHookTarget.js')
 const sendBroadcastMessage = require('./sendBroadcastMessage.js')
 const decodeData = require('./decodeData.js')
-const getHookHeaders = require('./getHookHeaders.js')
+const getHookHeaders = require('./getHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const sendHookBroadcast = require('./sendHookBroadcast.js')
 const sendHookNotify = require('./sendHookNotify.js')
 const sendHookAdapter = require('./sendHookAdapter.js')
-
+const getHeaders = require('./getHeaders.js')
+const debug = require('debug')('proxy:request-wrapper');
 
 /**
  * Process before Hooks.
  */
 function hookCall(targetRequest, globalServices, phase, callback) {
-  
   sendHookBroadcast(targetRequest, phase, globalServices)
   sendHookNotify(targetRequest, phase, globalServices)
   sendHookAdapter(targetRequest, phase, globalServices, callback)
@@ -141,18 +141,34 @@ function _request(getRequest, callback, targetRequest, noMetric, globalServices)
   })
 }
 
+function processEndpoint(endpointTargets, targetRequest, globalServices, callback) {
+  if (!endpointTargets.length) {
+    // TODO: policy for repeat.
+    return callback(new Error('Endpoint not found'))
+  }
+  // TODO apply tags based vouting here
+  let routerItem = endpointTargets.pop()
+  let requestOptions = {
+    uri: routerItem.url + targetRequest.path,
+    method: targetRequest.method,
+    headers: getHeaders(targetRequest, routerItem, false, false, false, false),
+    body: targetRequest.requestDetails._buffer
+  }
+  sendRequest(requestOptions, targetRequest, globalServices, function(err, response, body){
+    if(err) {
+      return processEndpoint(endpointTargets, targetRequest, globalServices, callback)
+    }
+    callback(err, response, body)
+  })
 
-
-
-
-
+}
 
 module.exports = function(targetRequest, globalServices, callback){
-  debug.debug('Route base: %s', targetRequest.route);
+  debug('Route base: %s', targetRequest.route);
 
   let endpointTargets = findAllTargets(targetRequest, 'handler', globalServices);
   if (endpointTargets instanceof Error) {
-    debug.debug('Route %s err %O', targetRequest.route, endpointTargets);
+    debug('Route %s err %O', targetRequest.route, endpointTargets);
     return callback(endpointTargets, null);
   }
 
@@ -162,62 +178,20 @@ module.exports = function(targetRequest, globalServices, callback){
   }
 
   hookCall(targetRequest, globalServices, 'before', function(){
-    //used later in sendBroadcastMessage
-    let router = false
-    // process request to endpoint
-    let getEndpointRequest = function(){
-      if (endpointTargets.length == 1) {
-        router = endpointTargets.pop();
-      } else {
-        // TODO: add diferent strategy to choose one of the routes
-        router =  getMinLoadedRouter(endpointTargets);
-      }
-      debug.log('Endpoint route %s result %O', targetRequest.route, router);
-      let headers = {};
-      let i;
-      let skipHeaders = [
-        'host',
-        'connection',
-        'content-length'
-      ]
-      for (i in targetRequest.requestDetails.headers) {
-        if (skipHeaders.indexOf(i) != -1) {
-          continue;
-        }
-        headers[i] = targetRequest.requestDetails.headers[i];
-      }
-
-      for (i in router.matchVariables) {
-        headers['mfw-' + i] = router.matchVariables[i];
-      }
-      return {
-        uri: router.url + targetRequest.path,
-        method: targetRequest.method,
-        headers: headers,
-        body: targetRequest.requestDetails._buffer
-      }
-    }
-    let callbackEndpointRequest = function(err, response, body){
-      if (err) {
-        debug.log('endpoint failed %O', err);
-        if (err !== false) {
-          // TODO call after hooks
-          return callback(err, null)
-        }
-        // TODO call after hooks
-        return callback(new Error('Endpoint not found'), null)
+    processEndpoint(endpointTargets, targetRequest, globalServices, function(err, response, body) {
+      if(err) {
+        // TODO possible call hoot after
+        return callback(err, null)
       }
       let bodyJSON = ""
       try {
         bodyJSON = decodeData(response.headers['content-type'], body)
       } catch (e) {
-        debug.debug('decodeData Error received: %O', e);
+        debug('decodeData Error received: %O', e);
         return callback(e);
       }
-      debug.debug('%s body: %O', route, body);
-      
-      // process after hooks
-      // hookCall requestDetails.headers and _buffer should contain response data.
+      debug('Requesnt endpoint on %s body: %O', route, body);
+      // Process after hooks
       let answerDetails = {
         headers: response.headers,
         _buffer: body,
@@ -232,8 +206,6 @@ module.exports = function(targetRequest, globalServices, callback){
         endpoint: targetRequest.endpoint
       }
       hookCall(targetAnswer, globalServices, 'after', function(){
-
-        // Double check updated _buffer after proxy.
         let body = false
         try {
           body = decodeData(answerDetails.headers['content-type'], answerDetails._buffer)
@@ -268,7 +240,6 @@ module.exports = function(targetRequest, globalServices, callback){
             }
           }
         }
-
         let responseHeaders = {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
@@ -283,18 +254,14 @@ module.exports = function(targetRequest, globalServices, callback){
         }
         // deprecated. websoket need to be rewriten as a hook broadcast
         if (response.statusCode == 200) {
-          sendBroadcastMessage(targetRequest.router,
-            targetRequest.method, targetRequest.requestDetails.url, body);
+          sendBroadcastMessage(targetRequest, body, globalServices);
         }
         callback(null, {
           code: response.statusCode,
           answer: body,
           headers: responseHeaders
         });
-
       })
-    }
-    _request(getEndpointRequest, callbackEndpointRequest, targetRequest, false, globalServices)
-    
+    })
   })
 }

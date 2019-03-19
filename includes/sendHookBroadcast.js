@@ -11,7 +11,7 @@
 
 const debug = require('debug')('proxy:send-hook-broadcast');
 
-const getHookHeaders = require('./getHookHeaders.js')
+const getHookHeaders = require('./getHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const findHookTarget = require('./findHookTarget.js')
 
@@ -42,6 +42,6 @@ module.exports = function(targetRequest, phase, globalServices){
   let broadcastTargets = findHookTarget(targetRequest, phase, 'broadcast', false, globalServices)
   debug('Broadcast: Phase %s for %s result: %O', phase, targetRequest.route, broadcastTargets);
   if (broadcastTargets instanceof Array) {
-    processBroadcast()
+    processBroadcast(broadcastTargets, targetRequest, phase, globalServices)
   }
 }
