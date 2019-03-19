@@ -36,7 +36,8 @@ for (let targetRequest of targetRequests) {
           let headers = getHeaders(targetRequest, routeItem )
           if (routeItem.matchVariables) {
             for (let key in routeItem.matchVariables) {
-              it(routeItem.type + ' [' + i + '] checking mfw-' + key + ': ' + routeItem.matchVariables[key], function(done) {
+              it(routeItem.type + ' [' + i + '] checking mfw-' + key
+              + ': ' + routeItem.matchVariables[key], function(done) {
                 expect(headers['mfw-' + key]).to.equal(routeItem.matchVariables[key])
                 done()
               })
