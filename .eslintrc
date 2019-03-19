@@ -5,6 +5,9 @@
   "env": {
         "node": true
   },
+  "plugins": [
+    "mocha"
+  ],
   "parserOptions": {
     "ecmaVersion": 6
   },
@@ -31,5 +34,14 @@
       2,
      {"int32Hint": true}
     ]
-  }
+  },
+  "overrides": [
+        {
+            "files": [ "test/**/*.js" ],
+            "env": { "mocha": true },
+            "rules": {
+                "max-nested-callbacks": [ "error", 8 ]
+            }
+        }
+    ]
 }
