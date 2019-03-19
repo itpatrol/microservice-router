@@ -33,7 +33,14 @@ module.exports = function(conditions, requestDetails, jsonData) {
   }
   // check methods
   if (conditions.methods && conditions.methods.length) {
-    if (conditions.methods.indexOf(requestDetails.method) == -1) {
+    if(conditions.methods instanceof Array) {
+      for(let i in conditions.methods) {
+        conditions.methods[i] = conditions.methods[i].toUpperCase()
+      }
+    } else if(conditions.methods.toUpperCase){
+      conditions.methods = conditions.methods.toUpperCase()
+    }
+    if (conditions.methods.indexOf(requestDetails.method) === -1) {
       return false;
     }
   }
