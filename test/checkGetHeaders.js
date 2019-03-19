@@ -44,15 +44,38 @@ for (let targetRequest of targetRequests) {
     if(routeItem.hook){
       
       describe('getHeaders:hook: ' + targetRequest.route, function(){
-        it('checking for hook headers', function(done) {
-          let headers = getHeaders(targetRequest, routeItem, routeItem.hook.phase, routeItem.hook.type, routeItem.hook.group, true )
-          console.log(headers)
+        let headers = getHeaders(targetRequest, routeItem, routeItem.hook.phase, routeItem.hook.type, routeItem.hook.group, true )
+
+        it('checking x-origin-url', function(done) {
           expect(headers['x-origin-url']).to.equal(targetRequest.route)
+          done()
+        })
+
+        it('checking x-origin-method', function(done) {
           expect(headers['x-origin-method']).to.equal(targetRequest.method)
+          done()
+        })
+
+        it('checking x-endpoint-scope', function(done) {
           expect(headers['x-endpoint-scope']).to.equal(targetRequest.endpoint.scope)
+          done()
+        })
+
+        it('checking x-hook-phase', function(done) {
           expect(headers['x-hook-phase']).to.equal(routeItem.hook.phase)
+          done()
+        })
+          
+        it('checking x-hook-type', function(done) {
           expect(headers['x-hook-type']).to.equal(routeItem.hook.type)
+          done()
+        })
+        it('checking x-hook-group', function(done) {
           expect(headers['x-hook-group']).to.equal(routeItem.hook.group)
+          done()
+        })
+        
+        it('checking x-hook-signature', function(done) {
           let hash = 'sha256=' 
           + signature('sha256', targetRequest.requestDetails._buffer, routeItem.secureKey)
           expect(headers['x-hook-signature']).to.equal(hash)
@@ -60,16 +83,20 @@ for (let targetRequest of targetRequests) {
         })
       })
     } else {
-      describe('getHeaders: ' + targetRequest.route, function(){
-        it('checking for request headers', function(done) {
+      describe('getHeaders:requestHeaders ' + targetRequest.route, function(){
+        if(Object.keys(targetRequest.requestDetails.headers).length) {
           let headers = getHeaders(targetRequest, routeItem )
-          if(Object.keys(targetRequest.requestDetails.headers).length) {
-            for(let key in targetRequest.requestDetails.headers) {
+          for(let key in targetRequest.requestDetails.headers) {
+            it('check header ' + key, function(done) {
               expect(headers[key]).to.equal(targetRequest.requestDetails.headers[key])
-            }
+              done()
+            })
           }
-          done()
-        })
+        } else {
+          it('no headers', function(done) {
+            done()
+          })
+        }
       })
     }
   }
