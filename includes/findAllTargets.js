@@ -17,13 +17,23 @@ module.exports = function(targetRequest, routeType, allRegisteredRoutes) {
 
   var availableRoutes = [];
   for (let i in allRegisteredRoutes) {
-    if (allRegisteredRoutes[i].type 
-      && allRegisteredRoutes[i].type.toLowerCase() !== routeType) {
-      continue
+    if (routeType) {
+      if (!allRegisteredRoutes[i].type) {
+        // Version 1.x compatibility
+        if (routeType !== 'handler') {
+          continue
+        }
+      }
+      if (allRegisteredRoutes[i].type.toLowerCase() !== routeType) {
+        continue
+      }
     }
     // For easy deployment when service need to stop receiving new requests.
-    if (!allRegisteredRoutes[i].online) {
-      continue
+    // Version 1.x compatibility
+    if (allRegisteredRoutes[i].online !== undefined) {
+      if (allRegisteredRoutes[i].online === false) {
+        continue
+      }
     }
     // Making copy of the router.
     let routeItem = JSON.parse(JSON.stringify(allRegisteredRoutes[i]));

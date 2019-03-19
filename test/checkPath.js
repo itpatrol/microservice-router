@@ -118,8 +118,10 @@ describe('checkPath', function(){
         for (let routeItem of routeItems) {
           if (checkPath(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner/:repo/files');
-            expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'ownername');
-            expect(routeItem.matchVariables).to.be.an('object').to.have.property('repo', 'reponame');       
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('owner', 'ownername');
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('repo', 'reponame');       
             delete routeItem.matchVariables   
           }
         }
@@ -136,8 +138,10 @@ describe('checkPath', function(){
         for (let routeItem of routeItems) {
           if (checkPath(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner/:repo/files');
-            expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'ownername');
-            expect(routeItem.matchVariables).to.be.an('object').to.have.property('repo', 'reponame');  
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('owner', 'ownername');
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('repo', 'reponame');  
             delete routeItem.matchVariables
           }
         }
@@ -153,7 +157,8 @@ describe('checkPath', function(){
         for (let routeItem of routeItems) {
           if (checkPath(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
-            expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'ownername'); 
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('owner', 'ownername'); 
             delete routeItem.matchVariables        
           }
         }
@@ -170,7 +175,8 @@ describe('checkPath', function(){
         for (let routeItem of routeItems) {
           if (checkPath(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
-            expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'ownername'); 
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('owner', 'ownername'); 
             delete routeItem.matchVariables
           }
         }

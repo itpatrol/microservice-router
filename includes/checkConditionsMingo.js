@@ -9,7 +9,6 @@
  */
 'use strict';
 const debug = require('debug')('proxy:check-conditions');
-const getProperty = require('./getProperty.js')
 const mingo = require('mingo')
 
 module.exports = function(conditions, requestDetails, jsonData) {

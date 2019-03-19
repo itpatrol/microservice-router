@@ -9,7 +9,6 @@
  */
 'use strict';
 const debug = require('debug')('proxy:check-conditions');
-const getProperty = require('./getProperty.js')
 const sift = require('sift').default
 
 module.exports = function(conditions, requestDetails, jsonData) {
