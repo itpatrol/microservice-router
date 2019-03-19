@@ -26,6 +26,12 @@ function processBroadcast(broadcastTargets, targetRequest, phase, globalServices
     headers: getHookHeaders(targetRequest, routerItem, phase, 'broadcast', false, true),
     body: targetRequest.requestDetails._buffer
   }
+  if(routerItem.hook.phase == "metric" && routerItem.hook.meta) {
+    let jsonCopy = JSON.parse(JSON.stringify(targetRequest.jsonData))
+    delete jsonCopy.request
+    delete jsonCopy.response
+    requestOptions.body = JSON.stringify(jsonCopy)
+  }
   sendRequest(requestOptions, targetRequest, globalServices, function(err){
     if (err) {
       debug('broadcast failed %O', err);

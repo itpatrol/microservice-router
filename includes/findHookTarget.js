@@ -28,8 +28,10 @@ module.exports = function(targetRequest, phase, type, group, allRegisteredRoutes
       continue
     }
     for (let hook of target.hook) {
-      if (phase !== null && hook.phase !== phase) {
-        continue
+      if (phase){
+        if(hook.phase !== phase) {
+          continue
+        }
       }
       if (hook.type !== type) {
         continue

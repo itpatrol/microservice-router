@@ -1,7 +1,6 @@
 const request = require('request');
 
 const findAllTargets = require('./findAllTargets.js')
-const findHookTarget = require('./findHookTarget.js')
 const sendBroadcastMessage = require('./sendBroadcastMessage.js')
 const decodeData = require('./decodeData.js')
 const getHookHeaders = require('./getHeaders.js')
@@ -19,126 +18,6 @@ function hookCall(targetRequest, globalServices, phase, callback) {
   sendHookBroadcast(targetRequest, phase, globalServices)
   sendHookNotify(targetRequest, phase, globalServices)
   sendHookAdapter(targetRequest, phase, globalServices, callback)
-}
-
-function _request(getRequest, callback, targetRequest, noMetric, globalServices) {
-  let requestOptions = getRequest()
-  
-  if (requestOptions instanceof Error) {
-    return callback(requestOptions)
-  }
-  if (requestOptions === false) {
-    return callback(false)
-  }
-  
-  // Validate URI 
-  let uri = url.parse(requestOptions.uri);
-  if (!(uri.host || (uri.hostname && uri.port)) && !uri.isUnix) {
-    return callback(new Error('Invalid URI' + requestOptions.uri))
-  }
-
-  
-  let startTime = Date.now();
-  debug.request('requestOptions: %O', requestOptions);
-  request(requestOptions, function(error, response, body) {
-    debug.request('requestOptions: %O answer err %O body %s', requestOptions, error, body);
-    let endTime = Date.now();
-    let executeTime = endTime - startTime
-    
-    debug.debugMetric('requestOptions: %O executeTime: %s', requestOptions, executeTime);
-    if (!noMetric) {
-      let metricTargets = findAllTargets(targetRequest, 'metric', globalServices)
-      debug.debugMetric('findHookTarget: for %s result: %O', targetRequest.route, metricTargets);
-    
-      if (metricTargets instanceof Array) {
-        let getMetricRequest = function(){
-          if (metricTargets instanceof Error) {
-            return metricTargets
-          }
-          if (!metricTargets.length) {
-            return false
-          }
-          let router = metricTargets.pop()
-          debug.log('Metric route %s result %O', targetRequest.route, router);
-          
-          let statusCode = 0
-          if (error) {
-            statusCode = error.code
-          } else {
-            if (response.statusCode) {
-              statusCode = response.statusCode
-            }
-          }
-
-          let metricJSON = {
-            startTime: startTime,
-            endTime: endTime,
-            executeTime: executeTime,
-            code: statusCode,
-            method: requestOptions.method,
-            headers: requestOptions.headers,
-            uri: requestOptions.uri,
-            route: targetRequest.route,
-          }
-          if (body && body.length) {
-            metricJSON.responseLength = body.length;
-          }
-          if (requestOptions.body && requestOptions.body.length) {
-            metricJSON.requestLength = requestOptions.body.length;
-          }
-          if (!router.meta) {
-            metricJSON.request = targetRequest.requestDetails._buffer;
-            metricJSON.response = body;
-          }
-          let metricBody = JSON.stringify(metricJSON)
-          let headers = getHookHeaders(targetRequest, router, false, 'metric', false, false)
-          // Sign request for hook
-          headers['x-hook-signature'] = 'sha256='
-            + signature('sha256', metricBody, router.secureKey);
-          
-          return {
-            uri: router.url + targetRequest.path,
-            method: 'NOTIFY',
-            headers: headers,
-            body: metricBody,
-            timeout: 300 // For metrics we limit to 300 ms.
-          }
-        }
-        let callbackMetricRequest = function(err, response, body){
-          // No action on broadcast hook.
-          if (err) {
-            debug.log('metric failed %O', err);
-          }
-          debug.log('metric sent');
-          debug.debugMetric('Metric targetRequest %O ', targetRequest);
-          // If more in queue left - send more
-          if (metricTargets.length) {
-            _request(getMetricRequest, callbackMetricRequest, targetRequest, true, globalServices)
-          }
-        }
-        _request(getMetricRequest, callbackMetricRequest, targetRequest, true, globalServices)
-      } else {
-        debug.debugMetric('no metric enpoints');
-      }
-    } else {
-      debug.debugMetric('metric disabled');
-    }
-    
-    if (error) {
-      // TODO add limit to re send
-      debug.debug('_request Error received: %O', error);
-      debug.debug('_request Restart request: %O', requestOptions);
-      return callback(error, response, body)
-      // Do not try to redeliver metrics. can lock a event loop
-      if (!noMetric) {
-
-        return _request(getRequest, callback, targetRequest, false, globalServices);
-      }
-    }
-    
-    debug.debug('%s body: %s', requestOptions.uri, body);
-    return callback(null, response, body)
-  })
 }
 
 function processEndpoint(endpointTargets, targetRequest, globalServices, callback) {

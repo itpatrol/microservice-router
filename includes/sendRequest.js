@@ -14,6 +14,7 @@ const request = require('request');
 const debug = require('debug')('proxy:request');
 const debugBody = require('debug')('proxy:request-body');
 const url = require('url');
+const sendMetrics = require('./sendMetrics.js')
 
 module.exports = function(requestOptions, targetRequest, globalServices, callback){
   // Validate URI 
@@ -25,8 +26,9 @@ module.exports = function(requestOptions, targetRequest, globalServices, callbac
   debug('requestOptions: %O', requestOptions);
   request(requestOptions, function(error, response, body) {
     debug('requestOptions: %O answer err %O body %s', requestOptions, error, body);
-    let endTime = Date.now();
-    let executeTime = endTime - startTime
+    if(!targetRequest.isMetric) {
+      sendMetrics(error, response, body, targetRequest, startTime, requestOptions, globalServices)
+    }
     if (error) {
       // TODO add limit to re send
       debug('_request %O Error received: %O', requestOptions, error);

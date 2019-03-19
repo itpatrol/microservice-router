@@ -12,13 +12,6 @@ const checkPath = require('./checkPath.js')
 const checkConditions = require('./checkConditions.js')
 
 module.exports = function(targetRequest, routeItem) {
-  if (routeItem.type == "metric") {
-    if (!routeItem.conditions) {
-      return true
-    }
-    return checkConditions(routeItem.conditions,
-      targetRequest.requestDetails, targetRequest.jsonData)
-  }
   if (routeItem.path && routeItem.path.length == 1 && routeItem.path[0] == '*') {
     if (!routeItem.conditions) {
       return true
