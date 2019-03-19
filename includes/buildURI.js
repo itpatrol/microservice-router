@@ -12,10 +12,18 @@ module.exports = function(endpointUrl, path){
   let URI = ''
   if(endpointUrl && endpointUrl.length) {
     URI += endpointUrl
-    if (endpointUrl[endpointUrl.length - 1] != '/') {
+    if (endpointUrl[endpointUrl.length - 1] !== '/') {
       URI += '/'
     }
   }
-  URI += path
+  if(path && path.length) {
+    for ( let i = 0; i < path.length; i++ ) {
+      if(path[i] !== '/') {
+        URI += path.substring(i)
+        break
+      }
+    }
+  }
+  
   return URI
 }
