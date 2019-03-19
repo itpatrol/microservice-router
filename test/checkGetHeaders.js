@@ -15,7 +15,8 @@ for (let targetRequest of targetRequests) {
     console.log('targetRequest', targetRequest)
     console.log('routeItem', routeItem)
     if(routeItem.hook){
-      console.log('getHeaders', getHeaders(targetRequest, routeItem, routeItem.hook.phase, routeItem.hook.type, routeItem.hook.group, true ))  
+      console.log('getHeaders', getHeaders(targetRequest, routeItem,
+        routeItem.hook.phase, routeItem.hook.type, routeItem.hook.group, true ))  
     } else {
       console.log('getHeaders', getHeaders(targetRequest, routeItem ))
     }
@@ -27,24 +28,25 @@ for (let targetRequest of targetRequests) {
 for (let targetRequest of targetRequests) {
   targetRequest.requestDetails._buffer = JSON.stringify(targetRequest.jsonData)
   let result = findAllTargets(targetRequest, false, routeItems)
-  for(let routeItem of result) {
-    if(Object.keys(routeItem.matchVariables).length) {
+  for (let routeItem of result) {
+    if (Object.keys(routeItem.matchVariables).length) {
       describe('getHeaders:matchVariables on ' + targetRequest.route, function(){
-        it('checking checkMatchVariables', function(done) {
-          let headers = getHeaders(targetRequest, routeItem )
-          if(routeItem.matchVariables) {
-            for(let key in routeItem.matchVariables) {
+        let headers = getHeaders(targetRequest, routeItem )
+        if (routeItem.matchVariables) {
+          for (let key in routeItem.matchVariables) {
+            it('checking mfw-' + key + ': ' + routeItem.matchVariables[key], function(done) {
               expect(headers['mfw-' + key]).to.equal(routeItem.matchVariables[key])
-            }
+              done()
+            })
           }
-          done()
-        })
+        }
       })
     }
-    if(routeItem.hook){
+    if (routeItem.hook){
       
       describe('getHeaders:hook: ' + targetRequest.route, function(){
-        let headers = getHeaders(targetRequest, routeItem, routeItem.hook.phase, routeItem.hook.type, routeItem.hook.group, true )
+        let headers = getHeaders(targetRequest, routeItem, routeItem.hook.phase,
+          routeItem.hook.type, routeItem.hook.group, true )
 
         it('checking x-origin-url', function(done) {
           expect(headers['x-origin-url']).to.equal(targetRequest.route)
@@ -84,9 +86,9 @@ for (let targetRequest of targetRequests) {
       })
     } else {
       describe('getHeaders:requestHeaders ' + targetRequest.route, function(){
-        if(Object.keys(targetRequest.requestDetails.headers).length) {
+        if (Object.keys(targetRequest.requestDetails.headers).length) {
           let headers = getHeaders(targetRequest, routeItem )
-          for(let key in targetRequest.requestDetails.headers) {
+          for (let key in targetRequest.requestDetails.headers) {
             it('check header ' + key, function(done) {
               expect(headers[key]).to.equal(targetRequest.requestDetails.headers[key])
               done()
