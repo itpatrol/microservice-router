@@ -5,6 +5,8 @@ const checkPath = require('../includes/checkPath.js')
 let targetRequests = require('./targetRequests.js')
 let routeItems = require('./routeItems.js')
 
+/*
+Future debug code
 for(let targetRequest of targetRequests) {
   for(let routeItem of routeItems) {
     if(checkPath(targetRequest, routeItem)) {
@@ -14,7 +16,7 @@ for(let targetRequest of targetRequests) {
       console.log("\n")
     }
   }
-}
+}*/
 describe('checkPath',function(){
   it('checking post register',function(done){
     let subTargetRequest = sift({
