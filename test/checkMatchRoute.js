@@ -1,7 +1,7 @@
 const expect  = require("chai").expect;
 const sift = require('sift').default
 
-const checkPath = require('../includes/checkPath.js')
+const matchRoute = require('../includes/matchRoute.js')
 let targetRequests = require('./targetRequests.js')
 let routeItems = require('./routeItems.js')
 
@@ -9,7 +9,7 @@ let routeItems = require('./routeItems.js')
 Future debug code
 for(let targetRequest of targetRequests) {
   for(let routeItem of routeItems) {
-    if(checkPath(targetRequest, routeItem)) {
+    if(matchRoute(targetRequest, routeItem)) {
       console.log('match')
       console.log('targetRequest', targetRequest)
       console.log('routeItem', routeItem)
@@ -17,7 +17,7 @@ for(let targetRequest of targetRequests) {
     }
   }
 }*/
-describe('checkPath', function(){
+describe('matchRoute', function(){
   it('checking post register', function(done){
     let subTargetRequest = sift({
       route: 'register',
@@ -25,7 +25,7 @@ describe('checkPath', function(){
     }, targetRequests)
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
-          if (checkPath(targetRequest, routeItem)) {
+          if (matchRoute(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('register');
           } else {
             expect(routeItem.path).to.be.an('array').that.not.include('register');
@@ -41,7 +41,7 @@ describe('checkPath', function(){
     }, targetRequests)
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
-          if (checkPath(targetRequest, routeItem)) {
+          if (matchRoute(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('register');
           } else {
             expect(routeItem.path).to.be.an('array').that.not.include('register');
@@ -57,7 +57,7 @@ describe('checkPath', function(){
     }, targetRequests)
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
-          if (checkPath(targetRequest, routeItem)) {
+          if (matchRoute(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner');
             expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'test');
             delete routeItem.matchVariables
@@ -75,7 +75,7 @@ describe('checkPath', function(){
     }, targetRequests)
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
-          if (checkPath(targetRequest, routeItem)) {
+          if (matchRoute(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner');
             expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'test');
             delete routeItem.matchVariables
@@ -95,7 +95,7 @@ describe('checkPath', function(){
     }, targetRequests)
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
-          if (checkPath(targetRequest, routeItem)) {
+          if (matchRoute(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos');
             expect(routeItem).to.not.have.property('matchVariables');
           } else {
@@ -113,7 +113,7 @@ describe('checkPath', function(){
     }, targetRequests)
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
-          if (checkPath(targetRequest, routeItem)) {
+          if (matchRoute(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos');
             expect(routeItem).to.not.have.property('matchVariables');
           } else {
@@ -130,7 +130,7 @@ describe('checkPath', function(){
     }, targetRequests)
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
-          if (checkPath(targetRequest, routeItem)) {
+          if (matchRoute(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner/:repo/files');
             expect(routeItem.matchVariables).to.be.an('object')
             .to.have.property('owner', 'ownername');
@@ -152,7 +152,7 @@ describe('checkPath', function(){
     }, targetRequests)
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
-          if (checkPath(targetRequest, routeItem)) {
+          if (matchRoute(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner/:repo/files');
             expect(routeItem.matchVariables).to.be.an('object')
             .to.have.property('owner', 'ownername');
@@ -173,7 +173,7 @@ describe('checkPath', function(){
     }, targetRequests)
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
-          if (checkPath(targetRequest, routeItem)) {
+          if (matchRoute(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
             expect(routeItem.matchVariables).to.be.an('object')
             .to.have.property('owner', 'ownername'); 
@@ -193,7 +193,7 @@ describe('checkPath', function(){
     }, targetRequests)
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
-          if (checkPath(targetRequest, routeItem)) {
+          if (matchRoute(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
             expect(routeItem.matchVariables).to.be.an('object')
             .to.have.property('owner', 'ownername'); 
