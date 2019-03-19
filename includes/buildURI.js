@@ -9,9 +9,12 @@
 'use strict';
 
 module.exports = function(endpointUrl, path){
-  let URI = endpointUrl
-  if (endpointUrl[endpointUrl.length - 1] != '/') {
-    URI += '/'
+  let URI = ''
+  if(endpointUrl && endpointUrl.length) {
+    URI += endpointUrl
+    if (endpointUrl[endpointUrl.length - 1] != '/') {
+      URI += '/'
+    }
   }
   URI += path
   return URI
