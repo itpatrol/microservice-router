@@ -16,18 +16,18 @@ module.exports = function(conditions, requestDetails, jsonData) {
   debug('checkConditions %O requestDetails: %O json: %O', conditions, requestDetails, jsonData)
   if (conditions.headers ) {
     let result = sift(conditions.headers, [requestDetails.headers])
-    if(!result.length){
+    if (!result.length){
       return false
     }
 
   }
   // check methods
   if (conditions.methods && conditions.methods.length) {
-    if(conditions.methods instanceof Array) {
-      for(let i in conditions.methods) {
+    if (conditions.methods instanceof Array) {
+      for (let i in conditions.methods) {
         conditions.methods[i] = conditions.methods[i].toUpperCase()
       }
-    } else if(conditions.methods.toUpperCase){
+    } else if (conditions.methods.toUpperCase){
       conditions.methods = conditions.methods.toUpperCase()
     }
     if (conditions.methods.indexOf(requestDetails.method) === -1) {
@@ -40,7 +40,7 @@ module.exports = function(conditions, requestDetails, jsonData) {
       return false
     }
     let result = sift(conditions.payload, [jsonData])
-    if(!result.length){
+    if (!result.length){
       return false
     }
   }
