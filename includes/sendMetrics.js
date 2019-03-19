@@ -1,5 +1,5 @@
 /**
- * Send Hook Notify
+ * Send Metrics
  *
  * @param Object targetRequest request details
  * @param String phase(optional) hook phase: before, after, metric

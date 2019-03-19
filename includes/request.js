@@ -18,6 +18,7 @@ const sendHookBroadcast = require('./sendHookBroadcast.js')
 const sendHookNotify = require('./sendHookNotify.js')
 const sendHookAdapter = require('./sendHookAdapter.js')
 const getHeaders = require('./getHeaders.js')
+const BuildURI = require('./BuildURI.js')
 const debug = require('debug')('proxy:request-wrapper');
 
 /**
@@ -37,7 +38,7 @@ function processEndpoint(endpointTargets, targetRequest, globalServices, callbac
   // TODO apply tags based vouting here
   let routerItem = endpointTargets.pop()
   let requestOptions = {
-    uri: routerItem.url + targetRequest.path,
+    uri: BuildURI(routerItem.endpointUrl, targetRequest.path),
     method: targetRequest.method,
     headers: getHeaders(targetRequest, routerItem, false, false, false, false),
     body: targetRequest.requestDetails._buffer
@@ -108,10 +109,10 @@ module.exports = function(targetRequest, globalServices, callback){
               // Make sure that url is not absolute
               if (body.url.indexOf('http://') == -1
                 && body.url.indexOf('https://') == -1) {
-                body.url = process.env.BASE_URL + body.url;
+                body.url = BuildURI(process.env.BASE_URL, body.url)
               }
             } else if (body.id) {
-              body.url = process.env.BASE_URL + targetRequest.route + '/' + body.id;
+              body.url = BuildURI(process.env.BASE_URL, BuildURI(targetRequest.route, body.id))
             }
           }
         }
@@ -121,10 +122,11 @@ module.exports = function(targetRequest, globalServices, callback){
               // Make sure that url is not absolute
               if (body[i].url.indexOf('http://') == -1
                 && body[i].url.indexOf('https://') == -1 ) {
-                body[i].url =  process.env.BASE_URL + body[i].url;
+                body[i].url =  BuildURI(process.env.BASE_URL, body[i].url)
               }
             } else if (body[i].id) {
-              body[i].url = process.env.BASE_URL + targetRequest.route  + '/' + body[i].id;
+              body[i].url = BuildURI(process.env.BASE_URL,
+                BuildURI(targetRequest.route, body[i].id))
             }
           }
         }

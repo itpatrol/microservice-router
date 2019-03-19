@@ -15,6 +15,7 @@ const debug = require('debug')('proxy:send-hook-adapter');
 const getHookHeaders = require('./getHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const findHookTarget = require('./findHookTarget.js')
+const BuildURI = require('./BuildURI.js')
 const signature = require('./signature.js');
 
 function processAdapter(adapterTargets, targetRequest,
@@ -25,7 +26,7 @@ function processAdapter(adapterTargets, targetRequest,
   // TODO apply tags based vouting here
   let routerItem = adapterTargets.pop()
   let requestOptions = {
-    uri: routerItem.url + targetRequest.path,
+    uri: BuildURI(routerItem.endpointUrl, targetRequest.path),
     method: 'NOTIFY',
     headers: getHookHeaders(targetRequest, routerItem, phase, 'adapter', routerItem.group, true),
     body: targetRequest.requestDetails._buffer

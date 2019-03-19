@@ -14,6 +14,7 @@ const debug = require('debug')('proxy:send-hook-broadcast');
 const getHookHeaders = require('./getHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const findHookTarget = require('./findHookTarget.js')
+const BuildURI = require('./BuildURI.js')
 
 function processBroadcast(broadcastTargets, targetRequest, phase, globalServices) {
   if (!broadcastTargets.length) {
@@ -21,7 +22,7 @@ function processBroadcast(broadcastTargets, targetRequest, phase, globalServices
   }
   let routerItem = broadcastTargets.pop()
   let requestOptions = {
-    uri: routerItem.url + targetRequest.path,
+    uri: BuildURI(routerItem.endpointUrl, targetRequest.path),
     method: 'NOTIFY',
     headers: getHookHeaders(targetRequest, routerItem, phase, 'broadcast', false, true),
     body: targetRequest.requestDetails._buffer

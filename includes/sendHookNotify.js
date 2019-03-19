@@ -14,6 +14,7 @@ const debug = require('debug')('proxy:send-hook-notify');
 const getHookHeaders = require('./getHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const findHookTarget = require('./findHookTarget.js')
+const BuildURI = require('./BuildURI.js')
 
 function processNotify(notifyTargets, targetRequest, phase, globalServices, callback) {
   if (!notifyTargets.length) {
@@ -22,7 +23,7 @@ function processNotify(notifyTargets, targetRequest, phase, globalServices, call
   // TODO apply tags based vouting here
   let routerItem = notifyTargets.pop()
   let requestOptions = {
-    uri: routerItem.url + targetRequest.path,
+    uri: BuildURI(routerItem.endpointUrl, targetRequest.path),
     method: 'NOTIFY',
     headers: getHookHeaders(targetRequest, routerItem, phase, 'notify', routerItem.group, true),
     body: targetRequest.requestDetails._buffer
