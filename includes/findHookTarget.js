@@ -29,7 +29,7 @@ module.exports = function(targetRequest, phase, type, group, allRegisteredRoutes
     }
     for (let hook of target.hook) {
       if (phase){
-        if(hook.phase !== phase) {
+        if (hook.phase !== phase) {
           continue
         }
       }

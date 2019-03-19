@@ -1,9 +1,18 @@
-const request = require('request');
+/**
+ * Process proxy request
+ *
+ * @param Object targetRequest request details
+ * @param Object object all available routes
+ * @param function callback when request processed
+ *
+ * @return 
+ */
+
+'use strict';
 
 const findAllTargets = require('./findAllTargets.js')
 const sendBroadcastMessage = require('./sendBroadcastMessage.js')
 const decodeData = require('./decodeData.js')
-const getHookHeaders = require('./getHeaders.js')
 const sendRequest = require('./sendRequest.js')
 const sendHookBroadcast = require('./sendHookBroadcast.js')
 const sendHookNotify = require('./sendHookNotify.js')
@@ -34,7 +43,7 @@ function processEndpoint(endpointTargets, targetRequest, globalServices, callbac
     body: targetRequest.requestDetails._buffer
   }
   sendRequest(requestOptions, targetRequest, globalServices, function(err, response, body){
-    if(err) {
+    if (err) {
       return processEndpoint(endpointTargets, targetRequest, globalServices, callback)
     }
     callback(err, response, body)
@@ -58,7 +67,7 @@ module.exports = function(targetRequest, globalServices, callback){
 
   hookCall(targetRequest, globalServices, 'before', function(){
     processEndpoint(endpointTargets, targetRequest, globalServices, function(err, response, body) {
-      if(err) {
+      if (err) {
         // TODO possible call hoot after
         return callback(err, null)
       }
@@ -69,7 +78,7 @@ module.exports = function(targetRequest, globalServices, callback){
         debug('decodeData Error received: %O', e);
         return callback(e);
       }
-      debug('Requesnt endpoint on %s body: %O', route, body);
+      debug('Requesnt endpoint on %s body: %O', targetRequest.route, body);
       // Process after hooks
       let answerDetails = {
         headers: response.headers,
@@ -102,12 +111,12 @@ module.exports = function(targetRequest, globalServices, callback){
                 body.url = process.env.BASE_URL + body.url;
               }
             } else if (body.id) {
-              body.url = process.env.BASE_URL + route + '/' + body.id;
+              body.url = process.env.BASE_URL + targetRequest.route + '/' + body.id;
             }
           }
         }
         if (body instanceof Array) {
-          for (var i in body) {
+          for (let i in body) {
             if (body[i].url) {
               // Make sure that url is not absolute
               if (body[i].url.indexOf('http://') == -1
@@ -115,7 +124,7 @@ module.exports = function(targetRequest, globalServices, callback){
                 body[i].url =  process.env.BASE_URL + body[i].url;
               }
             } else if (body[i].id) {
-              body[i].url = process.env.BASE_URL + route  + '/' + body[i].id;
+              body[i].url = process.env.BASE_URL + targetRequest.route  + '/' + body[i].id;
             }
           }
         }
@@ -126,7 +135,7 @@ module.exports = function(targetRequest, globalServices, callback){
             + ' token, Access-Token',
           'Access-Control-Expose-Headers': 'x-total-count',
         };
-        for (var i in answerDetails.headers) {
+        for (let i in answerDetails.headers) {
           if (i.substring(0, 1) == 'x') {
             responseHeaders[i] = answerDetails.headers[i];
           }

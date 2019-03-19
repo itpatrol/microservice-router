@@ -27,7 +27,7 @@ function processNotify(notifyTargets, targetRequest, phase, globalServices, call
     headers: getHookHeaders(targetRequest, routerItem, phase, 'notify', routerItem.group, true),
     body: targetRequest.requestDetails._buffer
   }
-  if(routerItem.hook.phase == "metric" && routerItem.hook.meta) {
+  if (routerItem.hook.phase == "metric" && routerItem.hook.meta) {
     let jsonCopy = JSON.parse(JSON.stringify(targetRequest.jsonData))
     delete jsonCopy.request
     delete jsonCopy.response

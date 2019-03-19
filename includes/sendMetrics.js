@@ -14,7 +14,8 @@ const debug = require('debug')('proxy:send-hook-metric');
 const sendHookBroadcast = require('./sendHookBroadcast.js')
 const sendHookNotify = require('./sendHookNotify.js')
 
-module.exports = function(error, response, body, startTime, targetRequest, requestOptions, globalServices){
+module.exports = function(error, response, body, startTime,
+  targetRequest, requestOptions, globalServices){
   let endTime = Date.now();
   let executeTime = endTime - startTime
   debug('requestOptions: %O executeTime: %s', requestOptions, executeTime);
