@@ -30,6 +30,7 @@ module.exports = function(targetRequest, routeItem) {
       continue;
     }
     var fullPathMatched = true;
+    routeItem.matchVariables = {}
     for (var i = 0; i < targetRoutePathItems.length; i++) {
       if (pathItems[i].charAt(0) == ':') {
         routeItem.matchVariables[pathItems[i].substring(1)] = targetRoutePathItems[i];
