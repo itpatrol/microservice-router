@@ -11,9 +11,6 @@ describe('sendRequest', function(){
     nock('http://test.com')
     .post('/')
     .reply(function(uri, requestBody) {
-//      console.log('path:', this.req.path);
-//      console.log('headers:', this.req.headers);
-//      console.log('requestBody:', requestBody);
       return {
         headers: this.req.headers,
         body: JSON.parse(requestBody)
@@ -32,8 +29,6 @@ describe('sendRequest', function(){
       body: targetRequest.requestDetails._buffer
     }
     sendRequest(options, targetRequest, routeItems, function(err, response, body) {
-//      console.log('err:', err);
-//      console.log('body:', body);
       let json = JSON.parse(body)
       expect(json.headers.test).to.equal("test")
       expect(json.body.test).to.equal("test")

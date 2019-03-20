@@ -395,5 +395,46 @@ module.exports = [{
   "created": 1551035828020,
   "changed": 1551036353638,
   "token": "xxx",
+},
+{
+  "path": [
+    "ws"
+  ],
+  "endpointURL": "http://127.0.0.1:8888/",
+  "secureKey": "xx11xx",
+  "scope": "ws",
+  "type": "websocket",
+  "methods": {
+    "post": "data",
+    "put": "data",
+    "delete": "data",
+    "search": "meta",
+    "get": "meta"
+  },
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 70.6953125,
+      "loadavg": [
+        1.919921875,
+        2.08984375,
+        2.201171875
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 76.671875,
+      "loadavg": [
+        1.919921875,
+        2.08984375,
+        2.201171875
+      ]
+    }
+  ],
+  "online": true,
+  "created": 1553000093132,
+  "changed": 1553049380061,
+  "token": "xxx",
+  "id": "5c90e69d12d92e11fd978f03"
 }
 ]
