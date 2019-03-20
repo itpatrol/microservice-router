@@ -436,5 +436,49 @@ module.exports = [{
   "changed": 1553049380061,
   "token": "xxx",
   "id": "5c90e69d12d92e11fd978f03"
+},
+{
+  "_id": "5c72edb07ca0193860fdef7b",
+  "type": "hook",
+  "hook":
+    {
+      "phase": "before",
+      "type": "adapter",
+      "group": "test1"
+    },
+  "conditions": {
+    "methods": [
+      "POST"
+    ]
+  },
+  "path": [
+    "register"
+  ],
+  "endpointURL": "http://127.0.0.1:8888/",
+  "secureKey": "xxxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 30.00390625,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 27.59375,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    }
+  ],
+  "created": 1551035824669,
+  "changed": 1551036353626,
+  "token": "xxx",
 }
 ]
