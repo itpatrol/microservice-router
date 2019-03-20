@@ -37,7 +37,7 @@ module.exports = [{
     "repos/:owner",
     "repos"
   ],
-  "endpointUrl": "http://142.44.212.5:10046/",
+  "endpointUrl": "http://127.0.0.1:8807/",
   "secureKey": "xxx",
   "provides": {
     ":repo": {
@@ -78,7 +78,7 @@ module.exports = [{
     "repos/:owner/:repo/files",
     "repos/:owner/files"
   ],
-  "endpointUrl": "https://api.zen.ci/http://142.44.212.5:10047/",
+  "endpointUrl": "https://api.zen.ci/http://127.0.0.1:10047/",
   "secureKey": "xxx",
   "metrics": [
     {
@@ -113,7 +113,7 @@ module.exports = [{
     "repos/:owner/:repo/files2",
     "repos/:owner/files2"
   ],
-  "endpointUrl": "https://api.zen.ci/http://142.44.212.5:10047/",
+  "endpointUrl": "https://api.zen.ci/http://127.0.0.1:10047/",
   "secureKey": "xxx",
   "metrics": [
     {
@@ -182,7 +182,7 @@ module.exports = [{
     "repos/:owner",
     "repos"
   ],
-  "endpointUrl": "http://142.44.212.5:10046/",
+  "endpointUrl": "http://127.0.0.1:10046/",
   "secureKey": "xxx",
   "provides": {
     ":repo": {
@@ -223,7 +223,7 @@ module.exports = [{
     "repos/:owner/:repo/files",
     "repos/:owner/files"
   ],
-  "endpointUrl": "https://api.zen.ci/http://142.44.212.5:10047/",
+  "endpointUrl": "https://api.zen.ci/http://127.0.0.1:10047/",
   "secureKey": "xxx",
   "metrics": [
     {
@@ -270,7 +270,7 @@ module.exports = [{
   "path": [
     "repos/:owner"
   ],
-  "endpointUrl": "http://142.44.212.5:10083/",
+  "endpointUrl": "http://127.0.0.1:10083/",
   "secureKey": "xxxx",
   "online": true,
   "metrics": [
@@ -315,7 +315,7 @@ module.exports = [{
   "path": [
     "repos/:owner"
   ],
-  "endpointUrl": "http://142.44.212.6:10095/",
+  "endpointUrl": "http://127.0.0.1:10095/",
   "secureKey": "xxxx",
   "online": true,
   "metrics": [
@@ -360,7 +360,7 @@ module.exports = [{
   "path": [
     "repos/:owner"
   ],
-  "endpointUrl": "http://142.44.212.6:10096/",
+  "endpointUrl": "http://127.0.0.1:10096/",
   "secureKey": "xxx",
   "online": true,
   "metrics": [
@@ -404,7 +404,7 @@ module.exports = [{
   "path": [
     "repos/:owner"
   ],
-  "endpointUrl": "http://142.44.212.5:10084/",
+  "endpointUrl": "http://127.0.0.1:10084/",
   "secureKey": "xxx",
   "online": true,
   "metrics": [
@@ -490,6 +490,139 @@ module.exports = [{
     "register"
   ],
   "endpointUrl": "http://127.0.0.1:8888/",
+  "secureKey": "xxxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 30.00390625,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 27.59375,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    }
+  ],
+  "created": 1551035824669,
+  "changed": 1551036353626,
+  "token": "xxx",
+},
+{
+  "_id": "5c72edb07ca0193860fdef7b",
+  "type": "hook",
+  "hook":
+    {
+      "phase": "after",
+      "type": "adapter",
+      "group": "test1"
+    },
+  "conditions": {
+    "methods": [
+      "POST"
+    ]
+  },
+  "path": [
+    "register"
+  ],
+  "endpointUrl": "http://127.0.0.1:9000/",
+  "secureKey": "xxxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 30.00390625,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 27.59375,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    }
+  ],
+  "created": 1551035824669,
+  "changed": 1551036353626,
+  "token": "xxx",
+},
+{
+  "_id": "5c72edb07ca0193860fdef7b",
+  "type": "hook",
+  "hook":
+    {
+      "phase": "before",
+      "type": "adapter",
+      "group": "test2"
+    },
+  "conditions": {
+    "methods": [
+      "POST"
+    ]
+  },
+  "path": [
+    "register"
+  ],
+  "endpointUrl": "http://127.0.0.1:1008/",
+  "secureKey": "xxxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 30.00390625,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 27.59375,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    }
+  ],
+  "created": 1551035824669,
+  "changed": 1551036353626,
+  "token": "xxx",
+},
+
+{
+  "_id": "5c72edb07ca0193860fdef7b",
+  "type": "hook",
+  "hook":
+    {
+      "phase": "before",
+      "type": "adapter",
+      "group": "test2"
+    },
+  "conditions": {
+    "methods": [
+      "POST"
+    ]
+  },
+  "path": [
+    "register"
+  ],
+  "endpointUrl": "http://127.0.0.1:1007/",
   "secureKey": "xxxx",
   "online": true,
   "metrics": [
@@ -701,13 +834,8 @@ module.exports = [{
       "type": "broadcast",
       "group": "test1"
     },
-  "conditions": {
-    "methods": [
-      "POST"
-    ]
-  },
   "path": [
-    "register"
+    "*"
   ],
   "endpointUrl": "http://127.0.0.1:8893/",
   "secureKey": "xxxx",
@@ -746,13 +874,8 @@ module.exports = [{
       "group": "test1",
       "meta": true
     },
-  "conditions": {
-    "methods": [
-      "POST"
-    ]
-  },
   "path": [
-    "register"
+    "*"
   ],
   "endpointUrl": "http://127.0.0.1:8894/",
   "secureKey": "xxxx",
@@ -790,13 +913,8 @@ module.exports = [{
       "type": "notify",
       "group": "test1"
     },
-  "conditions": {
-    "methods": [
-      "POST"
-    ]
-  },
   "path": [
-    "register"
+    "*"
   ],
   "endpointUrl": "http://127.0.0.1:8895/",
   "secureKey": "xxxx",
@@ -835,13 +953,8 @@ module.exports = [{
       "group": "test1",
       "meta": true
     },
-  "conditions": {
-    "methods": [
-      "POST"
-    ]
-  },
   "path": [
-    "register"
+    "*"
   ],
   "endpointUrl": "http://127.0.0.1:8896/",
   "secureKey": "xxxx",

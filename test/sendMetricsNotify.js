@@ -6,6 +6,8 @@ const request = require('../includes/request.js')
 let targetRequests = require('./targetRequests.js')
 let routeItems = require('./routeItems.js')
 
+let MAGIC_NUMBER = 9 //Amount of notifications that need to be send based on current routeItems file records
+
 describe('sendHookMetricNotify', function(){
   before(function(){
     this.receivedData1 = []
@@ -100,7 +102,7 @@ describe('sendHookMetricNotify', function(){
       setTimeout(function(){
         //console.log(self.receivedData1)
         let TotalLength = self.receivedData1.length + self.receivedData2.length
-        expect(TotalLength).to.equal(6)
+        expect(TotalLength).to.equal(MAGIC_NUMBER)
         done()
       }, 100)
     })
@@ -113,7 +115,7 @@ describe('sendHookMetricNotify', function(){
     request(targetRequest, routeItems, function(err, response) {
       setTimeout(function(){
         let TotalLength = self.receivedData1.length + self.receivedData2.length
-        expect(TotalLength).to.equal(6)
+        expect(TotalLength).to.equal(MAGIC_NUMBER)
         done()
       }, 100)
     })

@@ -39,9 +39,7 @@ function processBroadcast(broadcastTargets, targetRequest, phase, globalServices
     } else {
       debug('broadcast sent');
     }
-    if (broadcastTargets.length) {
-      processBroadcast(broadcastTargets, targetRequest, phase, globalServices)
-    }
+    processBroadcast(broadcastTargets, targetRequest, phase, globalServices)
   })
 }
 

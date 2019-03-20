@@ -26,7 +26,9 @@ describe('matchRoute', function(){
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
           if (matchRoute(targetRequest, routeItem)) {
-            expect(routeItem.path).to.be.an('array').that.include('register');
+            if(routeItem.path[0] != '*')  {
+              expect(routeItem.path).to.be.an('array').that.include('register');
+            }
           } else {
             if (routeItem.type !== 'hook') {
               expect(routeItem.path).to.be.an('array').that.not.include('register');
@@ -44,7 +46,9 @@ describe('matchRoute', function(){
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
           if (matchRoute(targetRequest, routeItem)) {
-            expect(routeItem.path).to.be.an('array').that.include('register');
+            if(routeItem.path[0] != '*')  {
+              expect(routeItem.path).to.be.an('array').that.include('register');
+            }
           } else {
             if (routeItem.type !== 'hook') {
               expect(routeItem.path).to.be.an('array').that.not.include('register');
@@ -62,8 +66,10 @@ describe('matchRoute', function(){
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
           if (matchRoute(targetRequest, routeItem)) {
-            expect(routeItem.path).to.be.an('array').that.include('repos/:owner');
-            expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'test');
+            if(routeItem.path[0] != '*')  {
+              expect(routeItem.path).to.be.an('array').that.include('repos/:owner');
+              expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'test');
+            }
             delete routeItem.matchVariables
           } else {
             if (routeItem.type !== 'hook') {
@@ -82,9 +88,11 @@ describe('matchRoute', function(){
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
           if (matchRoute(targetRequest, routeItem)) {
-            expect(routeItem.path).to.be.an('array').that.include('repos/:owner');
-            expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'test');
-            delete routeItem.matchVariables
+            if(routeItem.path[0] != '*')  {
+              expect(routeItem.path).to.be.an('array').that.include('repos/:owner');
+              expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'test');
+              delete routeItem.matchVariables
+            }
           } else {
             if (routeItem.type != "hook") {
               expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner');
@@ -102,8 +110,10 @@ describe('matchRoute', function(){
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
           if (matchRoute(targetRequest, routeItem)) {
-            expect(routeItem.path).to.be.an('array').that.include('repos');
-            expect(routeItem).to.not.have.property('matchVariables');
+            if(routeItem.path[0] != '*')  {
+              expect(routeItem.path).to.be.an('array').that.include('repos');
+              expect(routeItem).to.not.have.property('matchVariables');
+            }
           } else {
             if (routeItem.type !== 'hook') {
               expect(routeItem.path).to.be.an('array').that.not.include('repos');
@@ -122,8 +132,10 @@ describe('matchRoute', function(){
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
           if (matchRoute(targetRequest, routeItem)) {
-            expect(routeItem.path).to.be.an('array').that.include('repos');
-            expect(routeItem).to.not.have.property('matchVariables');
+            if(routeItem.path[0] != '*')  {
+              expect(routeItem.path).to.be.an('array').that.include('repos');
+              expect(routeItem).to.not.have.property('matchVariables');
+            }
           } else {
             if (routeItem.type !== 'hook') {
               expect(routeItem.path).to.be.an('array').that.not.include('repos');
@@ -141,12 +153,14 @@ describe('matchRoute', function(){
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
           if (matchRoute(targetRequest, routeItem)) {
-            expect(routeItem.path).to.be.an('array').that.include('repos/:owner/:repo/files');
-            expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('owner', 'ownername');
-            expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('repo', 'reponame');       
-            delete routeItem.matchVariables   
+            if(routeItem.path[0] != '*')  {
+              expect(routeItem.path).to.be.an('array').that.include('repos/:owner/:repo/files');
+              expect(routeItem.matchVariables).to.be.an('object')
+              .to.have.property('owner', 'ownername');
+              expect(routeItem.matchVariables).to.be.an('object')
+              .to.have.property('repo', 'reponame');       
+              delete routeItem.matchVariables   
+            }
           } else {
             if (routeItem.type !== 'hook') {
               expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/:repo/files');
@@ -165,12 +179,14 @@ describe('matchRoute', function(){
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
           if (matchRoute(targetRequest, routeItem)) {
-            expect(routeItem.path).to.be.an('array').that.include('repos/:owner/:repo/files');
-            expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('owner', 'ownername');
-            expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('repo', 'reponame');  
-            delete routeItem.matchVariables
+            if(routeItem.path[0] != '*')  {
+              expect(routeItem.path).to.be.an('array').that.include('repos/:owner/:repo/files');
+              expect(routeItem.matchVariables).to.be.an('object')
+              .to.have.property('owner', 'ownername');
+              expect(routeItem.matchVariables).to.be.an('object')
+              .to.have.property('repo', 'reponame');  
+              delete routeItem.matchVariables
+            }
           } else {
             if (routeItem.type !== 'hook') {
               expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/:repo/files');
@@ -188,10 +204,12 @@ describe('matchRoute', function(){
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
           if (matchRoute(targetRequest, routeItem)) {
-            expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
-            expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('owner', 'ownername'); 
-            delete routeItem.matchVariables        
+            if(routeItem.path[0] != '*')  {
+              expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
+              expect(routeItem.matchVariables).to.be.an('object')
+              .to.have.property('owner', 'ownername'); 
+              delete routeItem.matchVariables        
+            }
           } else {
             if (routeItem.type !== 'hook') {
               expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/files');
@@ -210,10 +228,12 @@ describe('matchRoute', function(){
       for (let targetRequest of subTargetRequest) {
         for (let routeItem of routeItems) {
           if (matchRoute(targetRequest, routeItem)) {
-            expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
-            expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('owner', 'ownername'); 
-            delete routeItem.matchVariables
+            if(routeItem.path[0] != '*')  {
+              expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
+              expect(routeItem.matchVariables).to.be.an('object')
+              .to.have.property('owner', 'ownername'); 
+              delete routeItem.matchVariables
+            }
           } else {
             if (routeItem.type !== 'hook') {
               expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/files');

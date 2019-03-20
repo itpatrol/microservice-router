@@ -85,7 +85,9 @@ describe('sendHookBroadcast', function(){
     request(targetRequest, routeItems, function(err, response) {
       expect(response.answer.headers.test).to.equal("test")
       expect(response.answer.body.test).to.equal("test")
-      done()
+      setTimeout(function(){
+        done()
+      },50)
     })
     
   })
@@ -95,9 +97,11 @@ describe('sendHookBroadcast', function(){
     let self = this
     
     request(targetRequest, routeItems, function(err, response) {
-      expect(self.receivedData1.body.test).to.equal("test")
-      expect(self.receivedData1.headers.test).to.equal("test")
-      done()
+      setTimeout(function(){
+        expect(self.receivedData1.body.test).to.equal("test")
+        expect(self.receivedData1.headers.test).to.equal("test")
+        done()
+      },50)
     })
     
   })
@@ -107,9 +111,30 @@ describe('sendHookBroadcast', function(){
     let self = this
     
     request(targetRequest, routeItems, function(err, response) {
-      expect(self.receivedData2.body.test).to.equal("test")
-      expect(self.receivedData2.headers.test).to.equal("test")
-      done()
+      setTimeout(function(){
+        expect(self.receivedData2.body.test).to.equal("test")
+        expect(self.receivedData2.headers.test).to.equal("test")
+        done()
+      },50)
+    })
+    
+  })
+  it('No Broadcast messages', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "test"}'
+
+    let routeNoBCItems =  sift({
+      "hook.type": {$ne: "broadcast"},
+    }, routeItems)
+    let self = this
+    request(targetRequest, routeNoBCItems, function(err, response) {
+      expect(response.answer.headers.test).to.equal("test")
+      expect(response.answer.body.test).to.equal("test")
+      setTimeout(function(){
+        expect(self.receivedData2).to.equal(false)
+        expect(self.receivedData1).to.equal(false)
+        done()
+      }, 100)
     })
     
   })

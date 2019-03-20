@@ -107,16 +107,9 @@ module.exports = function(targetRequest, phase, globalServices, callback){
   }
   let adapterGroups = []
   for (let target of adapterTargets) {
-    if (target.group) {
-      if (adapterGroups.indexOf(target.group) == -1) {
-        adapterGroups.push(target.group)
-      }
+    if (adapterGroups.indexOf(target.group) == -1) {
+      adapterGroups.push(target.group)
     }
-  }
-  if (!adapterGroups.length) {
-    // No adapters found. return true, no error but nothing to process.
-    debug('No adapter groups found');
-    return callback(new Error('No adapter groups found'))
   }
   adapterGroups.sort()
   debug('adapter Groups %O', adapterGroups);

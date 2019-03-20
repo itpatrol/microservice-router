@@ -24,7 +24,9 @@ describe('findAllTargets', function(){
       for (let targetRequest of subTargetRequest) {
         let targets = findAllTargets(targetRequest, false, routeItems)
         for (let routeItem of targets) {
-          expect(routeItem.path).to.be.an('array').that.include('register');
+          if(routeItem.path[0] != '*')  {
+            expect(routeItem.path).to.be.an('array').that.include('register');
+          }
         }
       }
       done()
@@ -37,7 +39,9 @@ describe('findAllTargets', function(){
       for (let targetRequest of subTargetRequest) {
         let targets = findAllTargets(targetRequest, false, routeItems)
         for (let routeItem of targets) {
-          expect(routeItem.path).to.be.an('array').that.include('register');
+          if(routeItem.path[0] != '*')  {
+            expect(routeItem.path).to.be.an('array').that.include('register');
+          }
         }
       }
       done()
@@ -50,8 +54,10 @@ describe('findAllTargets', function(){
       for (let targetRequest of subTargetRequest) {
         let targets = findAllTargets(targetRequest, false, routeItems)
         for (let routeItem of targets) {
-          expect(routeItem.path).to.be.an('array').that.include('repos/:owner');
-          expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'test');
+          if(routeItem.path[0] != '*')  {
+            expect(routeItem.path).to.be.an('array').that.include('repos/:owner');
+            expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'test');
+          }
         }
       }
       done()
@@ -64,9 +70,11 @@ describe('findAllTargets', function(){
       for (let targetRequest of subTargetRequest) {
         let targets = findAllTargets(targetRequest, false, routeItems)
         for (let routeItem of targets) {
-          expect(routeItem.path).to.be.an('array').that.include('repos/:owner');
-          expect(routeItem.matchVariables).to.be.an('object')
-          .to.have.property('owner', 'test');
+          if(routeItem.path[0] != '*')  {
+            expect(routeItem.path).to.be.an('array').that.include('repos/:owner');
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('owner', 'test');
+          }
         }
       }
       done()
@@ -79,8 +87,10 @@ describe('findAllTargets', function(){
       for (let targetRequest of subTargetRequest) {
         let targets = findAllTargets(targetRequest, false, routeItems)
         for (let routeItem of targets) {
-          expect(routeItem.path).to.be.an('array').that.include('repos');
-          expect(routeItem.matchVariables).to.be.an('object').to.be.empty;
+          if(routeItem.path[0] != '*')  {
+            expect(routeItem.path).to.be.an('array').that.include('repos');
+            expect(routeItem.matchVariables).to.be.an('object').to.be.empty;
+          }
         }
       }
       done()
@@ -94,8 +104,10 @@ describe('findAllTargets', function(){
       for (let targetRequest of subTargetRequest) {
         let targets = findAllTargets(targetRequest, false, routeItems)
         for (let routeItem of targets) {
-          expect(routeItem.path).to.be.an('array').that.include('repos');
-          expect(routeItem.matchVariables).to.be.an('object').to.be.empty;
+          if(routeItem.path[0] != '*')  {
+            expect(routeItem.path).to.be.an('array').that.include('repos');
+            expect(routeItem.matchVariables).to.be.an('object').to.be.empty;
+          }
         }
       }
       done()
@@ -108,11 +120,13 @@ describe('findAllTargets', function(){
       for (let targetRequest of subTargetRequest) {
         let targets = findAllTargets(targetRequest, false, routeItems)
         for (let routeItem of targets) {
-          expect(routeItem.path).to.be.an('array').that.include('repos/:owner/:repo/files');
-          expect(routeItem.matchVariables).to.be.an('object')
-          .to.have.property('owner', 'ownername');
-          expect(routeItem.matchVariables).to.be.an('object')
-          .to.have.property('repo', 'reponame');        
+          if(routeItem.path[0] != '*')  {
+            expect(routeItem.path).to.be.an('array').that.include('repos/:owner/:repo/files');
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('owner', 'ownername');
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('repo', 'reponame');        
+          }
         }
       }
       done()
@@ -126,11 +140,13 @@ describe('findAllTargets', function(){
       for (let targetRequest of subTargetRequest) {
         let targets = findAllTargets(targetRequest, false, routeItems)
         for (let routeItem of targets) {
-          expect(routeItem.path).to.be.an('array').that.include('repos/:owner/:repo/files');
-          expect(routeItem.matchVariables).to.be.an('object')
-          .to.have.property('owner', 'ownername');
-          expect(routeItem.matchVariables).to.be.an('object')
-          .to.have.property('repo', 'reponame');  
+          if(routeItem.path[0] != '*')  {
+            expect(routeItem.path).to.be.an('array').that.include('repos/:owner/:repo/files');
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('owner', 'ownername');
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('repo', 'reponame');  
+          }
         }
       }
       done()
@@ -143,9 +159,11 @@ describe('findAllTargets', function(){
       for (let targetRequest of subTargetRequest) {
         let targets = findAllTargets(targetRequest, false, routeItems)
         for (let routeItem of targets) {
-          expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
-          expect(routeItem.matchVariables).to.be.an('object')
-          .to.have.property('owner', 'ownername');  
+          if(routeItem.path[0] != '*')  {
+            expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('owner', 'ownername');  
+          }
         }
       }
       done()
@@ -159,9 +177,11 @@ describe('findAllTargets', function(){
       for (let targetRequest of subTargetRequest) {
         let targets = findAllTargets(targetRequest, false, routeItems)
         for (let routeItem of targets) {
-          expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
-          expect(routeItem.matchVariables).to.be.an('object')
-          .to.have.property('owner', 'ownername'); 
+          if(routeItem.path[0] != '*')  {
+            expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('owner', 'ownername')
+          }
         }
       }
       done()

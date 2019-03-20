@@ -7,10 +7,10 @@ const sendRequest = require('../includes/request.js')
 let targetRequests = require('./targetRequests.js')
 let routeItems = require('./routeItems.js')
 
-describe('sendHookAdapter', function(){
+describe('sendHookAdapter (After)', function(){
   before(function(){
     this.receivedData = false
-    this.httpAdapterServer = http.createServer().listen(8888);
+    this.httpAdapterServer = http.createServer().listen(9000);
     this.httpAdapterServer.on('request', (request, response) => {
       let body = [];
       request.on('error', (err) => {
@@ -21,10 +21,11 @@ describe('sendHookAdapter', function(){
         body = Buffer.concat(body).toString();
         response.writeHead(200, {
           'Content-Type': 'application/json',
+          'x-set-x-adapter-after-test': 'adapter-test'
         });
         this.receivedData = JSON.parse(body)
         body = JSON.parse(body)
-        body.extra = true
+        body.after = true
         response.write(JSON.stringify(body))
         response.end();
         
@@ -63,7 +64,7 @@ describe('sendHookAdapter', function(){
     sendRequest(targetRequest, routeItems, function(err, response) {
       expect(response.answer.headers.test).to.equal("test")
       expect(response.answer.body.test).to.equal("test")
-      expect(response.answer.body.extra).to.equal(true)
+      expect(response.answer.after).to.equal(true)
       done()
     })
     
@@ -73,7 +74,17 @@ describe('sendHookAdapter', function(){
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     
     sendRequest(targetRequest, routeItems, function(err, response) {
-      expect(response.answer.body.extra).to.equal(true)
+      expect(response.answer.after).to.equal(true)
+      done()
+    })
+    
+  })
+  it('Adapter set adapter-test header', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "test"}'
+    
+    sendRequest(targetRequest, routeItems, function(err, response) {
+      expect(response.headers['x-adapter-after-test']).to.equal('adapter-test')
       done()
     })
     
@@ -84,8 +95,24 @@ describe('sendHookAdapter', function(){
     let self = this
     
     sendRequest(targetRequest, routeItems, function(err, response) {
-      expect(self.receivedData.test).to.equal("test")
+      expect(self.receivedData.body.test).to.equal("test")
       done()
+    })
+    
+  })
+  it('No Adapter received', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "test"}'
+
+    let routeNoAdapterItems =  sift({
+      "hook.type": {$ne: "adapter"},
+    }, routeItems)
+    let self = this
+    sendRequest(targetRequest, routeNoAdapterItems, function(err, response) {
+      setTimeout(function(){
+        expect(self.receivedData).to.equal(false)
+        done()
+      }, 100)
     })
     
   })

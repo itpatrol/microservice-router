@@ -5,6 +5,7 @@ var http = require('http');
 const request = require('../includes/request.js')
 let targetRequests = require('./targetRequests.js')
 let routeItems = require('./routeItems.js')
+const signature = require('../includes/signature.js');
 
 describe('sendHookMetricBroadcast', function(){
   before(function(){
@@ -19,6 +20,7 @@ describe('sendHookMetricBroadcast', function(){
         body.push(chunk);
       }).on('end', () => {
         body = Buffer.concat(body).toString();
+        //console.log('httpMetric1Server', body)
         response.writeHead(200, {
           'Content-Type': 'application/json',
         });
@@ -39,6 +41,7 @@ describe('sendHookMetricBroadcast', function(){
         body.push(chunk);
       }).on('end', () => {
         body = Buffer.concat(body).toString();
+        //console.log('httpMetric2Server', body)
         response.writeHead(200, {
           'Content-Type': 'application/json',
         });
@@ -50,7 +53,7 @@ describe('sendHookMetricBroadcast', function(){
         
       });
     });
-    this.httpEndPointServer = http.createServer().listen(8808);
+    this.httpEndPointServer = http.createServer().listen(8807);
     this.httpEndPointServer.on('request', (request, response) => {
       // the same kind of magic happens here!
       let body = [];
@@ -79,9 +82,9 @@ describe('sendHookMetricBroadcast', function(){
     this.httpEndPointServer.close()
   })
   it('Endpoint response', function(done){
-    let targetRequest = targetRequests[0];
+    let targetRequest = targetRequests[4];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
-    let self = this
+
     request(targetRequest, routeItems, function(err, response) {
       expect(response.answer.headers.test).to.equal("test")
       expect(response.answer.body.test).to.equal("test")
@@ -92,29 +95,29 @@ describe('sendHookMetricBroadcast', function(){
     
   })
   it('Metric 1 request', function(done){
-    let targetRequest = targetRequests[0];
+    let targetRequest = targetRequests[4];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
 
     request(targetRequest, routeItems, function(err, response) {
       setTimeout(function(){
         //console.log(self.receivedData1)
-        expect(self.receivedData1.length).to.equal(6)
+        expect(self.receivedData1.length).to.equal(2)
         done()
-      }, 100)
+      }, 1000)
     })
     
   })
   it('Metric 2 request', function(done){
-    let targetRequest = targetRequests[0];
+    let targetRequest = targetRequests[4];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
     request(targetRequest, routeItems, function(err, response) {
       setTimeout(function(){
         //console.log(self.receivedData2)
-        expect(self.receivedData2.length).to.equal(6)
+        expect(self.receivedData2.length).to.equal(2)
         done()
-      }, 100)
+      }, 1000)
     })
   })
 })
