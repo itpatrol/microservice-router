@@ -28,7 +28,9 @@ describe('matchRoute', function(){
           if (matchRoute(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('register');
           } else {
-            expect(routeItem.path).to.be.an('array').that.not.include('register');
+            if(routeItem.type !== 'hook') {
+              expect(routeItem.path).to.be.an('array').that.not.include('register');
+            }
           }
         }
       }
@@ -44,7 +46,9 @@ describe('matchRoute', function(){
           if (matchRoute(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('register');
           } else {
-            expect(routeItem.path).to.be.an('array').that.not.include('register');
+            if(routeItem.type !== 'hook') {
+              expect(routeItem.path).to.be.an('array').that.not.include('register');
+            }
           }
         }
       }
@@ -62,7 +66,9 @@ describe('matchRoute', function(){
             expect(routeItem.matchVariables).to.be.an('object').to.have.property('owner', 'test');
             delete routeItem.matchVariables
           } else {
-            expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner');
+            if(routeItem.type !== 'hook') {
+              expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner');
+            }
           }
         }
       }
@@ -99,7 +105,9 @@ describe('matchRoute', function(){
             expect(routeItem.path).to.be.an('array').that.include('repos');
             expect(routeItem).to.not.have.property('matchVariables');
           } else {
-            expect(routeItem.path).to.be.an('array').that.not.include('repos');
+            if(routeItem.type !== 'hook') {
+              expect(routeItem.path).to.be.an('array').that.not.include('repos');
+            }
           }
         }
       }
@@ -117,7 +125,9 @@ describe('matchRoute', function(){
             expect(routeItem.path).to.be.an('array').that.include('repos');
             expect(routeItem).to.not.have.property('matchVariables');
           } else {
-            expect(routeItem.path).to.be.an('array').that.not.include('repos');
+            if(routeItem.type !== 'hook') {
+              expect(routeItem.path).to.be.an('array').that.not.include('repos');
+            }
           }
         }
       }
@@ -138,7 +148,9 @@ describe('matchRoute', function(){
             .to.have.property('repo', 'reponame');       
             delete routeItem.matchVariables   
           } else {
-            expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/:repo/files');
+            if(routeItem.type !== 'hook') {
+              expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/:repo/files');
+            }
           }
         }
       }
@@ -160,7 +172,9 @@ describe('matchRoute', function(){
             .to.have.property('repo', 'reponame');  
             delete routeItem.matchVariables
           } else {
-            expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/:repo/files');
+            if(routeItem.type !== 'hook') {
+              expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/:repo/files');
+            }
           }
         }
       }
@@ -179,7 +193,9 @@ describe('matchRoute', function(){
             .to.have.property('owner', 'ownername'); 
             delete routeItem.matchVariables        
           } else {
-            expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/files');
+            if(routeItem.type !== 'hook') {
+              expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/files');
+            }
           }
         }
       }
@@ -199,7 +215,9 @@ describe('matchRoute', function(){
             .to.have.property('owner', 'ownername'); 
             delete routeItem.matchVariables
           } else {
-            expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/files');
+            if(routeItem.type !== 'hook') {
+              expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/files');
+            }
           }
         }
       }
