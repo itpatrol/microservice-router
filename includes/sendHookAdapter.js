@@ -20,9 +20,6 @@ const signature = require('./signature.js');
 
 function processAdapter(adapterTargets, targetRequest,
                         phase, globalServices, callbackAdapterGroup) {
-  if (!adapterTargets.length) {
-    return callbackAdapterGroup()
-  }
   // TODO apply tags based vouting here
   let routerItem = adapterTargets.pop()
   let requestOptions = {
