@@ -14,7 +14,7 @@ const request = require('request');
 const debug = require('debug')('proxy:request');
 const debugBody = require('debug')('proxy:request-body');
 const url = require('url');
-const sendMetrics = require('./sendMetrics.js')
+
 
 module.exports = function(requestOptions, targetRequest, globalServices, callback){
   // Validate URI 
@@ -27,6 +27,7 @@ module.exports = function(requestOptions, targetRequest, globalServices, callbac
   request(requestOptions, function(error, response, body) {
     debug('requestOptions: %O answer err %O body %s', requestOptions, error, body);
     if (!targetRequest.isMetric) {
+      const sendMetrics = require('./sendMetrics.js')
       sendMetrics(error, response, body, startTime, targetRequest, requestOptions, globalServices)
     }
     if (error) {

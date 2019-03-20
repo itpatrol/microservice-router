@@ -480,5 +480,93 @@ module.exports = [{
   "created": 1551035824669,
   "changed": 1551036353626,
   "token": "xxx",
+},
+{
+  "_id": "5c72edb07ca0193860fdef7b",
+  "type": "hook",
+  "hook":
+    {
+      "phase": "after",
+      "type": "broadcast",
+      "group": "test1"
+    },
+  "conditions": {
+    "methods": [
+      "POST"
+    ]
+  },
+  "path": [
+    "register"
+  ],
+  "endpointUrl": "http://127.0.0.1:8889/",
+  "secureKey": "xxxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 30.00390625,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 27.59375,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    }
+  ],
+  "created": 1551035824669,
+  "changed": 1551036353626,
+  "token": "xxx",
+},
+{
+  "_id": "5c72edb07ca0193860fdef7b",
+  "type": "hook",
+  "hook":
+    {
+      "phase": "after",
+      "type": "broadcast",
+      "group": "test1"
+    },
+  "conditions": {
+    "methods": [
+      "POST"
+    ]
+  },
+  "path": [
+    "register"
+  ],
+  "endpointUrl": "http://127.0.0.1:8890/",
+  "secureKey": "xxxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 30.00390625,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 27.59375,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    }
+  ],
+  "created": 1551035824669,
+  "changed": 1551036353626,
+  "token": "xxx",
 }
 ]

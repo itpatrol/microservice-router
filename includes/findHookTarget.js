@@ -37,7 +37,6 @@ module.exports = function(targetRequest, phase, type, group, allRegisteredRoutes
       continue
     }
     let targetCopy = JSON.parse(JSON.stringify(target))
-    delete targetCopy.hook
     if (target.hook.group) {
       targetCopy.group = target.hook.group
     } else {

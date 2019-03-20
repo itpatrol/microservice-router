@@ -1,17 +1,17 @@
 const expect  = require("chai").expect;
 const sift = require('sift').default
-const nock = require('nock');
 var http = require('http');
 
-const sendRequest = require('../includes/request.js')
+const request = require('../includes/request.js')
 let targetRequests = require('./targetRequests.js')
 let routeItems = require('./routeItems.js')
 
-describe('sendHookAdapter', function(){
+describe('sendHookBroadcast', function(){
   before(function(){
-    this.receivedData = false
-    this.httpAdapterServer = http.createServer().listen(8888);
-    this.httpAdapterServer.on('request', (request, response) => {
+    this.receivedData1 = false
+    this.receivedData2 = false
+    this.httpBroadcast1Server = http.createServer().listen(8889);
+    this.httpBroadcast1Server.on('request', (request, response) => {
       let body = [];
       request.on('error', (err) => {
         console.error(err);
@@ -22,7 +22,27 @@ describe('sendHookAdapter', function(){
         response.writeHead(200, {
           'Content-Type': 'application/json',
         });
-        this.receivedData = JSON.parse(body)
+        this.receivedData1 = JSON.parse(body)
+        body = JSON.parse(body)
+        body.extra = true
+        response.write(JSON.stringify(body))
+        response.end();
+        
+      });
+    });
+    this.httpBroadcast2Server = http.createServer().listen(8890);
+    this.httpBroadcast2Server.on('request', (request, response) => {
+      let body = [];
+      request.on('error', (err) => {
+        console.error(err);
+      }).on('data', (chunk) => {
+        body.push(chunk);
+      }).on('end', () => {
+        body = Buffer.concat(body).toString();
+        response.writeHead(200, {
+          'Content-Type': 'application/json',
+        });
+        this.receivedData2 = JSON.parse(body)
         body = JSON.parse(body)
         body.extra = true
         response.write(JSON.stringify(body))
@@ -49,42 +69,46 @@ describe('sendHookAdapter', function(){
       });
     });
   })
-  after(function(){
-    this.httpAdapterServer.close()
-    this.httpEndPointServer.close()
-  })
   afterEach(function(){
-    this.receivedData = false
+    this.receivedData1 = false
+    this.receivedData2 = false
+  })
+  after(function(){
+    this.httpBroadcast1Server.close()
+    this.httpBroadcast2Server.close()
+    this.httpEndPointServer.close()
   })
   it('Endpoint response', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
-
-    sendRequest(targetRequest, routeItems, function(err, response) {
+    
+    request(targetRequest, routeItems, function(err, response) {
       expect(response.answer.headers.test).to.equal("test")
       expect(response.answer.body.test).to.equal("test")
-      expect(response.answer.body.extra).to.equal(true)
       done()
     })
     
   })
-  it('Adapter transformed request', function(done){
-    let targetRequest = targetRequests[0];
-    targetRequest.requestDetails._buffer = '{"test": "test"}'
-    
-    sendRequest(targetRequest, routeItems, function(err, response) {
-      expect(response.answer.body.extra).to.equal(true)
-      done()
-    })
-    
-  })
-  it('Adapter received request', function(done){
+  it('Broadcast 1 request', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
     
-    sendRequest(targetRequest, routeItems, function(err, response) {
-      expect(self.receivedData.test).to.equal("test")
+    request(targetRequest, routeItems, function(err, response) {
+      expect(self.receivedData1.body.test).to.equal("test")
+      expect(self.receivedData1.headers.test).to.equal("test")
+      done()
+    })
+    
+  })
+  it('Broadcast 2 request', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "test"}'
+    let self = this
+    
+    request(targetRequest, routeItems, function(err, response) {
+      expect(self.receivedData2.body.test).to.equal("test")
+      expect(self.receivedData2.headers.test).to.equal("test")
       done()
     })
     
