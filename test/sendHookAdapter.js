@@ -9,6 +9,7 @@ let routeItems = require('./routeItems.js')
 
 describe('sendHookAdapter', function(){
   before(function(){
+    this.receivedData = false
     let httpAdapterServer = http.createServer().listen(8888);
     httpAdapterServer.on('request', (request, response) => {
       let body = [];
@@ -21,6 +22,7 @@ describe('sendHookAdapter', function(){
         response.writeHead(200, {
           'Content-Type': 'application/json',
         });
+        this.receivedData = JSON.parse(body)
         body = JSON.parse(body)
         body.extra = true
         response.write(JSON.stringify(body))
@@ -47,15 +49,37 @@ describe('sendHookAdapter', function(){
       });
     });
   })
-  it('Checking headers and body endpoint', function(done){
+  it('Endpoint response', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
-    
+    let self = this
     
     sendRequest(targetRequest, routeItems, function(err, response) {
       expect(response.answer.headers.test).to.equal("test")
       expect(response.answer.body.test).to.equal("test")
       expect(response.answer.body.extra).to.equal(true)
+      done()
+    })
+    
+  })
+  it('Adapter transformed request', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "test"}'
+    let self = this
+    
+    sendRequest(targetRequest, routeItems, function(err, response) {
+      expect(response.answer.body.extra).to.equal(true)
+      done()
+    })
+    
+  })
+  it('Adapter received request', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "test"}'
+    let self = this
+    
+    sendRequest(targetRequest, routeItems, function(err, response) {
+      expect(self.receivedData.test).to.equal("test")
       done()
     })
     
