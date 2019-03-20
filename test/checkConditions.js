@@ -22,6 +22,15 @@ let jsonData = {
 }
 
 describe('conditions Check', function(){
+  it('check missing string header', function(done){
+    expect(checkConditions({
+      headers: [{
+        name: "string-missing",
+        value: "test"
+      }]
+    }, requestDetails, jsonData)).to.equal(false)
+    done();
+  })
   it('check equal string header', function(done){
     expect(checkConditions({
       headers: [{
@@ -48,6 +57,25 @@ describe('conditions Check', function(){
         isRegex: true
       }]
     }, requestDetails, jsonData)).to.equal(true)
+    done();
+  })
+  it('check regex string header fail', function(done){
+    expect(checkConditions({
+      headers: [{
+        name: "string",
+        value: "test1",
+        isRegex: true
+      }]
+    }, requestDetails, jsonData)).to.equal(false)
+    done();
+  })
+  it('check payload is string', function(done){
+    expect(checkConditions({
+      payload: [{
+        name: "string",
+        value: "test"
+      }]
+    }, requestDetails, 'jsonData')).to.equal(false)
     done();
   })
   it('check payload equal string', function(done){
@@ -78,6 +106,25 @@ describe('conditions Check', function(){
     }, requestDetails, jsonData)).to.equal(true)
     done();
   })
+  it('check payload regex missing', function(done){
+    expect(checkConditions({
+      payload: [{
+        name: "string",
+        value: "test2",
+        isRegex: true
+      }]
+    }, requestDetails, jsonData)).to.equal(false)
+    done();
+  })
+  it('check subProperty missing payload', function(done){
+    expect(checkConditions({
+      payload: [{
+        name: "sub.string2",
+        value: "test"
+      }]
+    }, requestDetails, jsonData)).to.equal(false)
+    done();
+  })
   it('check subProperty equal string payload', function(done){
     expect(checkConditions({
       payload: [{
@@ -103,6 +150,12 @@ describe('conditions Check', function(){
         value: "test",
         isRegex: true
       }]
+    }, requestDetails, jsonData)).to.equal(true)
+    done();
+  })
+  it('check method as a string', function(done){
+    expect(checkConditions({
+      methods: 'post'
     }, requestDetails, jsonData)).to.equal(true)
     done();
   })

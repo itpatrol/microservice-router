@@ -15,6 +15,8 @@ module.exports = function(endpointUrl, path){
     if (endpointUrl[endpointUrl.length - 1] !== '/') {
       URI += '/'
     }
+  } else {
+    URI += '/'
   }
   if (path && path.length) {
     for ( let i = 0; i < path.length; i++ ) {

@@ -33,16 +33,19 @@ module.exports = function(conditions, requestDetails, jsonData) {
   }
   // check methods
   if (conditions.methods && conditions.methods.length) {
-    if (conditions.methods instanceof Array) {
+    if(conditions.methods.toUpperCase) {
+      if(requestDetails.method != conditions.methods.toUpperCase()) {
+        return false
+      }
+    } else {
       for (let i in conditions.methods) {
         conditions.methods[i] = conditions.methods[i].toUpperCase()
       }
-    } else if (conditions.methods.toUpperCase){
-      conditions.methods = conditions.methods.toUpperCase()
+      if (conditions.methods.indexOf(requestDetails.method) === -1) {
+        return false;
+      }
     }
-    if (conditions.methods.indexOf(requestDetails.method) === -1) {
-      return false;
-    }
+    
   }
   // check payload
   if (conditions.payload && conditions.payload.length && jsonData) {

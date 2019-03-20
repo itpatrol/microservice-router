@@ -3,3 +3,5 @@ datastore
 .env
 pidfile
 nocommit
+.nyc_output
+coverage

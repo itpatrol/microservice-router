@@ -20,29 +20,25 @@ module.exports = function(targetRequest, routeItem) {
 
     // If targetRoutePathItems.length == 1, and did not match
     if (targetRoutePathItems.length == 1) {
-      if (path != targetRequest.route) {
-        continue;
-      }
+      continue;
     }
 
     let pathItems = path.split('/');
     if (pathItems.length != targetRoutePathItems.length) {
       continue;
     }
-    var fullPathMatched = true;
+    
     routeItem.matchVariables = {}
     for (var i = 0; i < targetRoutePathItems.length; i++) {
       if (pathItems[i].charAt(0) == ':') {
         routeItem.matchVariables[pathItems[i].substring(1)] = targetRoutePathItems[i];
       } else {
         if (targetRoutePathItems[i] != pathItems[i]) {
-          fullPathMatched = false;
-          break;
+          //if not matching items
+          return false
         }
       }
     }
-    if (fullPathMatched) {
-      return true;
-    }
+    return true;
   }
 }

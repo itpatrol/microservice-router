@@ -185,6 +185,25 @@ describe('checkPath', function(){
       }
       done()
   })
+  it('checking search repos/ownername/files', function(done){
+    let subTargetRequest = sift({
+      route: 'repos/ownername/files',
+      method: 'SEARCH'
+    }, targetRequests)
+      for (let targetRequest of subTargetRequest) {
+        for (let routeItem of routeItems) {
+          if (checkPath(targetRequest, routeItem)) {
+            expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
+            expect(routeItem.matchVariables).to.be.an('object')
+            .to.have.property('owner', 'ownername'); 
+            delete routeItem.matchVariables        
+          } else {
+            expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/files');
+          }
+        }
+      }
+      done()
+  })
   it('checking get repos/ownername/files/fileid', function(done){
     let subTargetRequest = sift({
       route: 'repos/ownername/files',

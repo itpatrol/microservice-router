@@ -110,6 +110,41 @@ module.exports = [{
 },
 {
   "path": [
+    "repos/:owner/:repo/files2",
+    "repos/:owner/files2"
+  ],
+  "endpointUrl": "https://api.zen.ci/http://142.44.212.5:10047/",
+  "secureKey": "xxx",
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 23.453125,
+      "loadavg": [
+        1.39208984375,
+        2.05908203125,
+        2.46337890625
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 23.59765625,
+      "loadavg": [
+        1.39208984375,
+        2.05908203125,
+        2.46337890625
+      ]
+    }
+  ],
+  "scope": "files",
+  "type": "handler",
+  "online": true,
+  "created": 1552536823177,
+  "changed": 1553011394363,
+  "token": "xxx",
+  "id": "5c89d4f7cf087c449c9ddc39"
+},
+{
+  "path": [
     "register"
   ],
   "endpointUrl": "http://127.0.0.1:8808/",

@@ -15,5 +15,12 @@ describe('buildURI', function(){
     expect(buildURI('http://test', '/id')).to.equal('http://test/id')
     done();
   });
-
+  it('Build with first part is null', function(done){
+    expect(buildURI(null, 'id')).to.equal('/id')
+    done();
+  });
+  it('Build with second part is null', function(done){
+    expect(buildURI('http://test', null)).to.equal('http://test/')
+    done();
+  });
 })
