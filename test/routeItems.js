@@ -2,7 +2,7 @@ module.exports = [{
   "path": [
     "register"
   ],
-  "endpointURL": "http://node2.vps-private.net:10045/",
+  "endpointUrl": "http://127.0.0.1:8808/",
   "secureKey": "xxxx",
   "online": true,
   "scope": "admin",
@@ -37,7 +37,7 @@ module.exports = [{
     "repos/:owner",
     "repos"
   ],
-  "endpointURL": "http://142.44.212.5:10046/",
+  "endpointUrl": "http://142.44.212.5:10046/",
   "secureKey": "xxx",
   "provides": {
     ":repo": {
@@ -78,7 +78,7 @@ module.exports = [{
     "repos/:owner/:repo/files",
     "repos/:owner/files"
   ],
-  "endpointURL": "https://api.zen.ci/http://142.44.212.5:10047/",
+  "endpointUrl": "https://api.zen.ci/http://142.44.212.5:10047/",
   "secureKey": "xxx",
   "metrics": [
     {
@@ -112,7 +112,7 @@ module.exports = [{
   "path": [
     "register"
   ],
-  "endpointURL": "http://node2.vps-private.net:10045/",
+  "endpointUrl": "http://127.0.0.1:8808/",
   "secureKey": "xxxx",
   "online": true,
   "scope": "admin",
@@ -147,7 +147,7 @@ module.exports = [{
     "repos/:owner",
     "repos"
   ],
-  "endpointURL": "http://142.44.212.5:10046/",
+  "endpointUrl": "http://142.44.212.5:10046/",
   "secureKey": "xxx",
   "provides": {
     ":repo": {
@@ -188,7 +188,7 @@ module.exports = [{
     "repos/:owner/:repo/files",
     "repos/:owner/files"
   ],
-  "endpointURL": "https://api.zen.ci/http://142.44.212.5:10047/",
+  "endpointUrl": "https://api.zen.ci/http://142.44.212.5:10047/",
   "secureKey": "xxx",
   "metrics": [
     {
@@ -235,7 +235,7 @@ module.exports = [{
   "path": [
     "repos/:owner"
   ],
-  "endpointURL": "http://142.44.212.5:10083/",
+  "endpointUrl": "http://142.44.212.5:10083/",
   "secureKey": "xxxx",
   "online": true,
   "metrics": [
@@ -280,7 +280,7 @@ module.exports = [{
   "path": [
     "repos/:owner"
   ],
-  "endpointURL": "http://142.44.212.6:10095/",
+  "endpointUrl": "http://142.44.212.6:10095/",
   "secureKey": "xxxx",
   "online": true,
   "metrics": [
@@ -325,7 +325,7 @@ module.exports = [{
   "path": [
     "repos/:owner"
   ],
-  "endpointURL": "http://142.44.212.6:10096/",
+  "endpointUrl": "http://142.44.212.6:10096/",
   "secureKey": "xxx",
   "online": true,
   "metrics": [
@@ -369,7 +369,7 @@ module.exports = [{
   "path": [
     "repos/:owner"
   ],
-  "endpointURL": "http://142.44.212.5:10084/",
+  "endpointUrl": "http://142.44.212.5:10084/",
   "secureKey": "xxx",
   "online": true,
   "metrics": [
@@ -400,7 +400,7 @@ module.exports = [{
   "path": [
     "ws"
   ],
-  "endpointURL": "http://127.0.0.1:8888/",
+  "endpointUrl": "http://127.0.0.1:8888/",
   "secureKey": "xx11xx",
   "scope": "ws",
   "type": "websocket",
@@ -454,7 +454,7 @@ module.exports = [{
   "path": [
     "register"
   ],
-  "endpointURL": "http://127.0.0.1:8888/",
+  "endpointUrl": "http://127.0.0.1:8888/",
   "secureKey": "xxxx",
   "online": true,
   "metrics": [

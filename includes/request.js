@@ -47,6 +47,8 @@ function processEndpoint(endpointTargets, targetRequest, globalServices, callbac
     if (err) {
       return processEndpoint(endpointTargets, targetRequest, globalServices, callback)
     }
+    // targetRequest.router used in sendBroadcastMessage
+    targetRequest.router = routerItem
     callback(err, response, body)
   })
 

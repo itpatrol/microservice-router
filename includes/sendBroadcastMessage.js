@@ -63,7 +63,7 @@ module.exports = function (targetRequest, message, allRegisteredRoutes) {
         continue;
       }
     }
-    var URL = url.parse(routeItem.endpointURL);
+    var URL = url.parse(routeItem.endpointUrl);
 
     broadcastMessage.signature = ['sha256',
       signature('sha256', JSON.stringify(broadcastMessage), routeItem.secureKey)];
