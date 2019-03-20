@@ -33,8 +33,8 @@ module.exports = function(conditions, requestDetails, jsonData) {
   }
   // check methods
   if (conditions.methods && conditions.methods.length) {
-    if(conditions.methods.toUpperCase) {
-      if(requestDetails.method != conditions.methods.toUpperCase()) {
+    if (conditions.methods.toUpperCase) {
+      if (requestDetails.method != conditions.methods.toUpperCase()) {
         return false
       }
     } else {
