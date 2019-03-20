@@ -5,7 +5,6 @@ var http = require('http');
 const request = require('../includes/request.js')
 let targetRequests = require('./targetRequests.js')
 let routeItems = require('./routeItems.js')
-const signature = require('../includes/signature.js');
 
 describe('sendHookMetricBroadcast', function(){
   before(function(){

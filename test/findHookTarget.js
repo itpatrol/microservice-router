@@ -46,4 +46,57 @@ describe('findHookTarget', function(){
       done()
   })
 
+  it('checking for null phase', function(done){
+    for (let targetRequest of targetRequests) {
+      let targets = findHookTarget(targetRequest, null, 'notify', false, routeItems)
+      for (let routeItem of targets) {
+        expect(routeItem.hook.phase).to.exist;
+      }
+
+    }
+    done()
+  })
+  it('checking for group repo-email', function(done){
+    for (let targetRequest of targetRequests) {
+      let targets = findHookTarget(targetRequest, null, 'notify', "repo-email", routeItems)
+      if(!targets.length) {
+        expect(targets).to.be.an.instanceof(Error)
+      } else {
+        for (let routeItem of targets) {
+          expect(routeItem.hook.phase).to.exist;
+          expect(routeItem.hook.group).to.equal("repo-email");
+        }
+      }
+
+    }
+    done()
+  })
+  it('checking for false phase', function(done){
+    for (let targetRequest of targetRequests) {
+      let targets = findHookTarget(targetRequest, false, 'notify', false, routeItems)
+
+      for (let routeItem of targets) {
+        expect(routeItem.hook.phase).to.exist;
+      }
+    }
+    done()
+  })
+
+  it('finding Hook when they are missing', function(done){
+    let subTargetRequest = sift({
+      route: 'repos/ownername/reponame/files',
+      method: 'POST'
+    }, targetRequests)
+    routeItems
+
+    let routeNoHookItems =  sift({
+      "type": {$ne: "hook"},
+    }, routeItems)
+
+      for (let targetRequest of subTargetRequest) {
+        let targets = findHookTarget(targetRequest, 'before', 'notify', false, routeNoHookItems)
+        expect(targets).to.be.an.instanceof(Error)
+      }
+      done()
+  })
 })

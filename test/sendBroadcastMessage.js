@@ -19,9 +19,11 @@ describe('sendBroadcastMessage', function(){
     
   });
   after(function(){
-    UDPServer.close()
+    if(UDPServer) {
+      UDPServer.close()
+    }
   })
-  it('general testing udp', function(done){
+  it('send success udp message', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
 
@@ -46,5 +48,29 @@ describe('sendBroadcastMessage', function(){
       expect(sign[1]).to.equal(hash)
       done()
     })
+  })
+  it('send fail udp message', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "test"}'
+
+    let routeWSItems =  sift({
+      path: 'ws',
+    }, routeItems)
+
+    targetRequest.router = routeWSItems[0]
+    targetRequest.requestDetails.url = 'TEST'
+    UDPServer.close()
+    
+    sendBroadcastMessage(targetRequest, JSON.parse(targetRequest.requestDetails._buffer), routeItems)
+    let messageReceived = false;
+    UDPServer.on('message', function(message, rinfo) {
+      messageReceived = JSON.parse(message);
+      
+    })
+    setTimeout(function(){
+      expect(messageReceived).to.equal(false)
+      UDPServer = false
+      done()
+    },100)
   })
 })

@@ -21,6 +21,7 @@ const url = require('url');
 function sendBroadcastMessageToClient(bufferedMessage, URL) {
   let client = dgram.createSocket('udp4');
   client.send(bufferedMessage, URL.port, URL.hostname, function(err) {
+    // Only happen if client close while sending some data.
     if (err) {
       debug('UDP broadcast Error: %O', err);
       client.close();
@@ -55,12 +56,10 @@ module.exports = function (targetRequest, message, allRegisteredRoutes) {
         broadcastMessage.message = message;
         break;
       }
-      case 'meta': {
+      case 'meta':
+      default : {
         broadcastMessage.meta = true;
         break;
-      }
-      default: {
-        continue;
       }
     }
     var URL = url.parse(routeItem.endpointUrl);

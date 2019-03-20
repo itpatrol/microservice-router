@@ -158,5 +158,21 @@ module.exports = [
       scope: 'admin',
       secureKey: 'xxxx'
     }
+  },
+  {
+    route: 'repos/ownername/files2',
+    path: 'fileid',
+    method: 'GET',
+    jsonData: {},
+    requestDetails: {
+      method: 'GET',
+      headers: {
+        test: "test"
+      }
+    },
+    endpoint: {
+      scope: 'admin',
+      secureKey: 'xxxx'
+    }
   }
 ]

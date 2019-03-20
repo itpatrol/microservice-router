@@ -243,4 +243,29 @@ describe('matchRoute', function(){
       }
       done()
   })
+  it('checking without conditions', function(done){
+    let subTargetRequest = sift({
+      route: 'repos/ownername/files2',
+      path: 'fileid',
+      method: 'GET'
+    }, targetRequests)
+      for (let targetRequest of subTargetRequest) {
+        for (let routeItem of routeItems) {
+          if (matchRoute(targetRequest, routeItem)) {
+            //console.log(targetRequest, routeItem)
+            if(routeItem.path[0] != '*')  {
+              expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files2');
+              expect(routeItem.matchVariables).to.be.an('object')
+              .to.have.property('owner', 'ownername'); 
+              delete routeItem.matchVariables
+            }
+          } else {
+            if (routeItem.type !== 'hook') {
+              expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/files2');
+            }
+          }
+        }
+      }
+      done()
+  })
 })

@@ -254,6 +254,73 @@ module.exports = [{
   "id": "5c89d4f7cf087c449c9ddc39"
 },
 {
+  "path": [
+    "repos/:owner/:repo/files",
+    "repos/:owner/files"
+  ],
+  "endpointUrl": "https://api.zen.ci/http://127.0.0.1:10047/",
+  "secureKey": "xxx",
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 23.453125,
+      "loadavg": [
+        1.39208984375,
+        2.05908203125,
+        2.46337890625
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 23.59765625,
+      "loadavg": [
+        1.39208984375,
+        2.05908203125,
+        2.46337890625
+      ]
+    }
+  ],
+  "scope": "files",
+  "created": 1552536823177,
+  "changed": 1553011394363,
+  "token": "xxx",
+  "id": "5c89d4f7cf087c449c9ddc39"
+},
+{
+  "path": [
+    "repos/:owner/:repo/files",
+    "repos/:owner/files"
+  ],
+  "endpointUrl": "https://api.zen.ci/http://127.0.0.1:10047/",
+  "secureKey": "xxx",
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 23.453125,
+      "loadavg": [
+        1.39208984375,
+        2.05908203125,
+        2.46337890625
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 23.59765625,
+      "loadavg": [
+        1.39208984375,
+        2.05908203125,
+        2.46337890625
+      ]
+    }
+  ],
+  "online": false,
+  "scope": "files",
+  "created": 1552536823177,
+  "changed": 1553011394363,
+  "token": "xxx",
+  "id": "5c89d4f7cf087c449c9ddc39"
+},
+{
   "_id": "5c72edae9196913851b214f3",
   "type": "hook",
   "hook":{
@@ -401,6 +468,87 @@ module.exports = [{
     ]
   },
   "group": "repo-email",
+  "path": [
+    "repos/:owner"
+  ],
+  "endpointUrl": "http://127.0.0.1:10084/",
+  "secureKey": "xxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 30.41796875,
+      "loadavg": [
+        13.4814453125,
+        12.83544921875,
+        8.81884765625
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 29.5859375,
+      "loadavg": [
+        13.4814453125,
+        12.83544921875,
+        8.81884765625
+      ]
+    }
+  ],
+  "created": 1551035828020,
+  "changed": 1551036353638,
+  "token": "xxx",
+},
+{
+  "_id": "5c72edb49196913851b214fa",
+  "type": "hook",
+  "conditions": {
+    "methods": [
+      "POST"
+    ]
+  },
+  "group": "missing-hook-settings",
+  "path": [
+    "repos/:owner"
+  ],
+  "endpointUrl": "http://127.0.0.1:10084/",
+  "secureKey": "xxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 30.41796875,
+      "loadavg": [
+        13.4814453125,
+        12.83544921875,
+        8.81884765625
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 29.5859375,
+      "loadavg": [
+        13.4814453125,
+        12.83544921875,
+        8.81884765625
+      ]
+    }
+  ],
+  "created": 1551035828020,
+  "changed": 1551036353638,
+  "token": "xxx",
+},
+{
+  "_id": "5c72edb49196913851b214fa",
+  "type": "hook",
+  "conditions": {
+    "methods": [
+      "POST"
+    ]
+  },
+  "hook":{
+    "phase": "after",
+    "type": "notify"
+  },
   "path": [
     "repos/:owner"
   ],
@@ -979,6 +1127,51 @@ module.exports = [{
       ]
     }
   ],
+  "created": 1551035824669,
+  "changed": 1551036353626,
+  "token": "xxx",
+},
+{
+  "_id": "5c72edb07ca0193860fdef7b",
+  "type": "hook",
+  "hook":
+    {
+      "phase": "metric",
+      "type": "notify",
+      "group": "test1",
+      "meta": true
+    },
+  "path": [
+    "*"
+  ],
+  "endpointUrl": "http://127.0.0.1:8896/",
+  "secureKey": "xxxx",
+  "online": true,
+  "metrics": [
+    {
+      "cpu": "0.00",
+      "memory": 30.00390625,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    },
+    {
+      "cpu": "0.00",
+      "memory": 27.59375,
+      "loadavg": [
+        13.13427734375,
+        11.650390625,
+        8.79296875
+      ]
+    }
+  ],
+  "conditions": {
+    "methods": [
+      "NOTIFY"
+    ]
+  },
   "created": 1551035824669,
   "changed": 1551036353626,
   "token": "xxx",

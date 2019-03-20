@@ -20,9 +20,7 @@ module.exports = function(targetRequest, routeType, allRegisteredRoutes) {
     if (routeType) {
       if (!allRegisteredRoutes[i].type) {
         // Version 1.x compatibility
-        if (routeType !== 'handler') {
-          continue
-        }
+        allRegisteredRoutes[i].type = "handler"
       }
       if (allRegisteredRoutes[i].type.toLowerCase() !== routeType) {
         continue
