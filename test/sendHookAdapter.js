@@ -52,7 +52,6 @@ describe('sendHookAdapter', function(){
   it('Endpoint response', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
-    let self = this
     
     sendRequest(targetRequest, routeItems, function(err, response) {
       expect(response.answer.headers.test).to.equal("test")
@@ -65,7 +64,6 @@ describe('sendHookAdapter', function(){
   it('Adapter transformed request', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
-    let self = this
     
     sendRequest(targetRequest, routeItems, function(err, response) {
       expect(response.answer.body.extra).to.equal(true)
