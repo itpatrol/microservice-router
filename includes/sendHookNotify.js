@@ -5,7 +5,7 @@
  * @param String phase(optional) hook phase: before, after, metric
  * @param Object object all available routes
  *
- * @return 
+ * @return
  */
 'use strict';
 
@@ -51,7 +51,7 @@ function processNotifyGroup(notifyGroups, notifyTargets, targetRequest, phase, g
       return a.group == currentNotifyGroup
     })
     debug('notify Groups %s %O', currentNotifyGroup, notifyGroups);
-  
+
     processNotify(currentNotifyTargets, targetRequest, phase, globalServices, function(){
       processNotifyGroup(notifyGroups, notifyTargets, targetRequest, phase, globalServices)
     })

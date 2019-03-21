@@ -61,7 +61,7 @@ describe('sendRequest', function(){
       expect(json.body.test).to.equal("test")
       done()
     })
-    
+
   })
   it('error if url is invalid', function(done){
     let targetRequest = targetRequests[0];
@@ -78,7 +78,7 @@ describe('sendRequest', function(){
       expect(err).to.be.an.instanceof(Error)
       done()
     })
-    
+
   })
   it('error if no response', function(done){
     let targetRequest = targetRequests[0];
@@ -114,6 +114,6 @@ describe('sendRequest', function(){
       expect(json.body.test).to.equal("test")
       done()
     })
-    
+
   })
 })

@@ -17,7 +17,7 @@ const url = require('url');
 
 
 module.exports = function(requestOptions, targetRequest, globalServices, callback){
-  // Validate URI 
+  // Validate URI
   let uri = url.parse(requestOptions.uri);
   if (!(uri.host || (uri.hostname && uri.port)) && !uri.isUnix) {
     return callback(new Error('Invalid URI' + requestOptions.uri))

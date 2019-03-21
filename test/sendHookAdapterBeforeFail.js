@@ -27,7 +27,7 @@ describe('sendHookAdapter (Before) with error', function(){
         body.extra = true
         response.write(JSON.stringify(body))
         response.end();
-        
+
       });
     });
     this.httpEndPointServer = http.createServer().listen(8808);
@@ -66,38 +66,38 @@ describe('sendHookAdapter (Before) with error', function(){
       expect(response.answer.body).to.have.not.property('extra')
       done()
     })
-    
+
   })
   it('Adapter do not transformed request', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
-    
+
     sendRequest(targetRequest, routeItems, function(err, response) {
       expect(response.answer.body).to.have.not.property('extra')
       done()
     })
-    
+
   })
   it('Adapter set adapter-test header', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
-    
+
     sendRequest(targetRequest, routeItems, function(err, response) {
       expect(response.answer.headers['adapter-test']).to.equal('adapter-test')
       done()
     })
-    
+
   })
   it('Adapter received request', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
-    
+
     sendRequest(targetRequest, routeItems, function(err, response) {
       expect(self.receivedData.test).to.equal("test")
       done()
     })
-    
+
   })
   it('No Adapter received', function(done){
     let targetRequest = targetRequests[0];
@@ -113,6 +113,6 @@ describe('sendHookAdapter (Before) with error', function(){
         done()
       }, 100)
     })
-    
+
   })
 })

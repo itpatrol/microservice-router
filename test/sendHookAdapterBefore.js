@@ -36,7 +36,7 @@ describe('sendHookAdapter (Before)', function(){
         body.extra = true
         response.write(JSON.stringify(body))
         response.end();
-        
+
       });
     });
     this.httpEndPointServer = http.createServer().listen(8808);
@@ -57,7 +57,7 @@ describe('sendHookAdapter (Before)', function(){
           let routeRegisterItems =  sift({
             "path": 'register',
           }, routeItems)
-          let hash = 'sha256=' 
+          let hash = 'sha256='
                   + signature('sha256', body, routeRegisterItems[0].secureKey)
           if (hash !== request.headers.signature) {
             //console.log('sig missmatch', hash, request.headers.signature)
@@ -90,7 +90,7 @@ describe('sendHookAdapter (Before)', function(){
       expect(response.answer.body.extra).to.equal(true)
       done()
     })
-    
+
   })
   it('Endpoint request with signature', function(done){
     let targetRequest = targetRequests[0];
@@ -99,7 +99,7 @@ describe('sendHookAdapter (Before)', function(){
     let routeRegisterItems =  sift({
       "path": 'register',
     }, routeItems)
-    let hash = 'sha256=' 
+    let hash = 'sha256='
             + signature('sha256', targetRequest.requestDetails._buffer, routeRegisterItems[0].secureKey)
             targetRequest.requestDetails.headers.signature = hash
 
@@ -109,38 +109,38 @@ describe('sendHookAdapter (Before)', function(){
       expect(response.answer.body.extra).to.equal(true)
       done()
     })
-    
+
   })
   it('Adapter transformed request', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
-    
+
     sendRequest(targetRequest, routeItems, function(err, response) {
       expect(response.answer.body.extra).to.equal(true)
       done()
     })
-    
+
   })
   it('Adapter set adapter-test header', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
-    
+
     sendRequest(targetRequest, routeItems, function(err, response) {
       expect(response.answer.headers['adapter-test']).to.equal('adapter-test')
       done()
     })
-    
+
   })
   it('Adapter received request', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
-    
+
     sendRequest(targetRequest, routeItems, function(err, response) {
       expect(self.receivedData.test).to.equal("test")
       done()
     })
-    
+
   })
   it('No Adapter received', function(done){
     let targetRequest = targetRequests[0];
@@ -156,7 +156,7 @@ describe('sendHookAdapter (Before)', function(){
         done()
       }, 100)
     })
-    
+
   })
   it('Adapter is down', function(done){
     let targetRequest = targetRequests[0];
@@ -167,14 +167,14 @@ describe('sendHookAdapter (Before)', function(){
     let routeRegisterItems =  sift({
       "path": 'register',
     }, routeItems)
-    let hash = 'sha256=' 
+    let hash = 'sha256='
             + signature('sha256', targetRequest.requestDetails._buffer, routeRegisterItems[0].secureKey)
             targetRequest.requestDetails.headers.signature = hash
-    
+
     sendRequest(targetRequest, routeItems, function(err, response) {
       expect(self.receivedData).to.equal(false)
       done()
     })
-    
+
   })
 })

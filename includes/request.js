@@ -5,7 +5,7 @@
  * @param Object object all available routes
  * @param function callback when request processed
  *
- * @return 
+ * @return
  */
 
 'use strict';

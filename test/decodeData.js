@@ -28,6 +28,6 @@ describe('decodeData', function(){
     expect(decoded).to.equal(false);
     done();
   });
-  
+
 
 })

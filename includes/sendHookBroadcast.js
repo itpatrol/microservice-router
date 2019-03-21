@@ -5,7 +5,7 @@
  * @param String phase(optional) hook phase: before, after, metric
  * @param Object object all available routes
  *
- * @return 
+ * @return
  */
 'use strict';
 

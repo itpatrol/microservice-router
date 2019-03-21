@@ -125,7 +125,7 @@ describe('findAllTargets', function(){
             expect(routeItem.matchVariables).to.be.an('object')
             .to.have.property('owner', 'ownername');
             expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('repo', 'reponame');        
+            .to.have.property('repo', 'reponame');
           }
         }
       }
@@ -145,7 +145,7 @@ describe('findAllTargets', function(){
             expect(routeItem.matchVariables).to.be.an('object')
             .to.have.property('owner', 'ownername');
             expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('repo', 'reponame');  
+            .to.have.property('repo', 'reponame');
           }
         }
       }
@@ -162,7 +162,7 @@ describe('findAllTargets', function(){
           if (routeItem.path[0] != '*')  {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
             expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('owner', 'ownername');  
+            .to.have.property('owner', 'ownername');
           }
         }
       }

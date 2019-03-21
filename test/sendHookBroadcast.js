@@ -42,7 +42,7 @@ describe('sendHookBroadcast', function(){
         body.extra = true
         response.write(JSON.stringify(body))
         response.end();
-        
+
       });
     });
     this.httpBroadcast2Server = http.createServer().listen(8890);
@@ -62,7 +62,7 @@ describe('sendHookBroadcast', function(){
         body.extra = true
         response.write(JSON.stringify(body))
         response.end();
-        
+
       });
     });
     this.httpEndPointServer = http.createServer().listen(4808);
@@ -96,21 +96,21 @@ describe('sendHookBroadcast', function(){
   it('Endpoint response', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
-    
+
     request(targetRequest, this.routeItems, function(err, response) {
       expect(response.answer.headers.test).to.equal("test")
       expect(response.answer.body.test).to.equal("test")
       setTimeout(function(){
         done()
-      }, 50)  
+      }, 50)
     })
-    
+
   })
   it('Broadcast 1 request', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
-    
+
     request(targetRequest, this.routeItems, function(err, response) {
       setTimeout(function(){
         expect(self.receivedBroadcastData1.body.test).to.equal("test")
@@ -118,13 +118,13 @@ describe('sendHookBroadcast', function(){
         done()
       }, 1000)
     })
-    
+
   })
   it('Broadcast 2 request', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
-    
+
     request(targetRequest, this.routeItems, function(err, response) {
       setTimeout(function(){
         expect(self.receivedBroadcastData2.body.test).to.equal("test")
@@ -132,7 +132,7 @@ describe('sendHookBroadcast', function(){
         done()
       }, 1000)
     })
-    
+
   })
   it('No Broadcast messages', function(done){
     let targetRequest = targetRequests[0];
@@ -151,6 +151,6 @@ describe('sendHookBroadcast', function(){
         done()
       }, 100)
     })
-    
+
   })
 })

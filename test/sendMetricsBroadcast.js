@@ -34,7 +34,7 @@ describe('sendHookMetricBroadcast', function(){
         body.extra = true
         response.write(JSON.stringify(body))
         response.end();
-        
+
       });
     });
     this.httpMetric2Server = http.createServer().listen(8894);
@@ -55,7 +55,7 @@ describe('sendHookMetricBroadcast', function(){
         body.extra = true
         response.write(JSON.stringify(body))
         response.end();
-        
+
       });
     });
     this.httpEndPointServer = http.createServer().listen(8807);
@@ -97,7 +97,7 @@ describe('sendHookMetricBroadcast', function(){
         done()
       }, 100)
     })
-    
+
   })
   it('Metric 1 request', function(done){
     let targetRequest = targetRequests[4];
@@ -111,7 +111,7 @@ describe('sendHookMetricBroadcast', function(){
         done()
       }, 1000)
     })
-    
+
   })
   it('Metric 2 request', function(done){
     let targetRequest = targetRequests[4];

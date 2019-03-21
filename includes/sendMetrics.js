@@ -6,7 +6,7 @@
  * @param Object object all available routes
  * @param function callback when adapter processed
  *
- * @return 
+ * @return
  */
 'use strict';
 
@@ -56,7 +56,7 @@ module.exports = function(error, response, body, startTime,
       _buffer: JSON.stringify(metricJSON),
       method: targetRequest.method
     },
-    endpoint: targetRequest.endpoint, 
+    endpoint: targetRequest.endpoint,
     isMetric: true
   }
 

@@ -35,7 +35,7 @@ describe('sendHookAdapter (After) with error', function(){
         body.push(chunk);
       }).on('end', () => {
         body = Buffer.concat(body).toString();
-        
+
         this.receivedData = JSON.parse(body)
         body = JSON.parse(body)
         body.after = true
@@ -51,7 +51,7 @@ describe('sendHookAdapter (After) with error', function(){
         });
         response.write(answer)
         response.end();
-        
+
       });
     });
     this.httpEndPointServer = http.createServer().listen(3018);
@@ -91,27 +91,27 @@ describe('sendHookAdapter (After) with error', function(){
       expect(response.answer).to.have.not.property('after')
       done()
     })
-    
+
   })
   it('Adapter do not transformed request', function(done){
     let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
     targetRequest.requestDetails._buffer = '{"test": "test"}'
-    
+
     sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(response.answer).to.have.not.property('after')
       done()
     })
-    
+
   })
   it('Adapter set adapter-test header', function(done){
     let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
     targetRequest.requestDetails._buffer = '{"test": "test"}'
-    
+
     sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(response.headers['x-adapter-after-test']).to.equal('adapter-test')
       done()
     })
-    
+
   })
   it('Adapter send broken data', function(done){
     let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
@@ -120,18 +120,18 @@ describe('sendHookAdapter (After) with error', function(){
       expect(response.headers).to.has.property('x-hook-adapter-status-test1-after', 'error: Unexpected token t in JSON at position 2')
       done()
     })
-    
+
   })
   it('Adapter received request', function(done){
     let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
-    
+
     sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(self.receivedData.body.test).to.equal("test")
       done()
     })
-    
+
   })
   it('No Adapter received', function(done){
     let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
@@ -147,6 +147,6 @@ describe('sendHookAdapter (After) with error', function(){
         done()
       }, 100)
     })
-    
+
   })
 })

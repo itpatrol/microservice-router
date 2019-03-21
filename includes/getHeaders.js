@@ -45,9 +45,9 @@ module.exports = function(targetRequest, routeItem, phase, hookType, hookGroup, 
   if (hookGroup) {
     headers['x-hook-group'] = hookGroup
   }
-  
+
   if (isSignature) {
-    headers['x-hook-signature'] = 'sha256=' 
+    headers['x-hook-signature'] = 'sha256='
       + signature('sha256', targetRequest.requestDetails._buffer, routeItem.secureKey)
   }
   debug('TargetRequest %O routeItem %O phase %s hookType headers %O', targetRequest,

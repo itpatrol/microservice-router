@@ -29,7 +29,7 @@ describe('sendBroadcastMessage', function(){
     UDPServer.on('error', function(err) {
       console.log('UDP Server error %O', err);
     });
-    
+
   });
   after(function(){
     if (UDPServer) {
@@ -76,12 +76,12 @@ describe('sendBroadcastMessage', function(){
     targetRequest.router = routeWSItems[0]
     targetRequest.requestDetails.url = 'TEST'
     UDPServer.close()
-    
+
     sendBroadcastMessage(targetRequest, JSON.parse(targetRequest.requestDetails._buffer), this.routeItems)
     let messageReceived = false;
     UDPServer.on('message', function(message, rinfo) {
       messageReceived = JSON.parse(message);
-      
+
     })
     setTimeout(function(){
       expect(messageReceived).to.equal(false)

@@ -1,6 +1,6 @@
 /**
  * Check Conditions for request.
- * 
+ *
  * @param Object conditions object with headers, payload and methods properties
  * @param Object requestDetails http request details
  * @param Object requestDetails http request json body.
@@ -45,7 +45,7 @@ module.exports = function(conditions, requestDetails, jsonData) {
         return false;
       }
     }
-    
+
   }
   // check payload
   if (conditions.payload && conditions.payload.length && jsonData) {

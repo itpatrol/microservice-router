@@ -135,8 +135,8 @@ describe('checkPath', function(){
             expect(routeItem.matchVariables).to.be.an('object')
             .to.have.property('owner', 'ownername');
             expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('repo', 'reponame');       
-            delete routeItem.matchVariables   
+            .to.have.property('repo', 'reponame');
+            delete routeItem.matchVariables
           } else {
             expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/:repo/files');
           }
@@ -157,7 +157,7 @@ describe('checkPath', function(){
             expect(routeItem.matchVariables).to.be.an('object')
             .to.have.property('owner', 'ownername');
             expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('repo', 'reponame');  
+            .to.have.property('repo', 'reponame');
             delete routeItem.matchVariables
           } else {
             expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/:repo/files');
@@ -176,8 +176,8 @@ describe('checkPath', function(){
           if (checkPath(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
             expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('owner', 'ownername'); 
-            delete routeItem.matchVariables        
+            .to.have.property('owner', 'ownername');
+            delete routeItem.matchVariables
           } else {
             expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/files');
           }
@@ -195,8 +195,8 @@ describe('checkPath', function(){
           if (checkPath(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
             expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('owner', 'ownername'); 
-            delete routeItem.matchVariables        
+            .to.have.property('owner', 'ownername');
+            delete routeItem.matchVariables
           } else {
             expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/files');
           }
@@ -215,7 +215,7 @@ describe('checkPath', function(){
           if (checkPath(targetRequest, routeItem)) {
             expect(routeItem.path).to.be.an('array').that.include('repos/:owner/files');
             expect(routeItem.matchVariables).to.be.an('object')
-            .to.have.property('owner', 'ownername'); 
+            .to.have.property('owner', 'ownername');
             delete routeItem.matchVariables
           } else {
             expect(routeItem.path).to.be.an('array').that.not.include('repos/:owner/files');

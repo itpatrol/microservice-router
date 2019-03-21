@@ -6,7 +6,7 @@
  * @param Object object all available routes
  * @param function callback when adapter processed
  *
- * @return 
+ * @return
  */
 'use strict';
 
@@ -35,7 +35,7 @@ function processAdapter(adapterTargets, targetRequest,
       decodeData(response.headers['content-type'], body)
     } catch (e) {
       debug('decodeData Error received: %O', e);
-      err = e 
+      err = e
     }
     if (err) {
       debug('Adapter failed %O', err);
@@ -72,7 +72,7 @@ function processAdapter(adapterTargets, targetRequest,
     if (phase == 'before') {
       // resign it
       if (targetRequest.requestDetails.headers.signature) {
-        targetRequest.requestDetails.headers.signature = 'sha256=' 
+        targetRequest.requestDetails.headers.signature = 'sha256='
         + signature('sha256',
           targetRequest.requestDetails._buffer,
           targetRequest.endpoint.secureKey);

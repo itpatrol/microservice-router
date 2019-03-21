@@ -139,7 +139,7 @@ describe('sendEndpoint request', function(){
       expect(response.answer.body.test).to.equal("test")
       done()
     })
-    
+
   })
   it('Endpoint response no id or url', function(done){
     let targetRequest = targetRequests[0];
@@ -150,7 +150,7 @@ describe('sendEndpoint request', function(){
       expect(response.answer).to.have.any.keys('url', 'id', 'some')
       done()
     })
-    
+
   })
   it('Endpoint response with id ', function(done){
     let targetRequest = targetRequests[0];
@@ -161,7 +161,7 @@ describe('sendEndpoint request', function(){
       expect(response.answer).to.have.any.keys('url', 'id', 'some')
       done()
     })
-    
+
   })
   it('Endpoint response with url ', function(done){
     let targetRequest = targetRequests[0];
@@ -173,7 +173,7 @@ describe('sendEndpoint request', function(){
       expect(response.answer).to.have.any.keys('url', 'id', 'some')
       done()
     })
-    
+
   })
   it('Endpoint response with https url ', function(done){
     let targetRequest = targetRequests[0];
@@ -185,7 +185,7 @@ describe('sendEndpoint request', function(){
       expect(response.answer).to.have.any.keys('url', 'id', 'some')
       done()
     })
-    
+
   })
   it('Endpoint response with string ', function(done){
     let targetRequest = targetRequests[0];
@@ -197,7 +197,7 @@ describe('sendEndpoint request', function(){
       expect(response.headers['content-type']).to.equal('text/plain')
       done()
     })
-    
+
   })
   it('Endpoint response without content-type ', function(done){
     let targetRequest = targetRequests[0];
@@ -208,7 +208,7 @@ describe('sendEndpoint request', function(){
       expect(response.headers['content-type']).to.not.exist
       done()
     })
-    
+
   })
   it('Endpoint response on OPTIONS', function(done){
     let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
@@ -221,7 +221,7 @@ describe('sendEndpoint request', function(){
       expect(response.headers['content-type']).to.not.exist
       done()
     })
-    
+
   })
   it('Endpoint response with short url ', function(done){
     let targetRequest = targetRequests[0];
@@ -232,7 +232,7 @@ describe('sendEndpoint request', function(){
       expect(response.answer).to.have.any.keys('url', 'id', 'some')
       done()
     })
-    
+
   })
   it('Endpoint response 200 array', function(done){
     let targetRequest = targetRequests[0];
@@ -244,10 +244,10 @@ describe('sendEndpoint request', function(){
       for (let i in response.answer) {
         expect(response.answer[i]).to.have.any.keys('url', 'id', 'some')
       }
-      
+
       done()
     })
-    
+
   })
   it('Endpoint response 503', function(done){
     let targetRequest = targetRequests[0];
@@ -259,7 +259,7 @@ describe('sendEndpoint request', function(){
       expect(response.answer.body.test).to.equal("503")
       done()
     })
-    
+
   })
   it('No endpoint found', function(done){
     let targetRequest = targetRequests[0];
@@ -273,7 +273,7 @@ describe('sendEndpoint request', function(){
       done()
 
     })
-    
+
   })
   it('No endpoint available', function(done){
     let targetRequest = targetRequests[0];
@@ -288,6 +288,6 @@ describe('sendEndpoint request', function(){
         done()
       }, 100)*/
     })
-    
+
   })
 })

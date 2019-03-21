@@ -1,6 +1,6 @@
 /**
  * Check Conditions for request.
- * 
+ *
  * @param Object conditions object with headers, payload and methods properties
  * @param Object requestDetails http request details
  * @param Object requestDetails http request json body.

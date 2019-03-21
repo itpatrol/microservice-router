@@ -6,7 +6,7 @@ let targetRequests = require('./targetRequests.js')
 let routeItems = require('./routeItems.js')
 const signature = require('../includes/signature.js');
 
-/* debug code 
+/* debug code
 for (let targetRequest of targetRequests) {
   targetRequest.requestDetails._buffer = JSON.stringify(targetRequest.jsonData)
   let result = findAllTargets(targetRequest, false, routeItems)
@@ -16,7 +16,7 @@ for (let targetRequest of targetRequests) {
     console.log('routeItem', routeItem)
     if(routeItem.hook){
       console.log('getHeaders', getHeaders(targetRequest, routeItem,
-        routeItem.hook.phase, routeItem.hook.type, routeItem.hook.group, true ))  
+        routeItem.hook.phase, routeItem.hook.type, routeItem.hook.group, true ))
     } else {
       console.log('getHeaders', getHeaders(targetRequest, routeItem ))
     }
@@ -32,7 +32,7 @@ for (let targetRequest of targetRequests) {
     for (let i in result) {
       let routeItem = result[i]
       if (Object.keys(routeItem.matchVariables).length) {
-        
+
           let headers = getHeaders(targetRequest, routeItem )
           if (routeItem.matchVariables) {
             for (let key in routeItem.matchVariables) {
@@ -45,8 +45,8 @@ for (let targetRequest of targetRequests) {
           }
       }
       if (routeItem.hook){
-        
-        
+
+
           let headers = getHeaders(targetRequest, routeItem, routeItem.hook.phase,
             routeItem.hook.type, routeItem.hook.group, true )
 
@@ -69,7 +69,7 @@ for (let targetRequest of targetRequests) {
             expect(headers['x-hook-phase']).to.equal(routeItem.hook.phase)
             done()
           })
-            
+
           it(routeItem.type + ' [' + i + '] checking x-hook-type', function(done) {
             expect(headers['x-hook-type']).to.equal(routeItem.hook.type)
             done()
@@ -78,9 +78,9 @@ for (let targetRequest of targetRequests) {
             expect(headers['x-hook-group']).to.equal(routeItem.hook.group)
             done()
           })
-          
+
           it(routeItem.type + ' [' + i + '] checking x-hook-signature', function(done) {
-            let hash = 'sha256=' 
+            let hash = 'sha256='
             + signature('sha256', targetRequest.requestDetails._buffer, routeItem.secureKey)
             expect(headers['x-hook-signature']).to.equal(hash)
             done()

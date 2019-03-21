@@ -1,6 +1,6 @@
 /**
  * Check if route match request.
- * 
+ *
  * @param Object targetRequest  request details
  * @param Object routeItem ob route table
  *
