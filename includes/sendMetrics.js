@@ -23,9 +23,7 @@ module.exports = function(error, response, body, startTime,
   if (error) {
     statusCode = error.code
   } else {
-    if (response.statusCode) {
-      statusCode = response.statusCode
-    }
+    statusCode = response.statusCode
   }
   let metricJSON = {
     startTime: startTime,

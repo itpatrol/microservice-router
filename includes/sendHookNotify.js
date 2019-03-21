@@ -64,16 +64,12 @@ module.exports = function(targetRequest, phase, globalServices){
   if (notifyTargets instanceof Array) {
     let notifyGroups = []
     for (let target of notifyTargets) {
-      if (target.group) {
-        if (notifyGroups.indexOf(target.group) == -1) {
-          notifyGroups.push(target.group)
-        }
+      if (notifyGroups.indexOf(target.group) == -1) {
+        notifyGroups.push(target.group)
       }
     }
     notifyGroups.sort()
     debug('notify Groups %O', notifyGroups);
-    if (notifyGroups.length){
-      processNotifyGroup(notifyGroups, notifyTargets, targetRequest, phase, globalServices)
-    }
+    processNotifyGroup(notifyGroups, notifyTargets, targetRequest, phase, globalServices)
   }
 }
