@@ -7,7 +7,7 @@ let targetRequests = JSON.parse(JSON.stringify(require('./targetRequests.js')))
 let routeItems = JSON.parse(JSON.stringify(require('./routeItems.js')))
 
 
-describe('sendHookAdapter (After)', function(){
+describe('sendHookAdapter (After) with error', function(){
   before(function(){
     this.receivedData = false
 
@@ -19,11 +19,14 @@ describe('sendHookAdapter (After)', function(){
 
     for (let targetRequest of this.routeItems) {
       if (targetRequest.endpointUrl == "http://127.0.0.1:8808/") {
-        targetRequest.endpointUrl = "http://127.0.0.1:3019/"
+        targetRequest.endpointUrl = "http://127.0.0.1:3018/"
+      }
+      if (targetRequest.endpointUrl == "http://127.0.0.1:9000/") {
+        targetRequest.endpointUrl = "http://127.0.0.1:3015/"
       }
     }
 
-    this.httpAdapterServer = http.createServer().listen(9000);
+    this.httpAdapterServer = http.createServer().listen(3015);
     this.httpAdapterServer.on('request', (request, response) => {
       let body = [];
       request.on('error', (err) => {
@@ -32,19 +35,26 @@ describe('sendHookAdapter (After)', function(){
         body.push(chunk);
       }).on('end', () => {
         body = Buffer.concat(body).toString();
-        response.writeHead(200, {
-          'Content-Type': 'application/json',
-          'x-set-x-adapter-after-test': 'adapter-test'
-        });
+        
         this.receivedData = JSON.parse(body)
         body = JSON.parse(body)
         body.after = true
-        response.write(JSON.stringify(body))
+        answer = JSON.stringify(body)
+        let code = 503
+        if (body.body.test == "broken") {
+          code = 200
+          answer = "{ test";
+        }
+        response.writeHead(code, {
+          'Content-Type': 'application/json',
+          'x-set-x-adapter-after-test': 'adapter-test'
+        });
+        response.write(answer)
         response.end();
         
       });
     });
-    this.httpEndPointServer = http.createServer().listen(3019);
+    this.httpEndPointServer = http.createServer().listen(3018);
     this.httpEndPointServer.on('request', (request, response) => {
       // the same kind of magic happens here!
       let body = [];
@@ -54,11 +64,13 @@ describe('sendHookAdapter (After)', function(){
         body.push(chunk);
       }).on('end', () => {
         body = Buffer.concat(body).toString();
+        body = JSON.parse(body)
         response.setHeader('Content-Type', 'application/json');
-        response.write(JSON.stringify({
+        let answer = JSON.stringify({
           headers: request.headers,
-          body: JSON.parse(body)
-        }))
+          body: body
+        })
+        response.write(answer)
         response.end();
       });
     });
@@ -71,28 +83,28 @@ describe('sendHookAdapter (After)', function(){
     this.receivedData = false
   })
   it('Endpoint response', function(done){
-    let targetRequest = targetRequests[0];
+    let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(response.answer.headers.test).to.equal("test")
       expect(response.answer.body.test).to.equal("test")
-      expect(response.answer.after).to.equal(true)
+      expect(response.answer).to.have.not.property('after')
       done()
     })
     
   })
-  it('Adapter transformed request', function(done){
-    let targetRequest = targetRequests[0];
+  it('Adapter do not transformed request', function(done){
+    let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     
     sendRequest(targetRequest, this.routeItems, function(err, response) {
-      expect(response.answer.after).to.equal(true)
+      expect(response.answer).to.have.not.property('after')
       done()
     })
     
   })
   it('Adapter set adapter-test header', function(done){
-    let targetRequest = targetRequests[0];
+    let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     
     sendRequest(targetRequest, this.routeItems, function(err, response) {
@@ -101,8 +113,17 @@ describe('sendHookAdapter (After)', function(){
     })
     
   })
+  it('Adapter send broken data', function(done){
+    let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
+    targetRequest.requestDetails._buffer = '{"test": "broken"}'
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
+      expect(response.headers).to.has.property('x-hook-adapter-status-test1-after', 'error: Unexpected token t in JSON at position 2')
+      done()
+    })
+    
+  })
   it('Adapter received request', function(done){
-    let targetRequest = targetRequests[0];
+    let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
     
@@ -113,7 +134,7 @@ describe('sendHookAdapter (After)', function(){
     
   })
   it('No Adapter received', function(done){
-    let targetRequest = targetRequests[0];
+    let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
     targetRequest.requestDetails._buffer = '{"test": "test"}'
 
     let routeNoAdapterItems =  sift({

@@ -3,13 +3,28 @@ const sift = require('sift').default
 var http = require('http');
 
 const request = require('../includes/request.js')
-let targetRequests = require('./targetRequests.js')
-let routeItems = require('./routeItems.js')
+let targetRequests = JSON.parse(JSON.stringify(require('./targetRequests.js')))
+let routeItems = JSON.parse(JSON.stringify(require('./routeItems.js')))
+
 
 describe('sendHookBroadcast', function(){
   before(function(){
-    this.receivedData1 = false
-    this.receivedData2 = false
+
+    this.routeItems = sift({
+      endpointUrl: {
+        $in: ["http://127.0.0.1:8889/", "http://127.0.0.1:8890/", "http://127.0.0.1:8808/"]
+      }
+    }, routeItems)
+
+
+
+    for (let targetRequest of this.routeItems) {
+      if (targetRequest.endpointUrl == "http://127.0.0.1:8808/") {
+        targetRequest.endpointUrl = "http://127.0.0.1:4808/"
+      }
+    }
+    this.receivedBroadcastData1 = false
+    this.receivedBroadcastData2 = false
     this.httpBroadcast1Server = http.createServer().listen(8889);
     this.httpBroadcast1Server.on('request', (request, response) => {
       let body = [];
@@ -22,7 +37,7 @@ describe('sendHookBroadcast', function(){
         response.writeHead(200, {
           'Content-Type': 'application/json',
         });
-        this.receivedData1 = JSON.parse(body)
+        this.receivedBroadcastData1 = JSON.parse(body)
         body = JSON.parse(body)
         body.extra = true
         response.write(JSON.stringify(body))
@@ -42,7 +57,7 @@ describe('sendHookBroadcast', function(){
         response.writeHead(200, {
           'Content-Type': 'application/json',
         });
-        this.receivedData2 = JSON.parse(body)
+        this.receivedBroadcastData2 = JSON.parse(body)
         body = JSON.parse(body)
         body.extra = true
         response.write(JSON.stringify(body))
@@ -50,7 +65,7 @@ describe('sendHookBroadcast', function(){
         
       });
     });
-    this.httpEndPointServer = http.createServer().listen(8808);
+    this.httpEndPointServer = http.createServer().listen(4808);
     this.httpEndPointServer.on('request', (request, response) => {
       // the same kind of magic happens here!
       let body = [];
@@ -70,8 +85,8 @@ describe('sendHookBroadcast', function(){
     });
   })
   afterEach(function(){
-    this.receivedData1 = false
-    this.receivedData2 = false
+    this.receivedBroadcastData1 = false
+    this.receivedBroadcastData2 = false
   })
   after(function(){
     this.httpBroadcast1Server.close()
@@ -82,12 +97,12 @@ describe('sendHookBroadcast', function(){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     
-    request(targetRequest, routeItems, function(err, response) {
+    request(targetRequest, this.routeItems, function(err, response) {
       expect(response.answer.headers.test).to.equal("test")
       expect(response.answer.body.test).to.equal("test")
       setTimeout(function(){
         done()
-      },50)
+      }, 50)  
     })
     
   })
@@ -96,12 +111,12 @@ describe('sendHookBroadcast', function(){
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
     
-    request(targetRequest, routeItems, function(err, response) {
+    request(targetRequest, this.routeItems, function(err, response) {
       setTimeout(function(){
-        expect(self.receivedData1.body.test).to.equal("test")
-        expect(self.receivedData1.headers.test).to.equal("test")
+        expect(self.receivedBroadcastData1.body.test).to.equal("test")
+        expect(self.receivedBroadcastData1.headers.test).to.equal("test")
         done()
-      },50)
+      }, 1000)
     })
     
   })
@@ -110,12 +125,12 @@ describe('sendHookBroadcast', function(){
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
     
-    request(targetRequest, routeItems, function(err, response) {
+    request(targetRequest, this.routeItems, function(err, response) {
       setTimeout(function(){
-        expect(self.receivedData2.body.test).to.equal("test")
-        expect(self.receivedData2.headers.test).to.equal("test")
+        expect(self.receivedBroadcastData2.body.test).to.equal("test")
+        expect(self.receivedBroadcastData2.headers.test).to.equal("test")
         done()
-      },50)
+      }, 1000)
     })
     
   })
@@ -125,14 +140,14 @@ describe('sendHookBroadcast', function(){
 
     let routeNoBCItems =  sift({
       "hook.type": {$ne: "broadcast"},
-    }, routeItems)
+    }, this.routeItems)
     let self = this
     request(targetRequest, routeNoBCItems, function(err, response) {
       expect(response.answer.headers.test).to.equal("test")
       expect(response.answer.body.test).to.equal("test")
       setTimeout(function(){
-        expect(self.receivedData2).to.equal(false)
-        expect(self.receivedData1).to.equal(false)
+        expect(self.receivedBroadcastData2).to.equal(false)
+        expect(self.receivedBroadcastData1).to.equal(false)
         done()
       }, 100)
     })

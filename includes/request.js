@@ -97,13 +97,7 @@ module.exports = function(targetRequest, globalServices, callback){
         endpoint: targetRequest.endpoint
       }
       hookCall(targetAnswer, globalServices, 'after', function(){
-        let body = false
-        try {
-          body = decodeData(answerDetails.headers['content-type'], answerDetails._buffer)
-        } catch (e) {
-          debug.debug('decodeData Error received: %O', e);
-          return callback(e);
-        }
+        let body = decodeData(answerDetails.headers['content-type'], answerDetails._buffer)
         if (typeof body == "object") {
           // prefix with base_URL all urls
           if (targetRequest.method != 'OPTIONS') {
@@ -144,7 +138,7 @@ module.exports = function(targetRequest, globalServices, callback){
             responseHeaders[i] = answerDetails.headers[i];
           }
         }
-        if(answerDetails.headers['content-type']) {
+        if (answerDetails.headers['content-type']) {
           responseHeaders['content-type'] = answerDetails.headers['content-type'];
         }
         // deprecated. websoket need to be rewriten as a hook broadcast

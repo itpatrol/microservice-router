@@ -1,16 +1,30 @@
 const expect  = require("chai").expect;
 const sift = require('sift').default
-const nock = require('nock');
 var http = require('http');
 
 const sendRequest = require('../includes/request.js')
-let targetRequests = require('./targetRequests.js')
-let routeItems = require('./routeItems.js')
+let targetRequests = JSON.parse(JSON.stringify(require('./targetRequests.js')))
+let routeItems = JSON.parse(JSON.stringify(require('./routeItems.js')))
+
 
 describe('sendEndpoint request', function(){
   before(function(){
+
+    this.routeItems = sift({
+      type: "handler",
+      endpointUrl: {
+        $in: ["http://127.0.0.1:8808/"]
+      }
+    }, routeItems)
+
+    for (let targetRequest of this.routeItems) {
+      if (targetRequest.endpointUrl == "http://127.0.0.1:8808/") {
+        targetRequest.endpointUrl = "http://127.0.0.1:5808/"
+      }
+    }
+
     this.receivedData = false
-    this.httpEndPointServer = http.createServer().listen(8808);
+    this.httpEndPointServer = http.createServer().listen(5808);
     this.httpEndPointServer.on('request', (request, response) => {
       // the same kind of magic happens here!
       let body = [];
@@ -22,7 +36,7 @@ describe('sendEndpoint request', function(){
         body = Buffer.concat(body).toString();
         body = JSON.parse(body)
         let code = 200
-        if(body.test == "503") {
+        if (body.test == "503") {
           code = 503
         }
 
@@ -30,7 +44,7 @@ describe('sendEndpoint request', function(){
         let headers = {
           'Content-Type': 'application/json',
         }
-        switch(body.test) {
+        switch (body.test) {
           case 'some': {
             answer = JSON.stringify({
               some: 'some'
@@ -40,6 +54,13 @@ describe('sendEndpoint request', function(){
           case 'url' : {
             answer = JSON.stringify({
               url: 'http://ya.ru/test/2',
+              id: 2
+            })
+            break
+          }
+          case 'urls' : {
+            answer = JSON.stringify({
+              url: 'https://ya.ru/test/2',
               id: 2
             })
             break
@@ -61,19 +82,19 @@ describe('sendEndpoint request', function(){
             answer = JSON.stringify([{
               url: 'test/1',
               id: 1
-            },{
+            }, {
               url: 'test/2',
               id: 2
-            },{
+            }, {
               url: 'test/3',
               id: 3
-            },{
+            }, {
               id: 4
-            },{
+            }, {
               url: 'http://ya.ru'
-            },{
+            }, {
               url: 'https://ya.ru'
-            },{
+            }, {
               some: 'unknown'
             }])
             break
@@ -112,7 +133,7 @@ describe('sendEndpoint request', function(){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
 
-    sendRequest(targetRequest, routeItems, function(err, response) {
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(response.code).to.equal(200)
       expect(response.answer.headers.test).to.equal("test")
       expect(response.answer.body.test).to.equal("test")
@@ -124,7 +145,7 @@ describe('sendEndpoint request', function(){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "some"}'
 
-    sendRequest(targetRequest, routeItems, function(err, response) {
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(response.code).to.equal(200)
       expect(response.answer).to.have.any.keys('url', 'id', 'some')
       done()
@@ -135,7 +156,7 @@ describe('sendEndpoint request', function(){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "id"}'
 
-    sendRequest(targetRequest, routeItems, function(err, response) {
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(response.code).to.equal(200)
       expect(response.answer).to.have.any.keys('url', 'id', 'some')
       done()
@@ -146,8 +167,21 @@ describe('sendEndpoint request', function(){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "url"}'
 
-    sendRequest(targetRequest, routeItems, function(err, response) {
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(response.code).to.equal(200)
+      expect(response.answer.url).to.equal('http://ya.ru/test/2')
+      expect(response.answer).to.have.any.keys('url', 'id', 'some')
+      done()
+    })
+    
+  })
+  it('Endpoint response with https url ', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "urls"}'
+
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
+      expect(response.code).to.equal(200)
+      expect(response.answer.url).to.equal('https://ya.ru/test/2')
       expect(response.answer).to.have.any.keys('url', 'id', 'some')
       done()
     })
@@ -157,7 +191,7 @@ describe('sendEndpoint request', function(){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "string"}'
 
-    sendRequest(targetRequest, routeItems, function(err, response) {
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(response.code).to.equal(200)
       expect(response.answer).to.equal('string')
       expect(response.headers['content-type']).to.equal('text/plain')
@@ -169,7 +203,7 @@ describe('sendEndpoint request', function(){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "no-content-type"}'
 
-    sendRequest(targetRequest, routeItems, function(err, response) {
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(response.code).to.equal(200)
       expect(response.headers['content-type']).to.not.exist
       done()
@@ -177,12 +211,12 @@ describe('sendEndpoint request', function(){
     
   })
   it('Endpoint response on OPTIONS', function(done){
-    let targetRequest = targetRequests[0];
+    let targetRequest = JSON.parse(JSON.stringify(targetRequests[0]));
     targetRequest.requestDetails._buffer = '{"test": "no-content-type"}'
     targetRequest.method = 'OPTIONS'
 
-    sendRequest(targetRequest, routeItems, function(err, response) {
-      console.log(err, response)
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
+      //console.log(err, response)
       expect(response.code).to.equal(200)
       expect(response.headers['content-type']).to.not.exist
       done()
@@ -193,7 +227,7 @@ describe('sendEndpoint request', function(){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "urlshort"}'
 
-    sendRequest(targetRequest, routeItems, function(err, response) {
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(response.code).to.equal(200)
       expect(response.answer).to.have.any.keys('url', 'id', 'some')
       done()
@@ -204,10 +238,10 @@ describe('sendEndpoint request', function(){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "array"}'
 
-    sendRequest(targetRequest, routeItems, function(err, response) {
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(response.code).to.equal(200)
       expect(response.answer).to.be.an('array')
-      for(let i in response.answer) {
+      for (let i in response.answer) {
         expect(response.answer[i]).to.have.any.keys('url', 'id', 'some')
       }
       
@@ -219,7 +253,7 @@ describe('sendEndpoint request', function(){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "503"}'
 
-    sendRequest(targetRequest, routeItems, function(err, response) {
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(response.code).to.equal(503)
       expect(response.answer.headers.test).to.equal("test")
       expect(response.answer.body.test).to.equal("503")
@@ -227,43 +261,12 @@ describe('sendEndpoint request', function(){
     })
     
   })
-  /*it('Adapter transformed request', function(done){
-    let targetRequest = targetRequests[0];
-    targetRequest.requestDetails._buffer = '{"test": "test"}'
-    
-    sendRequest(targetRequest, routeItems, function(err, response) {
-      expect(response.answer.after).to.equal(true)
-      done()
-    })
-    
-  })
-  it('Adapter set adapter-test header', function(done){
-    let targetRequest = targetRequests[0];
-    targetRequest.requestDetails._buffer = '{"test": "test"}'
-    
-    sendRequest(targetRequest, routeItems, function(err, response) {
-      expect(response.headers['x-adapter-after-test']).to.equal('adapter-test')
-      done()
-    })
-    
-  })
-  it('Adapter received request', function(done){
-    let targetRequest = targetRequests[0];
-    targetRequest.requestDetails._buffer = '{"test": "test"}'
-    let self = this
-    
-    sendRequest(targetRequest, routeItems, function(err, response) {
-      expect(self.receivedData.body.test).to.equal("test")
-      done()
-    })
-    
-  })*/
   it('No endpoint found', function(done){
     let targetRequest = targetRequests[0];
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let routeNoRegisterItems =  sift({
       path: { $ne: 'register'},
-    }, routeItems)
+    }, this.routeItems)
     let self = this
     sendRequest(targetRequest, routeNoRegisterItems, function(err, response) {
       expect(err).to.be.instanceof(Error)
@@ -277,7 +280,7 @@ describe('sendEndpoint request', function(){
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     this.httpEndPointServer.close()
     let self = this
-    sendRequest(targetRequest, routeItems, function(err, response) {
+    sendRequest(targetRequest, this.routeItems, function(err, response) {
       expect(err).to.be.instanceof(Error)
       done()
       /*setTimeout(function(){

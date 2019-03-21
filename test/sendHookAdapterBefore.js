@@ -1,14 +1,18 @@
 const expect  = require("chai").expect;
 const sift = require('sift').default
-const nock = require('nock');
 var http = require('http');
 
 const sendRequest = require('../includes/request.js')
 let targetRequests = require('./targetRequests.js')
-let routeItems = require('./routeItems.js')
 const signature = require('../includes/signature.js');
 
+let routeALLItems = require('./routeItems.js')
 
+let routeItems = sift({
+  endpointUrl: {
+    $in: ["http://127.0.0.1:8888/", "http://127.0.0.1:8808/"]
+  }
+}, routeALLItems)
 
 
 describe('sendHookAdapter (Before)', function(){
@@ -49,13 +53,13 @@ describe('sendHookAdapter (Before)', function(){
         //console.log('headers', request.headers)
         //console.log('body', body)
 
-        if(request.headers.signature) {
+        if (request.headers.signature) {
           let routeRegisterItems =  sift({
             "path": 'register',
           }, routeItems)
           let hash = 'sha256=' 
                   + signature('sha256', body, routeRegisterItems[0].secureKey)
-          if(hash !== request.headers.signature) {
+          if (hash !== request.headers.signature) {
             //console.log('sig missmatch', hash, request.headers.signature)
             //console.log('endpoint', body, routeRegisterItems[0].secureKey)
             return response.end();

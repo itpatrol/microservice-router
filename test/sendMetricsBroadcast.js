@@ -4,7 +4,13 @@ var http = require('http');
 
 const request = require('../includes/request.js')
 let targetRequests = require('./targetRequests.js')
-let routeItems = require('./routeItems.js')
+let routeALLItems = require('./routeItems.js')
+
+let routeItems = sift({
+  endpointUrl: {
+    $in: ["http://127.0.0.1:8893/", "http://127.0.0.1:8894/", "http://127.0.0.1:8807/"]
+  }
+}, routeALLItems)
 
 describe('sendHookMetricBroadcast', function(){
   before(function(){
@@ -101,7 +107,7 @@ describe('sendHookMetricBroadcast', function(){
     request(targetRequest, routeItems, function(err, response) {
       setTimeout(function(){
         //console.log(self.receivedData1)
-        expect(self.receivedData1.length).to.equal(2)
+        expect(self.receivedData1.length).to.equal(1)
         done()
       }, 1000)
     })
@@ -114,7 +120,7 @@ describe('sendHookMetricBroadcast', function(){
     request(targetRequest, routeItems, function(err, response) {
       setTimeout(function(){
         //console.log(self.receivedData2)
-        expect(self.receivedData2.length).to.equal(2)
+        expect(self.receivedData2.length).to.equal(1)
         done()
       }, 1000)
     })

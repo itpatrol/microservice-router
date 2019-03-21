@@ -59,7 +59,7 @@ describe('findHookTarget', function(){
   it('checking for group repo-email', function(done){
     for (let targetRequest of targetRequests) {
       let targets = findHookTarget(targetRequest, null, 'notify', "repo-email", routeItems)
-      if(!targets.length) {
+      if (!targets.length) {
         expect(targets).to.be.an.instanceof(Error)
       } else {
         for (let routeItem of targets) {

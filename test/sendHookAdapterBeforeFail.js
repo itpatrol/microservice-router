@@ -1,6 +1,5 @@
 const expect  = require("chai").expect;
 const sift = require('sift').default
-const nock = require('nock');
 var http = require('http');
 
 const sendRequest = require('../includes/request.js')

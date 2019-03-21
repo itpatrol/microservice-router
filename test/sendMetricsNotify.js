@@ -4,9 +4,15 @@ var http = require('http');
 
 const request = require('../includes/request.js')
 let targetRequests = require('./targetRequests.js')
-let routeItems = require('./routeItems.js')
+let routeALLItems = require('./routeItems.js')
 
-let MAGIC_NUMBER = 9 //Amount of notifications that need to be send based on current routeItems file records
+let routeItems = sift({
+  endpointUrl: {
+    $in: ["http://127.0.0.1:8895/", "http://127.0.0.1:8896/", "http://127.0.0.1:8808/"]
+  }
+}, routeALLItems)
+
+let MAGIC_NUMBER = 1 //Amount of notifications that need to be send based on current routeItems file records
 
 describe('sendHookMetricNotify', function(){
   before(function(){

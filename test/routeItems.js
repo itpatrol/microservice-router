@@ -583,7 +583,7 @@ module.exports = [{
   "path": [
     "ws"
   ],
-  "endpointUrl": "http://127.0.0.1:8888/",
+  "endpointUrl": "http://127.0.0.1:1018/",
   "secureKey": "xx11xx",
   "scope": "ws",
   "type": "websocket",

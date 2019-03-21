@@ -17,6 +17,7 @@ const sendRequest = require('./sendRequest.js')
 const findHookTarget = require('./findHookTarget.js')
 const BuildURI = require('./buildURI.js')
 const signature = require('./signature.js');
+const decodeData = require('./decodeData.js')
 
 function processAdapter(adapterTargets, targetRequest,
                         phase, globalServices, callbackAdapterGroup) {
@@ -30,6 +31,12 @@ function processAdapter(adapterTargets, targetRequest,
   }
   sendRequest(requestOptions, targetRequest, globalServices, function(err, response, body){
     let headerStatusName = 'x-hook-adapter-status-' + routerItem.group + '-' + phase
+    try {
+      decodeData(response.headers['content-type'], body)
+    } catch (e) {
+      debug('decodeData Error received: %O', e);
+      err = e 
+    }
     if (err) {
       debug('Adapter failed %O', err);
       // It's communication error and we need to try next adapter
