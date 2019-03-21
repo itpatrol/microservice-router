@@ -102,7 +102,7 @@ describe('sendHookBroadcast', function(){
       expect(response.answer.body.test).to.equal("test")
       setTimeout(function(){
         done()
-      }, 50)
+      }, 10)
     })
 
   })
@@ -112,11 +112,14 @@ describe('sendHookBroadcast', function(){
     let self = this
 
     request(targetRequest, this.routeItems, function(err, response) {
-      setTimeout(function(){
-        expect(self.receivedBroadcastData1.body.test).to.equal("test")
+      let interval = setInterval(function(){
+        if(self.receivedBroadcastData1) {
+          expect(self.receivedBroadcastData1.body.test).to.equal("test")
         expect(self.receivedBroadcastData1.headers.test).to.equal("test")
-        done()
-      }, 1000)
+          done()
+          clearInterval(interval)
+        }
+      }, 10)
     })
 
   })
@@ -126,11 +129,14 @@ describe('sendHookBroadcast', function(){
     let self = this
 
     request(targetRequest, this.routeItems, function(err, response) {
-      setTimeout(function(){
-        expect(self.receivedBroadcastData2.body.test).to.equal("test")
+      let interval = setInterval(function(){
+        if(self.receivedBroadcastData2) {
+          expect(self.receivedBroadcastData2.body.test).to.equal("test")
         expect(self.receivedBroadcastData2.headers.test).to.equal("test")
-        done()
-      }, 1000)
+          done()
+          clearInterval(interval)
+        }
+      }, 10)
     })
 
   })
@@ -149,7 +155,7 @@ describe('sendHookBroadcast', function(){
         expect(self.receivedBroadcastData2).to.equal(false)
         expect(self.receivedBroadcastData1).to.equal(false)
         done()
-      }, 100)
+      }, 50)
     })
 
   })

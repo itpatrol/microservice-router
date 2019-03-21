@@ -95,7 +95,7 @@ describe('sendHookMetricBroadcast', function(){
       expect(response.answer.body.test).to.equal("test")
       setTimeout(function(){
         done()
-      }, 100)
+      }, 10)
     })
 
   })
@@ -105,11 +105,13 @@ describe('sendHookMetricBroadcast', function(){
     let self = this
 
     request(targetRequest, routeItems, function(err, response) {
-      setTimeout(function(){
-        //console.log(self.receivedData1)
-        expect(self.receivedData1.length).to.equal(1)
-        done()
-      }, 1000)
+      let interval = setInterval(function(){
+        if(self.receivedData1.length) {
+          expect(self.receivedData1.length).to.equal(1)
+          done()
+          clearInterval(interval)
+        }
+      }, 10)
     })
 
   })
@@ -118,11 +120,13 @@ describe('sendHookMetricBroadcast', function(){
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
     request(targetRequest, routeItems, function(err, response) {
-      setTimeout(function(){
-        //console.log(self.receivedData2)
-        expect(self.receivedData2.length).to.equal(1)
-        done()
-      }, 1000)
+      let interval = setInterval(function(){
+        if(self.receivedData2.length) {
+          expect(self.receivedData2.length).to.equal(1)
+          done()
+          clearInterval(interval)
+        }
+      }, 10)
     })
   })
 })

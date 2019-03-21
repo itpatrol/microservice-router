@@ -95,7 +95,7 @@ describe('sendHookMetricNotify', function(){
       expect(response.answer.body.test).to.equal("test")
       setTimeout(function(){
         done()
-      }, 100)
+      }, 10)
     })
 
   })
@@ -105,12 +105,14 @@ describe('sendHookMetricNotify', function(){
     let self = this
 
     request(targetRequest, routeItems, function(err, response) {
-      setTimeout(function(){
-        //console.log(self.receivedData1)
+      let interval = setInterval(function(){
         let TotalLength = self.receivedData1.length + self.receivedData2.length
-        expect(TotalLength).to.equal(MAGIC_NUMBER)
-        done()
-      }, 100)
+        if(TotalLength == MAGIC_NUMBER) {
+          expect(TotalLength).to.equal(MAGIC_NUMBER)
+          done()
+          clearInterval(interval)
+        }
+      }, 10)
     })
 
   })
@@ -119,11 +121,14 @@ describe('sendHookMetricNotify', function(){
     targetRequest.requestDetails._buffer = '{"test": "test"}'
     let self = this
     request(targetRequest, routeItems, function(err, response) {
-      setTimeout(function(){
+      let interval = setInterval(function(){
         let TotalLength = self.receivedData1.length + self.receivedData2.length
-        expect(TotalLength).to.equal(MAGIC_NUMBER)
-        done()
-      }, 100)
+        if(TotalLength == MAGIC_NUMBER) {
+          expect(TotalLength).to.equal(MAGIC_NUMBER)
+          done()
+          clearInterval(interval)
+        }
+      }, 10)
     })
   })
 })

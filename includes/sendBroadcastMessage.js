@@ -56,7 +56,6 @@ module.exports = function (targetRequest, message, allRegisteredRoutes) {
         broadcastMessage.message = message;
         break;
       }
-      case 'meta':
       default : {
         broadcastMessage.meta = true;
         break;
