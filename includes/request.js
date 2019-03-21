@@ -144,6 +144,9 @@ module.exports = function(targetRequest, globalServices, callback){
             responseHeaders[i] = answerDetails.headers[i];
           }
         }
+        if(answerDetails.headers['content-type']) {
+          responseHeaders['content-type'] = answerDetails.headers['content-type'];
+        }
         // deprecated. websoket need to be rewriten as a hook broadcast
         if (response.statusCode == 200) {
           sendBroadcastMessage(targetRequest, body, globalServices);

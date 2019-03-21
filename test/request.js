@@ -25,35 +25,79 @@ describe('sendEndpoint request', function(){
         if(body.test == "503") {
           code = 503
         }
-        
-        response.writeHead(code, {
+
+        let answer = false
+        let headers = {
           'Content-Type': 'application/json',
-        });
-        if(body.test == "array") {
-          response.write(JSON.stringify([{
-            url: 'test/1',
-            id: 1
-          },{
-            url: 'test/2',
-            id: 2
-          },{
-            url: 'test/3',
-            id: 3
-          },{
-            id: 4
-          },{
-            url: 'http://ya.ru'
-          },{
-            url: 'https://ya.ru'
-          },{
-            some: 'unknown'
-          }]))
-        } else {
-          response.write(JSON.stringify({
-            headers: request.headers,
-            body: body
-          }))
         }
+        switch(body.test) {
+          case 'some': {
+            answer = JSON.stringify({
+              some: 'some'
+            })
+            break
+          }
+          case 'url' : {
+            answer = JSON.stringify({
+              url: 'http://ya.ru/test/2',
+              id: 2
+            })
+            break
+          }
+          case 'urlshort' : {
+            answer = JSON.stringify({
+              url: 'test/2',
+            id: 2
+            })
+            break
+          }
+          case 'id' : {
+            answer = JSON.stringify({
+              id: 2
+            })
+            break
+          }
+          case 'array' : {
+            answer = JSON.stringify([{
+              url: 'test/1',
+              id: 1
+            },{
+              url: 'test/2',
+              id: 2
+            },{
+              url: 'test/3',
+              id: 3
+            },{
+              id: 4
+            },{
+              url: 'http://ya.ru'
+            },{
+              url: 'https://ya.ru'
+            },{
+              some: 'unknown'
+            }])
+            break
+          }
+          case 'string': {
+            answer = "string"
+            headers = {'content-type': 'text/plain'}
+            break
+          }
+          case 'no-content-type': {
+            answer = JSON.stringify({
+              id: 2
+            })
+            headers = {}
+          }
+          default: {
+            answer = JSON.stringify({
+              headers: request.headers,
+              body: body
+            })
+          }
+        }
+        response.writeHead(code, headers);
+        response.write(answer)
         response.end();
       });
     });
@@ -72,6 +116,86 @@ describe('sendEndpoint request', function(){
       expect(response.code).to.equal(200)
       expect(response.answer.headers.test).to.equal("test")
       expect(response.answer.body.test).to.equal("test")
+      done()
+    })
+    
+  })
+  it('Endpoint response no id or url', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "some"}'
+
+    sendRequest(targetRequest, routeItems, function(err, response) {
+      expect(response.code).to.equal(200)
+      expect(response.answer).to.have.any.keys('url', 'id', 'some')
+      done()
+    })
+    
+  })
+  it('Endpoint response with id ', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "id"}'
+
+    sendRequest(targetRequest, routeItems, function(err, response) {
+      expect(response.code).to.equal(200)
+      expect(response.answer).to.have.any.keys('url', 'id', 'some')
+      done()
+    })
+    
+  })
+  it('Endpoint response with url ', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "url"}'
+
+    sendRequest(targetRequest, routeItems, function(err, response) {
+      expect(response.code).to.equal(200)
+      expect(response.answer).to.have.any.keys('url', 'id', 'some')
+      done()
+    })
+    
+  })
+  it('Endpoint response with string ', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "string"}'
+
+    sendRequest(targetRequest, routeItems, function(err, response) {
+      expect(response.code).to.equal(200)
+      expect(response.answer).to.equal('string')
+      expect(response.headers['content-type']).to.equal('text/plain')
+      done()
+    })
+    
+  })
+  it('Endpoint response without content-type ', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "no-content-type"}'
+
+    sendRequest(targetRequest, routeItems, function(err, response) {
+      expect(response.code).to.equal(200)
+      expect(response.headers['content-type']).to.not.exist
+      done()
+    })
+    
+  })
+  it('Endpoint response on OPTIONS', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "no-content-type"}'
+    targetRequest.method = 'OPTIONS'
+
+    sendRequest(targetRequest, routeItems, function(err, response) {
+      console.log(err, response)
+      expect(response.code).to.equal(200)
+      expect(response.headers['content-type']).to.not.exist
+      done()
+    })
+    
+  })
+  it('Endpoint response with short url ', function(done){
+    let targetRequest = targetRequests[0];
+    targetRequest.requestDetails._buffer = '{"test": "urlshort"}'
+
+    sendRequest(targetRequest, routeItems, function(err, response) {
+      expect(response.code).to.equal(200)
+      expect(response.answer).to.have.any.keys('url', 'id', 'some')
       done()
     })
     
