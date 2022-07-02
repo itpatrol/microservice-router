@@ -121,14 +121,16 @@ function ExplorerClass(requestDetails, callback) {
 
   self.on('service', function(path, service, options) {
     self.debug.explorer('Service %s, %O, %O', path, service, options);
-
-    self.map.push({
+    let item = {
       path: path,
       scope: service.scope,
       provides: service.provides,
-      secureKey: service.secureKey,
       options: options
-    });
+    };
+    if (self.requestDetails.isSecure) {
+      item.secureKey = service.secureKey
+    }
+    self.map.push(item);
     if (self.map.length == self.servicesCount) {
       self.emit('done', self.map);
     }
