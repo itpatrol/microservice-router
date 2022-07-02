@@ -11,6 +11,7 @@ const dgram = require('dgram');
 const url = require('url');
 const signature = require('./includes/signature.js');
 const ExplorerClass = require('./includes/explorerClass.js');
+const MAX_REQUEST_COUNT = 3
 
 var debug = {
   log: debugF('proxy:log'),
@@ -861,12 +862,19 @@ function _request(getRequest, callback, targetRequest, noMetric) {
     }
     
     if (error) {
-      // TODO add limit to re send
       debug.debug('_request Error received: %O', error);
       debug.debug('_request Restart request: %O', requestOptions);
+
+      // TODO add limit to re send
+
+
       // Do not try to redeliver metrics. can lock a event loop
       if(!noMetric) {
-        return _request(getRequest, callback, targetRequest);
+        debug.log('requets failed: %O %O %O %O', targetRequest, error, body, response);
+        targetRequest.requestCount++
+        if(targetRequest.requestCount <= MAX_REQUEST_COUNT){
+          return _request(getRequest, callback, targetRequest);
+        }
       }
     }
     
@@ -885,7 +893,8 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
     path: path,
     method: method,
     jsonData: jsonData,
-    requestDetails: requestDetails
+    requestDetails: requestDetails,
+    requestCount: 0
   }
   let endpointTargets = findAllTargets(targetRequest, 'handler');
   if (endpointTargets instanceof Error) {
@@ -953,11 +962,17 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
         return callback(new Error('Endpoint not found'), null)
       }
       let bodyJSON = ""
-      try {
-        bodyJSON = decodeData(response.headers['content-type'], body)
-      } catch (e) {
-        debug.debug('decodeData Error received: %O', e);
-        return callback(e);
+      if(response.headers && response.headers['content-type']) { 
+        try {
+          bodyJSON = decodeData(response.headers['content-type'], body)
+        } catch (e) {
+          debug.debug('decodeData Error received: %O', e);
+          return callback(e);
+        }
+      }
+
+      if(!response.headers) {
+        response.headers = {}
       }
       debug.debug('%s body: %O', route, body);
       
