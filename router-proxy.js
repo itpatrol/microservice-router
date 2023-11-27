@@ -177,7 +177,7 @@ function ProxyRequestOPTIONS(jsonData, requestDetails, callbacks, callback) {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
         'Access-Control-Allow-Headers': 'content-type, signature, access_token,'
-          + ' token, Access-Token',
+          + ' token, Access-Token, scope',
         'Access-Control-Expose-Headers': 'x-total-count',
       }
     });
@@ -1033,7 +1033,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
           'Access-Control-Allow-Headers': 'content-type, signature, access_token,'
-            + ' token, Access-Token',
+            + ' token, Access-Token, scope',
           'Access-Control-Expose-Headers': 'x-total-count',
         };
         for (var i in answerDetails.headers) {
