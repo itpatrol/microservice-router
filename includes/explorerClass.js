@@ -26,7 +26,7 @@ function ExplorerClass(requestDetails, callback) {
   self.accessTokenDetails = false;
   self.map = [];
   self.callback = callback;
-  if (requestDetails.headers.accept.indexOf('text/html') != -1) {
+  if (requestDetails.headers && requestDetails.headers.accept && requestDetails.headers.accept.indexOf('text/html') != -1) {
     self.mode = 'html';
   }
   self.once('error', function(err) {
