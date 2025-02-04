@@ -34,7 +34,7 @@ function ExplorerClass(requestDetails, callback) {
     return self.callback(err, null);
   });
   self.once('services', function(services) {
-    self.debug.explorer('services %O', services);
+    self.debug.explorer('services %O %O', services, self.requestDetails);
     if (!self.requestDetails.isSecure) {
       let accessToken = ''
       if (self.requestDetails.headers.access_token) {
@@ -85,8 +85,40 @@ function ExplorerClass(requestDetails, callback) {
       return 0;
     });
     if (self.mode == 'json') {
+      var version = 'unknown';
+      if (process.env.mfw_package_version) {
+        version = process.env.mfw_package_version;
+      } else if (process.env.npm_package_version) {
+        version = process.env.npm_package_version;
+      }
+
+      var name = 'unknown';
+      if (process.env.mfw_package_name) {
+        name = process.env.mfw_package_name;
+      } else if (process.env.npm_package_name) {
+        name = process.env.npm_package_name;
+      }
+
+      var description = '';
+      if (process.env.mfw_package_description) {
+        description = process.env.mfw_package_description;
+      } else if (process.env.npm_package_description) {
+        description = process.env.npm_package_description;
+      }
+      resultMap.push({
+        name: name,
+        version: version,
+        description:description
+      })
       return self.callback(null, {
         code: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
+          'Access-Control-Allow-Headers': 'content-type, signature, access_token,'
+            + ' token, Access-Token',
+          'Access-Control-Expose-Headers': 'x-total-count',
+        },
         answer: resultMap
       });
     }

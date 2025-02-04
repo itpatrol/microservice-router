@@ -87,6 +87,7 @@ function applyAccessToken(requestDetails) {
     if (!accessToken || accessToken == '') {
       return;
     }
+    console.log('TEST', accessToken, process.env.SECURE_KEY);
     if (accessToken != process.env.SECURE_KEY) {
       // eslint-disable-next-line camelcase
       requestDetails.headers.access_token = accessToken;
@@ -94,6 +95,20 @@ function applyAccessToken(requestDetails) {
     } else {
       requestDetails.isSecure = true;
       requestDetails.SecureKey = accessToken;
+    }
+  } else {
+    let accessToken = false;
+    if(requestDetails.headers['access-token']){
+      accessToken =requestDetails.headers['access-token'];
+    }
+    if(requestDetails.headers['access_token']){
+      accessToken =requestDetails.headers['access_token'];
+    }
+    if(accessToken && requestDetails.headers['access-token'] == process.env.SECURE_KEY) {
+      requestDetails.isSecure = true;
+      requestDetails.SecureKey = accessToken;
+      delete requestDetails.headers['access-token'];
+      delete requestDetails.headers['access_token'];
     }
   }
 }
@@ -107,9 +122,31 @@ function ProxyRequestGet(url, requestDetails, callback) {
     var Explorer = new ExplorerClass(requestDetails, callback);
     return Explorer.process();
   }
+  
   let cutPosition = requestDetails.url.lastIndexOf('/');
   let route = requestDetails.url.substring(0, cutPosition);
   let path = requestDetails.url.substring(cutPosition + 1);
+  // Token verification for secure key
+  if (route == 'auth' 
+    && requestDetails.isSecure 
+    && path == process.env.SECURE_KEY) {
+    let responseHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
+      'Access-Control-Allow-Headers': 'content-type, signature, access_token,'
+        + ' token, Access-Token, scope, Scope',
+      'Access-Control-Expose-Headers': 'x-total-count',
+    };
+    return callback(null, {
+      code: 200,
+      answer: {
+
+        expireAt: -1,
+        secureKey: path
+      },
+      headers: responseHeaders
+    });
+  }
   proxyRequest(route, path, 'GET', url, requestDetails, callback);
 }
 
@@ -177,7 +214,7 @@ function ProxyRequestOPTIONS(jsonData, requestDetails, callbacks, callback) {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
         'Access-Control-Allow-Headers': 'content-type, signature, access_token,'
-          + ' token, Access-Token, scope',
+          + ' token, Access-Token, scope, Scope',
         'Access-Control-Expose-Headers': 'x-total-count',
       }
     });
@@ -1033,7 +1070,7 @@ function proxyRequest(route, path, method, jsonData, requestDetails, callback) {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT, SEARCH',
           'Access-Control-Allow-Headers': 'content-type, signature, access_token,'
-            + ' token, Access-Token, scope',
+            + ' token, Access-Token, scope, Scope',
           'Access-Control-Expose-Headers': 'x-total-count',
         };
         for (var i in answerDetails.headers) {
